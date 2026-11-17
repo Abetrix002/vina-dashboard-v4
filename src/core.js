@@ -355,6 +355,12 @@ const metricIc = label => { const m = METRIC_IC.find(([re]) => re.test(String(la
 // mic(label, size): the icon tile for a metric label. size is the glyph px (tile is glyph + 12).
 const mic = (label, size) => { const [i, t] = metricIc(label), g = size || 15; return `<span class="mic c-${t}" style="--mic:${g + 12}px" aria-hidden="true">${ic(i, g)}</span>`; };
 
+/* ---------- Analytics layout helpers ---------- */
+// reportCard({title, sub, right, body, link:[label, route], id, cls}) : the one card pattern for report content
+const reportCard = o => `<section class="card rc ${o.cls || ''}" ${o.id ? `id="${o.id}"` : ''} aria-label="${esc(o.title)}"><header class="rc-h"><div class="grow"><h2>${esc(o.title)}</h2>${o.sub ? `<div class="sub">${o.sub}</div>` : ''}</div>${o.right || ''}</header><div class="rc-b">${o.body}</div>${o.link ? `<footer class="rc-f"><a href="#${o.link[1]}">${esc(o.link[0])}${ic('arrowR', 14)}</a></footer>` : ''}</section>`;
+// pageToolbar({left, date:{label, range, action}, right}) : filters left, date range + actions right
+const pageToolbar = o => `<div class="ptb">${o.left || ''}<span class="sp"></span>${o.date ? `<button type="button" class="ptb-date" data-a="${o.date.action || 'noop'}" aria-haspopup="menu">${ic('cal', 16)}<b>${esc(o.date.label)}</b><span class="r">${esc(o.date.range)}</span>${ic('chevD', 14)}</button>` : ''}${o.right || ''}</div>`;
+
 /* ---------- V2 helpers ---------- */
 const countAttr = v => `data-count="${esc(v)}"`; // numbers count up on page entry
 const pulse = (c) => `<span class="pulse ${c || ''}" aria-hidden="true"></span>`;

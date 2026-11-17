@@ -770,6 +770,31 @@ header.top .crumb{font-size:13px}
   .cx-search input{font-size:16px}
 }
 
+/* ================= Analytics layout (GA-style): flat cards with hairline borders, one report card pattern ================= */
+:root{--card-bd:var(--line)}
+.card,.kpi,.tbl-wrap{box-shadow:none;border:1px solid var(--card-bd);border-radius:12px}
+.card.soft,.card.flat,.kpi.mini{border-color:transparent}
+.card.lift:hover,.lift:hover{box-shadow:0 4px 14px -6px rgba(22,26,61,.18)}
+.page{gap:20px}
+/* Report card: title row, body, footer link to the full report */
+.rc{display:flex;flex-direction:column;padding:0;min-width:0}
+.rc-h{display:flex;align-items:flex-start;gap:12px;padding:18px 20px 6px}
+.rc-h h2{font-family:var(--f);font-size:14px;font-weight:600;line-height:20px;letter-spacing:0}
+.rc-h .sub{font-size:12.5px;color:var(--mute);margin-top:2px}
+.rc-b{padding:10px 20px 18px;flex:1;min-width:0}
+.rc-f{display:flex;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line)}
+.rc-f a,.rc-f button{display:inline-flex;align-items:center;gap:4px;min-height:32px;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--link);font-size:13px;font-weight:600;text-decoration:none;cursor:pointer}
+.rc-f a:hover,.rc-f button:hover{background:var(--sel)}
+/* Page toolbar: filters on the left, date range and page actions on the right (one row, wraps on small screens) */
+.ptb{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;min-height:44px}
+.ptb .sp{flex:1}
+.ptb-date{display:inline-flex;align-items:center;gap:10px;min-height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--card);cursor:pointer;font-size:13px;color:var(--text)}
+.ptb-date .r{color:var(--mute);font-variant-numeric:tabular-nums}
+.ptb-date:hover{background:var(--sub)}
+.addf{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:999px;border:1px dashed var(--line2);background:transparent;color:var(--mute);font-size:13px;font-weight:500;cursor:pointer}
+.addf:hover{border-style:solid;color:var(--text);background:var(--sub)}
+@media (max-width:760px){.rc-h{padding:14px 16px 4px}.rc-b{padding:8px 16px 14px}}
+
 </style>
 </head>
 <body>
@@ -1134,6 +1159,12 @@ const METRIC_IC = [
 const metricIc = label => { const m = METRIC_IC.find(([re]) => re.test(String(label))); return m ? [m[1], m[2]] : ['overview', 'grey']; };
 // mic(label, size): the icon tile for a metric label. size is the glyph px (tile is glyph + 12).
 const mic = (label, size) => { const [i, t] = metricIc(label), g = size || 15; return `<span class="mic c-${t}" style="--mic:${g + 12}px" aria-hidden="true">${ic(i, g)}</span>`; };
+
+/* ---------- Analytics layout helpers ---------- */
+// reportCard({title, sub, right, body, link:[label, route], id, cls}) : the one card pattern for report content
+const reportCard = o => `<section class="card rc ${o.cls || ''}" ${o.id ? `id="${o.id}"` : ''} aria-label="${esc(o.title)}"><header class="rc-h"><div class="grow"><h2>${esc(o.title)}</h2>${o.sub ? `<div class="sub">${o.sub}</div>` : ''}</div>${o.right || ''}</header><div class="rc-b">${o.body}</div>${o.link ? `<footer class="rc-f"><a href="#${o.link[1]}">${esc(o.link[0])}${ic('arrowR', 14)}</a></footer>` : ''}</section>`;
+// pageToolbar({left, date:{label, range, action}, right}) : filters left, date range + actions right
+const pageToolbar = o => `<div class="ptb">${o.left || ''}<span class="sp"></span>${o.date ? `<button type="button" class="ptb-date" data-a="${o.date.action || 'noop'}" aria-haspopup="menu">${ic('cal', 16)}<b>${esc(o.date.label)}</b><span class="r">${esc(o.date.range)}</span>${ic('chevD', 14)}</button>` : ''}${o.right || ''}</div>`;
 
 /* ---------- V2 helpers ---------- */
 const countAttr = v => `data-count="${esc(v)}"`; // numbers count up on page entry
