@@ -667,7 +667,10 @@ header.top .crumb{font-size:13px}
 /* ---------- Chat parts shared by AG1 Inbox and M3 Conversations (.cx-*) ---------- */
 .cx-av{position:relative;display:inline-flex;flex:0 0 auto}
 .cx-row>.cx-av{align-self:flex-start;margin-top:2px}
-.cx-chb{position:absolute;right:-6px;bottom:-5px;width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--card)}
+.cx-chb{position:absolute;right:-7px;bottom:-6px;width:15px;height:15px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--card)}
+.cx-chb .ic{width:9px;height:9px}
+/* folder tabs that run past the list edge fade out, so it reads as "scroll for more" */
+.ag-ftabs,.mg-tabs{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);padding-inline-end:24px}
 .cx-search{display:flex;align-items:center;gap:8px;min-height:38px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--sub);color:var(--mute);flex:1;min-width:0;transition:border-color var(--d1),box-shadow var(--d2) var(--ease),background var(--d1)}
 .cx-search:focus-within{border-color:var(--horizon);background:var(--inp);box-shadow:0 0 0 4px var(--ring)}
 .cx-search input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:14px;min-width:0;height:36px}
