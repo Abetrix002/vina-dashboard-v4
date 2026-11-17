@@ -131,4 +131,62 @@ export default [
     if (CH.ig) return 'CH.ig still defined';
     for (const s of SCREENS) { await open1(s[0]); const t = txt(); if (/instagram/i.test(t)) return 'Instagram on ' + s[0]; }
     return true;`],
+  ['Chat: same-sender messages group, days split, 3+ events collapse (AG1 and M3 share it); J and ] work', `${G}
+    signIn('manager'); await tick(150); S.f.m3sel = 'l10'; await go2('conversations'); await tick();
+    const vg = document.querySelector('#m3-chat .cx-g.vina'); if (!vg) return 'no VINA group';
+    if (vg.querySelectorAll('.cx-m').length !== 2 || vg.querySelectorAll('.cx-gh').length !== 1 || vg.querySelectorAll('.cx-gav .av.vina').length !== 1) return 'VINA answer + location pin not grouped under one avatar';
+    if (!vg.querySelector('.cx-src[data-tip*="Showroom hours"], .cx-src[title*="Showroom hours"]')) return 'no Source chip with the full source';
+    if (document.querySelector('#app textarea') || !/View only. The agent handling this lead replies./.test(txt())) return 'M3 not view only';
+    signIn('sales'); await tick(150); await go2('inbox'); A['ag-sel']({dataset:{x:'l01'}}); render(); await tick();
+    const days = [...document.querySelectorAll('#ag-chat .cx-day')].map(d => d.textContent).join('|'); if (days !== 'Wed 4 Nov|Today') return 'day lines ' + days;
+    const more = document.querySelector('#ag-chat .cx-more'); if (!more || !/3 updates/.test(more.textContent)) return 'no "3 updates · Show"';
+    if (!document.querySelector('#ag-chat .cx-g.agent .cx-tick')) return 'no delivery tick';
+    more.click(); await tick(); if (document.querySelectorAll('#ag-chat .cx-ev').length !== 4) return 'events did not expand';
+    const was = S.ag.sel; document.dispatchEvent(new KeyboardEvent('keydown', {key:'j', bubbles:true})); await tick(); if (S.ag.sel === was) return 'J did not move to the next chat';
+    const open = !!document.querySelector('#app .cx-dp'); document.dispatchEvent(new KeyboardEvent('keydown', {key:']', bubbles:true})); await tick(); if (!!document.querySelector('#app .cx-dp') === open) return '] did not toggle details';
+    document.dispatchEvent(new KeyboardEvent('keydown', {key:']', bubbles:true})); await tick();
+    return true;`],
+  ['Chat header: one primary action, the rest in the ⋯ menu, nothing shown twice', `${G}
+    const twice = () => { const k = [...document.querySelectorAll('#app [data-a]')].map(e => e.dataset.a + ':' + (e.dataset.x || '')).filter(x => /^(ag-(take|handback|call|sendsales|close|booktd|copy)|dp):/.test(x)); return k.find((x, i) => k.indexOf(x) !== i && !/^dp:/.test(x)); };
+    signIn('cc'); await tick(150); await go2('inbox'); A['ag-sel']({dataset:{x:'l11'}}); render(); await tick();
+    const head = document.querySelector('#app .cx-head');
+    if (head.querySelector('[data-a="ag-sendsales"],[data-a="ag-close"]')) return 'lead actions in the header';
+    if (!head.querySelector('[data-a="ag-take"]') || !head.querySelector('[data-a="ag-call"]')) return 'Take over or Call missing';
+    head.querySelector('[data-x="ag-more"]').click(); await tick();
+    const m = document.querySelector('#app .ag-morew .menu'); if (!m) return 'menu did not open';
+    for (const w of ['Send to sales', 'Close lead', 'Open lead page', 'Copy mobile']) if (!m.innerText.includes(w)) return 'menu lacks ' + w;
+    if (twice()) return 'shown twice: ' + twice();
+    document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', bubbles:true})); await tick(); if (S.menu) return 'Esc did not close the menu';
+    head.ownerDocument.querySelector('[data-x="ag-more"]').click(); await tick(); document.querySelector('.ag-morew .menu [data-a="ag-sendsales"]').click(); await tick();
+    if (S.menu || !S.modal || S.modal._k !== 'send-sales') return 'Send to sales did not open from the menu'; S.modal = null; render();
+    document.querySelector('[data-a="ag-take"]').click(); await tick();
+    if (document.querySelector('#app .cx-head [data-a="ag-take"], #app .cx-head [data-a="ag-handback"]')) return 'header still has Take over / Hand back';
+    if (document.querySelectorAll('#app .ag-paused [data-a="ag-handback"]').length !== 1) return 'no Hand back in the paused bar';
+    if (lead('l11').h[0].title !== 'Took over the chat') return 'take over not in history';
+    if (twice()) return 'shown twice after take over: ' + twice();
+    signIn('sales'); await tick(150); await go2('inbox'); document.querySelector('[data-x="ag-more"]').click(); await tick();
+    const t = document.querySelector('.ag-morew .menu').innerText; S.menu = null; render();
+    return (/Book test drive/.test(t) && !/Send to sales|\\bCall\\b/.test(t)) || 'sales menu: ' + t;`],
+  ['Composer: N switches to a tinted team-only note, R back to reply', `${G}
+    signIn('sales'); await tick(150); await go2('inbox'); A['ag-sel']({dataset:{x:'l06'}}); render(); await tick(); const l = lead('l06');
+    document.dispatchEvent(new KeyboardEvent('keydown', {key:'n', bubbles:true})); await tick();
+    const c = document.querySelector('#app .ag-comp'); if (!c.classList.contains('note')) return 'N did not switch to Note';
+    if (!/Only your team sees notes/.test(c.innerText)) return 'no team-only line';
+    const ta = document.querySelector('#app textarea'); if (document.activeElement !== ta) return 'note box not focused';
+    fire(ta, 'Trade-in photos are in the lead.'); ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true})); await tick(150);
+    if (l.m[l.m.length - 1].k !== 'note' || l.h[0].t !== 'note') return 'note not saved or not in history';
+    const g = [...document.querySelectorAll('#ag-chat .cx-g.note')].pop(); if (!g || !/Trade-in photos/.test(g.innerText)) return 'note not in the thread';
+    document.dispatchEvent(new KeyboardEvent('keydown', {key:'r', bubbles:true})); await tick();
+    return !document.querySelector('#app .ag-comp.note') || 'R did not switch back to Reply';`],
+  ['Composer: "/" opens saved replies filtered as you type, Enter picks, Shift+Enter is a new line, Ctrl+Enter sends', `${G}
+    signIn('sales'); await tick(150); await go2('inbox'); A['ag-sel']({dataset:{x:'l03'}}); render(); await tick();
+    document.dispatchEvent(new KeyboardEvent('keydown', {key:'/', bubbles:true})); await tick(50);
+    let ta = document.querySelector('#app textarea'); if (S.menu !== 'ag-saved' || ta.value !== '/') return 'slash: menu ' + S.menu + ' text ' + ta.value;
+    fire(ta, '/showroom'); await tick();
+    const items = [...document.querySelectorAll('#app .ag-comp .menu [data-a="ag-saved"]')]; if (items.length !== 1 || !/Madinah Road showroom/.test(items[0].textContent)) return 'filter gave ' + items.length;
+    ta = document.querySelector('#app textarea'); ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true})); await tick(50);
+    ta = document.querySelector('#app textarea'); if (S.menu || !/^Our Madinah Road showroom is open/.test(ta.value)) return 'pick gave ' + ta.value;
+    const n = lead('l03').m.length; ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', shiftKey:true, bubbles:true})); await tick(); if (lead('l03').m.length !== n) return 'Shift+Enter sent';
+    ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', ctrlKey:true, bubbles:true})); await tick(100);
+    return (lead('l03').m.some(x => x.k === 'agent' && /Madinah Road showroom/.test(x.text)) && lead('l03').h[0].title === 'Message sent') || 'Ctrl+Enter did not send';`],
 ];

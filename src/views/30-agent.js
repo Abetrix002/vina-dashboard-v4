@@ -2,52 +2,64 @@
    Exposes: R inbox/callbacks/alerts, MODALS send-sales/close-lead/call, DRAWERS.alerts, A.bell, window.startCall, AFTER send-sales/close-lead. */
 (function () {
   document.body.insertAdjacentHTML('beforeend', `<style>
-/* AG1 inbox: list · chat · customer panel */
-.ag-inbox{display:grid;grid-template-columns:304px minmax(0,1fr) 336px;height:calc(100vh - 69px);min-height:540px;position:relative}
-.ag-col{display:flex;flex-direction:column;min-height:0;min-width:0;border-right:1px solid var(--line);background:var(--card)}
-.ag-folders{padding:12px;display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line)}
-.ag-folders .fchip{min-height:32px;font-size:12px;padding:0 11px}
-.ag-list{flex:1;overflow-y:auto}
-.ag-item{position:relative;display:flex;gap:10px;width:100%;padding:12px 14px 12px 16px;border:0;border-bottom:1px solid var(--line);background:transparent;text-align:start;cursor:pointer;color:var(--text);font:inherit;transition:background var(--d1)}
-.ag-item:hover{background:var(--sub)}
-.ag-item[aria-current="true"]{background:var(--sel);box-shadow:inset 3px 0 0 var(--horizon)}
-.ag-item .l1{display:flex;align-items:center;gap:6px;min-width:0}
-.ag-item .nm{font-weight:600}
-.ag-item.unread .nm{font-weight:700}
-.ag-item .tm{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;font-size:12px;font-variant-numeric:tabular-nums}
-.ag-item .l2{font-size:13px;color:var(--mute);margin-top:3px}
-.ag-item.unread .l2{color:var(--text)}
-.ag-item .l3{display:flex;align-items:center;gap:6px;margin-top:7px;flex-wrap:wrap}
+/* AG1 inbox: list · chat · details. The list rows, thread, header and details panel are the shared .cx-* parts in core. */
+.ag-inbox{position:relative;display:grid;grid-template-columns:320px minmax(0,1fr);height:calc(100vh - 69px);min-height:540px}
+@media (min-width:1280px){.ag-inbox.dp-on{grid-template-columns:320px minmax(0,1fr) 320px}}
+.ag-col{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--card)}
+.ag-listcol{border-inline-end:1px solid var(--line)}
+.ag-lh{display:flex;flex-direction:column;gap:4px;padding:12px 12px 0;border-bottom:1px solid var(--line)}
+.ag-ftabs{border-bottom:0;margin:0 -6px}
+.ag-ftabs .tab{min-height:40px;padding:0 8px;gap:6px}
+.ag-ftabs .tab .n{min-width:20px;height:18px;padding:0 5px}
 .ag-chatcol{background:var(--bg)}
-.ag-chead{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;min-height:64px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--line)}
-.ag-chead .btn{flex:0 0 auto}
-.ag-chatcol .chat{flex:1;min-height:0}
-.ag-paused{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--amber-b);color:var(--amber-f);border-bottom:1px solid color-mix(in srgb,var(--amber-f) 22%,transparent);font-size:12px;line-height:1.4}
-.ag-paused b{display:block;font-size:13px}
+@container (max-width:480px){.ag-hl2{display:none}}
+@container (max-width:400px){.ag-hl{display:none}}
+@container (max-width:640px){.ag-pl{display:none}}
+@container (max-width:470px){.ag-wl{display:none}}
+.ag-morew{position:relative;display:inline-flex}
+.ag-morew .menu{top:calc(100% + 6px);right:0;min-width:248px}
+.ag-keys{padding:6px 10px 4px;font-size:12px;line-height:1.6;color:var(--mute);max-width:248px}
+.ag-keys kbd{font:600 11px var(--f);padding:1px 5px;border-radius:5px;border:1px solid var(--line2);background:var(--sub);color:var(--text)}
+.ag-paused{container-type:inline-size;display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 10px 6px 16px;background:var(--amber-b);color:var(--amber-f);border-top:1px solid color-mix(in srgb,var(--amber-f) 22%,transparent);font-size:13px}
+.ag-paused b{font-weight:700}
+.ag-paused .btn{min-height:30px;background:var(--card)}
 .ag-paused.flash{animation:agDrop var(--d3) var(--spring) 1}
-@keyframes agDrop{from{opacity:0;transform:translateY(-8px)}}
-.ag-closedbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--grey-b);color:var(--grey-f);font-size:13px;font-weight:500}
-.msg.agent:not(.note) .bub a{color:inherit;text-decoration:underline}
-.ag-tplh{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.02em;opacity:.78;margin-bottom:4px}
-.ag-comp{position:relative;background:var(--card);border-top:1px solid var(--line);padding:0 16px 12px;display:flex;flex-direction:column;gap:8px}
-.ag-comp-top{display:flex;align-items:center;gap:10px}
-.ag-comp .tabs{border-bottom:0}
-.ag-win{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--r-m);background:var(--amber-b);color:var(--amber-f);font-size:12.5px;line-height:1.45}
-.ag-win b{color:inherit}
-.ag-ta{border:1px solid var(--line2);min-height:72px!important;resize:none}
-.ag-ta.note{background:var(--amber-b)}
-.ag-ta:disabled{opacity:.6;cursor:not-allowed}
-.ag-tools{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
-.ag-comp .menu{bottom:52px;left:16px;max-width:min(420px,calc(100% - 32px))}
-.ag-comp .menu button{white-space:normal;padding:8px 10px;min-height:44px;align-items:flex-start;flex-direction:column;gap:2px}
+@keyframes agDrop{from{opacity:0;transform:translateY(8px)}}
+.ag-closedbar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid var(--line);background:var(--grey-b);color:var(--grey-f);font-size:13px;font-weight:500}
+/* composer: one box, Reply / Note tabs on top, icon tools below */
+.ag-comp{position:relative;padding:10px 16px 14px}
+.ag-box{display:flex;flex-direction:column;border:1px solid var(--line2);border-radius:14px;background:var(--card);box-shadow:var(--e1);transition:border-color var(--d1),box-shadow var(--d2) var(--ease),background var(--d2)}
+.ag-box:focus-within{border-color:var(--horizon);box-shadow:0 0 0 4px var(--ring)}
+.ag-comp.note .ag-box{background:var(--amber-b);border-color:color-mix(in srgb,var(--amber-f) 45%,transparent)}
+.ag-comp.note .ag-box:focus-within{box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 30%,transparent)}
+.ag-ctop{container-type:inline-size;display:flex;align-items:center;gap:8px;padding:6px 8px 0 6px;min-width:0}
+.ag-ctabs{display:flex;gap:2px}
+.ag-ctabs button{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:var(--mute);font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background var(--d1),color var(--d1)}
+.ag-ctabs button:hover{color:var(--text)}
+.ag-ctabs button[aria-selected="true"]{background:var(--sub);color:var(--text)}
+.ag-comp.note .ag-ctabs button[aria-selected="true"]{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-f)}
+.ag-win{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--green-b);color:var(--green-f);font-size:12px;font-weight:600;white-space:nowrap;cursor:help}
+.ag-win.low{background:var(--amber-b);color:var(--amber-f)}
+.ag-nhint{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--amber-f);white-space:nowrap}
+.ag-ta{display:block;width:100%;field-sizing:content;min-height:calc(1.5em + 18px);max-height:calc(9em + 18px);padding:9px 14px;border:0;outline:0;resize:none;overflow-y:auto;background:transparent;color:var(--text);font:inherit;font-size:14px;line-height:1.5}
+.ag-ta::placeholder{color:var(--faint)}
+.ag-tools{display:flex;align-items:center;gap:2px;padding:0 8px 8px 6px}
+.ag-tools .ibtn{color:var(--mute)}
+.ag-tools .ibtn:hover,.ag-tools .ibtn[aria-expanded="true"]{color:var(--text);background:var(--sub)}
+.ag-hint{margin-inline-end:10px;font-size:12px;color:var(--faint);white-space:nowrap}
 .ag-file:focus-visible+label{outline:2px solid var(--horizon);outline-offset:2px}
-.ag-panel{background:var(--card);overflow-y:auto;padding:18px;gap:16px;border-right:0}
+.ag-comp .menu{bottom:calc(100% - 8px);left:16px;width:min(420px,calc(100% - 32px))}
+.ag-comp .menu button{white-space:normal;padding:8px 10px;min-height:44px;align-items:flex-start;flex-direction:column;gap:2px}
+.ag-comp .menu button.hit{background:var(--sel)}
+.ag-why{display:flex;gap:8px;align-items:flex-start;padding:8px 14px 4px;font-size:13px;line-height:1.5;color:var(--amber-f)}
+.ag-why .ic{flex:0 0 auto;margin-top:2px}
+.ag-tpls{display:flex;gap:8px;padding:6px 8px 8px;overflow-x:auto;scrollbar-width:thin}
+.ag-tplc{flex:0 0 min(240px,78%);display:flex;flex-direction:column;gap:3px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--card);color:var(--text);text-align:start;font:inherit;cursor:pointer;transition:border-color var(--d1),background var(--d1)}
+.ag-tplc:hover{border-color:var(--horizon);background:var(--sel)}
+.ag-tplc b{font-size:13px}
+.ag-tplc span{font-size:12px;line-height:1.45;color:var(--mute)}
 .ag-sum{background:var(--teal-b);border-radius:var(--r-m);padding:12px 14px;font-size:13px;color:var(--text)}
 .ag-sum .hd{display:flex;align-items:center;gap:6px;color:var(--teal-f);font-weight:700;font-size:12px;letter-spacing:.02em;margin-bottom:6px}
-.ag-sum .kv{margin-top:10px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--teal-f) 22%,transparent);grid-template-columns:auto 1fr;gap:6px 12px;font-size:12.5px}
-.ag-pact{display:flex;flex-direction:column;gap:8px}
-.ag-panel>.kv{padding-top:14px;border-top:1px solid var(--line);padding-bottom:72px}
-.ag-back,.ag-pbtn{display:none}
 /* AG2 callbacks */
 .ag-daycard{padding:18px 20px}
 .ag-day{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
@@ -88,11 +100,8 @@
 .ag-al .unread-dot{margin-top:6px}
 .ag-alhead{display:flex;align-items:center;gap:12px;min-height:40px}
 @media (max-width:1180px){
-  .ag-inbox{grid-template-columns:280px minmax(0,1fr)}
-  .ag-panel{display:none}
-  .ag-panel.open{display:flex;position:absolute;top:0;right:0;bottom:0;width:min(340px,100%);box-shadow:var(--e3);z-index:5}
-  .ag-pbtn{display:inline-flex}
-  .ag-tools .ag-tl,.ag-chead .ag-hl2,.ag-comp-top .ag-hint{display:none}
+  .ag-inbox{grid-template-columns:288px minmax(0,1fr)}
+  .ag-hint{display:none}
   .ag-cbrow{grid-template-columns:104px minmax(0,1fr) auto;grid-template-areas:"tm who act" "tm why act"}
   .ag-alpage{grid-template-columns:1fr}
 }
@@ -100,10 +109,9 @@
   .ag-inbox{grid-template-columns:1fr;height:calc(100vh - 118px)}
   .ag-inbox[data-mob="list"] .ag-chatcol{display:none}
   .ag-inbox[data-mob="chat"] .ag-listcol{display:none}
-  .ag-back{display:inline-flex}
-  .ag-chead{padding:8px 12px;gap:8px}
-  .ag-chead .ag-hl{display:none}
-  .ag-comp-top .ag-hint{display:none}
+  .ag-inbox[data-mob="list"] .cx-dp{display:none}
+  .ag-comp{padding:8px 10px 10px}
+  .ag-ta{font-size:16px}
   .ag-daycard{display:none}
   .ag-dayline{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:12px 14px;border-radius:var(--r-m);background:var(--sub);font-size:13px;color:var(--mute)}
   .ag-dayline b{color:var(--text);font-family:var(--f-display)}
@@ -120,7 +128,7 @@
 }
 </style>`);
 
-  const G = S.ag = {folder:{cc:'callbacks', sales:'sent'}, sel:null, tab:'reply', mob:'list', panel:false, typing:null, replied:new Set(), duePopped:new Set(['l09']), cbTab:'today', alF:'all'};
+  const G = S.ag = {folder:{cc:'callbacks', sales:'sent'}, sel:null, tab:'reply', mob:'list', sq:null, typing:null, replied:new Set(), duePopped:new Set(['l09']), cbTab:'today', alF:'all'};
   const isOpen = l => !['sold','lost'].includes(l.status);
   const elapsed = () => (Date.now() - T0) / 60000;
   const rem = l => l.cb ? Math.round(l.cb.in - elapsed()) : null;
@@ -205,63 +213,64 @@
   };
   const folderList = k => { const f = FOLDERS[S.role].find(x => x[0] === k) || FOLDERS[S.role][0]; return mine().filter(f[2]).sort((a, b) => (b.unread - a.unread) || ((b.late ? 1 : 0) - (a.late ? 1 : 0)) || (a.lastIn - b.lastIn)); };
   const lastLine = l => { const m = [...l.m].reverse().find(x => x.k !== 'evt' && x.k !== 'act' && x.text); return m ? m : null; };
-  const listTime = l => { const r = rem(l); if (isCC() && l.cb && !l.cb.done && r < 0) return [`${mins(-r)} late`, true]; const m = lastLine(l); return [m ? m.at.replace(/^Today /, '') : '—', l.late]; };
+  const listTime = l => { const r = rem(l); if (isCC() && l.cb && !l.cb.done && r < 0) return [`${mins(-r)} late`, true]; const m = lastLine(l); return [m ? rowTime(m.at) : '—', l.late]; };
   const SAVED = ['Hi {first}, this is {me} from iCaur Alghanim. Is now a good time to talk?', 'Our Madinah Road showroom is open 9 AM to 10 PM, Saturday to Thursday.', 'I will send you the full offer in writing in a few minutes.', 'Would you like to book a test drive? Tell me the day and time that suits you.'];
   const TPL = [['Follow up', 'Hello {first}, this is iCaur Alghanim. Are you still interested in the {model}? Reply to this message and we will help you.'], ['New offer', 'Hello {first}, there is a new offer on the {model} this month. Reply YES to hear more.'], ['Test drive reminder', 'Hello {first}, a reminder of your test drive at our Madinah Road showroom. Reply to change the time.']];
   const REPLY = {Arabic:['تمام، شكراً لك', 'طيب، أنتظر اتصالك', 'ممتاز، يناسبني'], English:['Great, thank you.', 'Okay, that works for me.', 'Perfect, talk soon.']};
-
-  function msgHtml(m, l) {
-    const meta = (who, at) => `${esc(who)} · ${esc(String(at || '').replace(/^Today /, ''))}`;
-    if (m.k === 'evt') return `<div class="evt ${m.tone || ''}">${ic(m.i || 'info', 14)}<span>${txt(m.text)} · ${esc(m.at)}</span></div>`;
-    if (m.k === 'act') return `<div class="actcard ${m.st === 'Failed' ? 'fail' : ''}"><div class="ah">${av('VINA', 'sm')}${esc(m.name)}<span class="st">${chipC(m.st, m.st === 'Done' ? 'green' : m.st === 'Failed' ? 'red' : 'blue')}</span></div><ul>${(m.lines || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
-    if (m.k === 'in') return `<div class="msg in"><div class="bub">${txt(m.text)}</div><div class="meta">${meta(firstName(l), m.at)}</div></div>`;
-    if (m.k === 'vina') return `<div class="msg vina"><div class="bub">${txt(m.text)}</div><div class="meta">${av('VINA', 'sm')}${meta('VINA', m.at)}${m.src ? `<span class="src" tabindex="0" title="VINA answered from: ${esc(m.src)}">${ic('book', 12)}${esc(m.src)}</span>` : ''}</div></div>`;
-    if (m.k === 'note') return `<div class="msg note agent"><div class="bub">${esc(m.text)}</div><div class="meta">${ic('lock', 12)}Note for the team · ${meta(first(m.who), m.at)}</div></div>`;
-    if (m.k === 'file') return `<div class="msg ${m.who ? 'agent' : 'vina'}"><div class="bub row tight nowrap">${ic('clip', 16)}<span>${esc(m.text)}</span></div><div class="meta">${m.who ? '' : av('VINA', 'sm')}${meta(m.who ? first(m.who) : 'VINA', m.at)}</div></div>`;
-    if (m.k === 'tpl') return `<div class="msg agent"><div class="bub"><div class="ag-tplh">${ic('tpl', 12)}WhatsApp template · ${esc(m.name)}</div>${esc(m.text)}</div><div class="meta">${meta(first(m.who), m.at)}</div></div>`;
-    return `<div class="msg agent"><div class="bub">${txt(m.text)}</div><div class="meta">${meta(first(m.who), m.at)}</div></div>`;
-  }
-
-  function panelHtml(l) {
-    const r = rem(l);
-    const cbTxt = l.cb && !l.cb.done ? `${esc(l.cb.at)} · ${r < 0 ? `<span class="red b">${mins(-r)} late</span>` : 'in ' + mins(r)}` : '—';
-    const acts = isOpen(l) ? (isCC() ? `<button type="button" class="btn pri" data-a="ag-sendsales" data-x="${l.id}">${ic('send', 16)}Send to sales</button>` : `<button type="button" class="btn pri" data-a="ag-booktd" data-x="${l.id}">${ic('cal', 16)}Book test drive</button>`) + `<button type="button" class="btn" data-a="ag-close" data-x="${l.id}">${ic('check', 16)}Close lead</button>` : '';
-    return `<div class="row nowrap">${av(l.name, 'lg')}<div class="grow"><div class="b ell" style="font-size:16px;font-family:var(--f-display)" title="${esc(l.name)}">${esc(l.name)}</div><div class="small mute num">${esc(l.mob)}</div></div><button type="button" class="ibtn sm bare ag-pbtn" data-a="ag-panel" aria-label="Close customer details">${ic('x', 16)}</button></div>
-      <div class="row tight">${chip(l.status)}${chIc(l.ch)}<span class="small mute">${esc(CH[l.ch].label)}</span>${l.vq ? vtag() : ''}</div>
-      <div class="ag-sum"><div class="hd">${ic('spark', 14)}VINA summary</div><p>${esc(l.summary)}.</p>${l.facts ? `<dl class="kv">${l.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}</div>
-      <div class="ag-pact">${acts}<a class="btn ghost" href="#lead-${l.id}">Open lead page${ic('arrowR', 14)}</a></div>
-      <dl class="kv"><dt>Callback time</dt><dd>${cbTxt}</dd><dt>Car model</dt><dd>${esc(l.model)}${l.trim ? ' · ' + esc(l.trim) : ''}${l.colour ? ' · ' + esc(l.colour) : ''}</dd><dt>Status</dt><dd>${esc(STATUS[l.status].label)}</dd><dt>Came from</dt><dd>${esc(l.src)}</dd><dt>Next step</dt><dd>${esc(l.next)}</dd><dt>City</dt><dd>${esc(l.city)}</dd><dt>Language</dt><dd>${esc(l.lang)}</dd>
-      <dt>Customer rating</dt><dd>${l.rating ? `${stars(l.rating)}<div class="xs mute" style="margin-top:4px">“${esc(l.ratingNote || '')}”</div>` : '<span class="mute">Not rated yet</span>'}</dd></dl>`;
-  }
+  const savedFor = l => SAVED.map((s, i) => [i, fill(s, l)]).filter(([, t]) => !G.sq || t.toLowerCase().includes(G.sq.toLowerCase()));
+  const focusTa = () => setTimeout(() => { const t = $('#b-f-agText'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }, 0);
+  const cbTxt = l => { if (!l.cb || l.cb.done) return ''; const r = rem(l); return `${esc(l.cb.at)} · ${r < 0 ? `<span class="red b">${mins(-r)} late</span>` : 'in ' + mins(r)}`; };
+  const winChip = l => {
+    if (l.ch !== 'wa') return ''; const h = 24 - l.lastIn;
+    return `<span class="ag-win ${h < 2 ? 'low' : ''}" tabindex="0" title="WhatsApp lets you write freely for 24 hours after ${esc(firstName(l))}'s last message. After that, only approved templates.">${ic('clock', 12)}<span class="ag-wl">Reply window · </span>${h >= 1 ? Math.floor(h) + ' h' : Math.max(1, Math.round(h * 60)) + ' min'} left</span>`;
+  };
 
   function composerHtml(l) {
-    const closedWin = windowClosed(l) && G.tab === 'reply';
+    const note = G.tab === 'note', fn = esc(firstName(l));
+    const tabs = `<div class="ag-ctabs" role="tablist" aria-label="Write"><button type="button" role="tab" aria-selected="${!note}" data-a="ag-tab" data-x="reply" title="Reply to ${fn} (R)" aria-keyshortcuts="R">Reply</button><button type="button" role="tab" aria-selected="${note}" data-a="ag-tab" data-x="note" title="Note for the team (N)" aria-keyshortcuts="N">${ic('lock', 12)}Note for the team</button></div>`;
+    // WhatsApp 24-hour window closed: the composer becomes the template picker
+    if (!note && windowClosed(l)) return `<div class="ag-comp"><div class="ag-box"><div class="ag-ctop">${tabs}</div>
+      <p class="ag-why" role="status">${ic('clock', 14)}<span>WhatsApp only allows approved templates now, because ${fn}'s last message was more than 24 hours ago.</span></p>
+      <div class="ag-tpls" role="group" aria-label="WhatsApp templates">${TPL.map(([n, s], i) => `<button type="button" class="ag-tplc" data-a="ag-tpl" data-x="${i}"><b>${esc(n)}</b><span>${esc(fill(s, l))}</span></button>`).join('')}</div></div></div>`;
     const ta = bindTa('f.agText');
-    const note = G.tab === 'note';
-    const fn = esc(firstName(l));
-    return `<div class="ag-comp">
-      <div class="ag-comp-top"><div class="tabs" role="tablist" aria-label="Write"><button type="button" role="tab" class="tab" aria-selected="${!note}" data-a="ag-tab" data-x="reply">Reply</button><button type="button" role="tab" class="tab" aria-selected="${note}" data-a="ag-tab" data-x="note">${ic('lock', 13)}Note for the team</button></div><span class="sp"></span><span class="xs mute ag-hint" id="ag-hint">Enter to send · Shift+Enter for a new line</span></div>
-      ${closedWin ? `<div class="ag-win" role="status">${ic('clock', 16)}<span><b>The WhatsApp 24-hour window has closed.</b> ${fn}'s last message was over 24 hours ago, so WhatsApp only lets you send an approved template. When ${fn} replies, you can write freely again.</span></div>` : ''}
+    const matches = savedFor(l);
+    return `<div class="ag-comp ${note ? 'note' : ''}"><div class="ag-box">
+      <div class="ag-ctop">${tabs}<span class="sp"></span>${note ? `<span class="ag-nhint">${ic('eyeOff', 13)}Only your team sees notes</span>` : winChip(l)}</div>
       <label class="sr" for="b-f-agText">${note ? 'Note for the team' : 'Message to ' + esc(l.name)}</label>
-      <textarea class="inp ag-ta ${note ? 'note' : ''}" rows="3" ${ta[0]} aria-describedby="ag-hint" ${closedWin ? 'disabled' : ''} placeholder="${note ? 'Only your team sees this note. The customer does not.' : closedWin ? 'Pick a WhatsApp template below' : 'Write to ' + fn + '…'}">${closedWin ? '' : ta[1]}</textarea>
+      <textarea class="ag-ta" rows="1" ${ta[0]} data-in="ag-type" aria-describedby="ag-hint" placeholder="${note ? 'Write a note for the team…' : 'Reply to ' + fn + '… Type / for saved replies'}">${ta[1]}</textarea>
       <div class="ag-tools">
-        ${note ? '' : `<button type="button" class="btn sm" data-a="ag-menu" data-x="ag-saved" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-saved'}" aria-label="Saved replies" title="Saved replies" ${closedWin ? 'disabled' : ''}>${ic('book', 14)}<span class="ag-tl">Replies</span></button>${l.ch === 'wa' ? `<button type="button" class="btn sm ${closedWin ? 'pri' : ''}" data-a="ag-menu" data-x="ag-tpl" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-tpl'}" aria-label="WhatsApp templates" title="WhatsApp templates">${ic('tpl', 14)}<span class="ag-tl">Templates</span></button>` : ''}<input type="file" id="ag-file" class="sr ag-file" data-ch="ag-file" ${closedWin ? 'disabled' : ''}><label class="btn sm" for="ag-file" title="Attach a file" ${closedWin ? 'aria-disabled="true" style="opacity:.5;pointer-events:none"' : ''}>${ic('clip', 14)}<span class="ag-tl">Attach</span></label>`}
-        <span class="sp"></span>
-        <button type="button" class="btn pri sm" data-a="ag-send" ${closedWin ? 'disabled title="Free text is blocked after 24 hours. Pick a template."' : ''}>${ic(note ? 'note' : 'send', 14)}${note ? 'Save note' : 'Send'}</button>
-      </div>
-      ${S.menu === 'ag-saved' ? `<div class="menu" role="menu" aria-label="Saved replies">${SAVED.map((s, i) => `<button type="button" role="menuitem" data-a="ag-saved" data-x="${i}"><span class="small">${esc(fill(s, l))}</span></button>`).join('')}</div>` : ''}
-      ${S.menu === 'ag-tpl' ? `<div class="menu" role="menu" aria-label="WhatsApp templates">${TPL.map(([n, s], i) => `<button type="button" role="menuitem" data-a="ag-tpl" data-x="${i}"><b class="small">${esc(n)}</b><span class="xs mute">${esc(fill(s, l))}</span></button>`).join('')}</div>` : ''}
+        ${note ? '' : `<input type="file" id="ag-file" class="sr ag-file" data-ch="ag-file"><label class="ibtn sm bare" for="ag-file" title="Attach a file" aria-label="Attach a file">${ic('clip', 17)}</label>
+        <button type="button" class="ibtn sm bare" data-a="ag-menu" data-x="ag-saved" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-saved'}" aria-label="Saved replies" title="Saved replies (/)" aria-keyshortcuts="/">${ic('book', 17)}</button>
+        ${l.ch === 'wa' ? `<button type="button" class="ibtn sm bare" data-a="ag-menu" data-x="ag-tpl" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-tpl'}" aria-label="WhatsApp templates" title="WhatsApp templates">${ic('tpl', 17)}</button>` : ''}`}
+        <span class="sp"></span><span class="ag-hint" id="ag-hint">Enter to send · Shift+Enter for a new line</span>
+        <button type="button" class="btn pri sm" data-a="ag-send" title="${note ? 'Save note' : 'Send'} (Enter)" aria-keyshortcuts="Enter Control+Enter Meta+Enter">${ic(note ? 'note' : 'send', 14)}${note ? 'Save note' : 'Send'}</button>
+      </div></div>
+      ${S.menu === 'ag-saved' && !note ? `<div class="menu" role="menu" aria-label="Saved replies"><div class="mh">Saved replies${G.sq ? ' · “' + esc(G.sq) + '”' : ''}</div>${matches.length ? matches.map(([i, t], n) => `<button type="button" role="menuitem" class="${n === 0 && G.sq != null ? 'hit' : ''}" data-a="ag-saved" data-x="${i}"><span class="small">${esc(t)}</span></button>`).join('') : `<p class="xs mute" style="padding:6px 10px 8px">No saved reply has “${esc(G.sq)}” in it.</p>`}${G.sq != null && matches.length ? '<div class="ag-keys"><kbd>Enter</kbd> picks the first one · <kbd>Esc</kbd> closes</div>' : ''}</div>` : ''}
+      ${S.menu === 'ag-tpl' && !note ? `<div class="menu" role="menu" aria-label="WhatsApp templates"><div class="mh">WhatsApp templates</div>${TPL.map(([n, s], i) => `<button type="button" role="menuitem" data-a="ag-tpl" data-x="${i}"><b class="small">${esc(n)}</b><span class="xs mute">${esc(fill(s, l))}</span></button>`).join('')}</div>` : ''}
     </div>`;
   }
 
+  function moreMenu(l, closed) {
+    const open = S.menu === 'ag-more';
+    const items = (closed ? '' : (isCC() ? `<button type="button" role="menuitem" data-a="ag-sendsales" data-x="${l.id}">${ic('send', 16)}<span class="grow">Send to sales</span></button>` : `<button type="button" role="menuitem" data-a="ag-booktd" data-x="${l.id}">${ic('cal', 16)}<span class="grow">Book test drive</span></button>`)
+      + `<button type="button" role="menuitem" data-a="ag-close" data-x="${l.id}">${ic('check', 16)}<span class="grow">Close lead</span></button><div class="hr" style="margin:6px 0"></div>`)
+      + `<a role="menuitem" href="#lead-${l.id}">${ic('arrowR', 16)}<span class="grow">Open lead page</span></a><button type="button" role="menuitem" data-a="ag-copy" data-x="${l.id}">${ic('copy', 16)}<span class="grow">Copy mobile</span><span class="xs mute num">${esc(l.mob.slice(-4))}</span></button>`;
+    return `<span class="ag-morew"><button type="button" class="ibtn sm" data-a="ag-menu" data-x="ag-more" aria-haspopup="menu" aria-expanded="${open}" aria-label="More actions" title="More actions">${ic('more', 18)}</button>${open ? `<div class="menu" role="menu" aria-label="More actions">${items}<div class="hr" style="margin:6px 0"></div><div class="ag-keys"><kbd>J</kbd> <kbd>K</kbd> next, previous chat · <kbd>R</kbd> reply · <kbd>N</kbd> note · <kbd>]</kbd> details · <kbd>/</kbd> saved replies</div></div>` : ''}</span>`;
+  }
+
   R('inbox', {id:'AG1', title:'Inbox', roles:['cc','sales'], states:[['empty','No chats'],['closed','Chat closed'],['loading','Loading'],['error','Could not load']], render() {
-    const fk = G.folder[S.role];
-    const list = S.st === 'empty' ? [] : folderList(fk);
+    // hand-off from other screens (lead page "See chat", WhatsApp button)
+    if (S.f.agSel) { const x = lead(S.f.agSel); S.f.agSel = null; if (x && x.owner === S.me) { G.sel = G.keep = x.id; G.mob = 'chat'; x.unread = false; stickBottom(); } }
+    const fk = G.folder[S.role], q = (S.f.agQ || '').trim().toLowerCase(), dq = q.replace(/\D/g, '');
+    let list = S.st === 'empty' ? [] : folderList(fk);
+    if (q) list = list.filter(x => x.name.toLowerCase().includes(q) || (dq.length >= 3 && x.mob.replace(/\D/g, '').includes(dq)));
     // the open chat stays open after the agent acts on it, even if it no longer matches this folder
     if (!list.find(l => l.id === G.sel)) { const cur = G.sel && lead(G.sel); if (cur && G.keep === G.sel && cur.owner === S.me) list.unshift(cur); else G.sel = list[0] ? list[0].id : null; }
     const l = G.sel && lead(G.sel);
-    const folders = FOLDERS[S.role].map(([k, t]) => `<button type="button" class="fchip ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-pressed="${fk === k}">${t} <span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span></button>`).join('');
-    const items = S.st === 'loading' ? `<div style="padding:14px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x); const m = lastLine(x); return `<button type="button" class="ag-item ${x.unread ? 'unread' : ''} ${flashCls(x.id)}" data-a="ag-sel" data-x="${x.id}" aria-current="${x.id === G.sel}"${x.unread ? ' aria-label="' + esc(x.name) + ', unread"' : ''}>${av(x.name)}<span class="grow"><span class="l1"><span class="nm ell">${esc(x.name)}</span><span class="sp"></span><span class="tm ${late ? 'red b' : 'mute'}">${late ? pulse('red') : ''}${esc(t)}</span></span><span class="l2 ell" style="display:block">${m ? txt(m.text) : esc(x.summary)}</span><span class="l3">${chIc(x.ch)}${x.asked && isOpen(x) ? chipC('Asked for a person', 'amber', true) : chip(x.status)}<span class="xs mute">${esc(x.model)}</span><span class="sp"></span>${x.unread ? '<span class="unread-dot" aria-hidden="true"></span>' : ''}</span></span></button>`; }).join('')
+    const folders = `<div class="tabs ag-ftabs" role="tablist" aria-label="Folders">${FOLDERS[S.role].map(([k, t]) => `<button type="button" role="tab" class="tab ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-selected="${fk === k}">${t}<span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span></button>`).join('')}</div>`;
+    const items = S.st === 'loading' ? `<div style="padding:8px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x); const m = lastLine(x);
+        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:(x.asked && isOpen(x) ? chipC('Asked for a person', 'amber', true) : chip(x.status)) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
+      : q ? empty('search', 'No chats match', 'Nothing in this folder has “' + esc(S.f.agQ.trim()) + '” in the name or mobile number.')
       : empty('inbox', fk === 'closed' ? 'Nothing closed today yet' : 'No chats here', fk === 'closed' ? 'Leads you close today show here.' : 'When VINA hands a chat to you, it shows here and you get an alert. You can keep working your leads in My leads.', `<a class="btn" href="#leads">Open my leads</a>`);
     let chat;
     if (S.st === 'loading') chat = `<div style="padding:20px">${loadingRows(5, 54)}</div>`;
@@ -269,30 +278,38 @@
     else if (!l) chat = empty('conv', 'Pick a chat', 'Choose a chat on the left to read it and reply.');
     else {
       const closed = !isOpen(l) || S.st === 'closed';
-      const line = [CH[l.ch].label, l.model, l.owner === S.me ? 'given to you' : ''].filter(Boolean).map(esc).join(' · ');
-      chat = `<div class="ag-chead"><button type="button" class="ibtn sm bare ag-back" data-a="ag-back" aria-label="Back to chats">${ic('chevL')}</button>${av(l.name)}<div class="grow" style="min-width:0"><div class="b ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="xs mute ell">${line}</div></div>
-        ${closed ? '' : `${l.paused ? `<button type="button" class="btn sm" data-a="ag-handback" data-x="${l.id}" aria-label="Hand back to VINA">${ic('play', 14)}<span class="ag-hl">Hand back</span></button>` : `<button type="button" class="btn sm" data-a="ag-take" data-x="${l.id}" aria-label="Take over">${ic('pause', 14)}<span class="ag-hl">Take over</span></button>`}
-        ${isCC() ? `<button type="button" class="btn sm" data-a="ag-call" data-x="${l.id}" aria-label="Call ${esc(l.name)}">${ic('phone', 14)}<span class="ag-hl ag-hl2">Call</span></button>` : ''}`}
-        <button type="button" class="btn sm ag-pbtn" data-a="ag-panel" aria-expanded="${G.panel}" aria-label="Customer details">${ic('user', 14)}<span class="ag-hl ag-hl2">Customer</span></button></div>
-        ${closed ? `<div class="ag-closedbar">${ic('lock', 16)}<span class="grow">This lead is closed · ${esc(l.status === 'sold' ? 'Sold' : l.lostReason || 'Lost')}${l.checkin ? ' · VINA checks in on 7 Dec' : ''}. You cannot reply here.</span><a class="btn sm" href="#lead-${l.id}">Open lead page</a></div>`
-          : l.paused ? `<div class="ag-paused ${flashCls('ag-pause-' + l.id)}" role="status">${pulse()}<span class="grow"><b>VINA is paused in this chat</b>You are replying. VINA carries on by itself after 24 hours without a reply from you.</span><button type="button" class="btn sm" data-a="ag-handback" data-x="${l.id}">${ic('play', 14)}Hand back to VINA</button></div>` : ''}
-        <div class="chat" id="ag-chat" data-keep data-stick aria-live="polite">${l.m.length ? l.m.map(m => msgHtml(m, l)).join('') : `<div class="evt">${ic('info', 14)}No messages yet. ${esc(l.summary)}.</div>`}${G.typing === l.id ? `<div class="typing" style="align-self:flex-start;background:var(--card);border:1px solid var(--line)" aria-label="${esc(firstName(l))} is typing"><i style="background:var(--mute)"></i><i style="background:var(--mute)"></i><i style="background:var(--mute)"></i></div>` : ''}</div>
-        ${closed ? '' : composerHtml(l)}`;
+      const line = [CH[l.ch].label, l.model, l.owner === S.me ? 'given to you' : 'given to ' + uname(l.owner)].map(esc).join(' · ');
+      // one primary action for the state: Take over here, or Hand back in the paused bar above the composer
+      const acts = closed ? '' : (l.paused ? '' : `<button type="button" class="btn sm pri" data-a="ag-take" data-x="${l.id}" aria-label="Take over" title="VINA stops replying in this chat only">${ic('pause', 14)}<span class="ag-hl">Take over</span></button>`)
+        + (isCC() ? `<button type="button" class="btn sm" data-a="ag-call" data-x="${l.id}" aria-label="Call ${esc(l.name)}" title="Call ${esc(l.mob)}">${ic('phone', 14)}<span class="ag-hl ag-hl2">Call</span></button>` : '');
+      chat = cxHead(l, {back:'ag-back', line, acts, more:moreMenu(l, closed)})
+        + cxThread(l, {id:'ag-chat', typing:G.typing === l.id})
+        + (closed ? `<div class="ag-closedbar" role="status">${ic('lock', 16)}<span class="grow">This lead is closed · ${esc(l.status === 'sold' ? 'Sold' : l.lostReason || 'Lost')}${l.checkin ? ' · VINA checks in on 7 Dec' : ''}. You cannot reply here.</span></div>`
+          : (l.paused ? `<div class="ag-paused ${flashCls('ag-pause-' + l.id)}" role="status">${pulse()}<span class="grow" title="VINA carries on by itself after 24 hours without a reply from you"><b>VINA is paused in this chat</b><span class="ag-pl"> · back on its own after 24 h without your reply</span></span><button type="button" class="btn sm" data-a="ag-handback" data-x="${l.id}" title="VINA replies in this chat again">${ic('play', 14)}Hand back</button></div>` : '') + composerHtml(l));
     }
-    return shell({nav:'inbox', title:'Inbox', flush:true, search:true, body:`<div class="ag-inbox" data-mob="${G.mob}">
-      <section class="ag-col ag-listcol" aria-label="Chats"><div class="ag-folders" role="group" aria-label="Folders">${folders}</div><div class="ag-list" id="ag-list" data-keep>${items}</div></section>
+    const dp = l && S.st !== 'loading' && S.st !== 'error' && dpOpen();
+    return shell({nav:'inbox', title:'Inbox', flush:true, search:true, body:`<div class="ag-inbox ${dp ? 'dp-on' : ''}" data-mob="${G.mob}">
+      <section class="ag-col ag-listcol" aria-label="Chats"><div class="ag-lh">${cxSearch('f.agQ', 'Search my chats')}${folders}</div><div class="cx-list" id="ag-list" data-keep aria-keyshortcuts="J K">${items}</div></section>
       <section class="ag-col ag-chatcol" aria-label="Chat">${chat}</section>
-      ${l && S.st !== 'loading' && S.st !== 'error' ? `<aside class="ag-col ag-panel col ${G.panel ? 'open' : ''}" aria-label="Customer details">${panelHtml(l)}</aside>` : '<aside class="ag-col ag-panel col" aria-hidden="true"></aside>'}
+      ${dp ? cxDetails(l, {cb:cbTxt(l)}) : ''}
     </div>`});
-  }});
+  }, after() { if (!CSS.supports('field-sizing', 'content')) { const t = $('#b-f-agText'); if (t) autoGrow(t); } }});
+  // ponytail: JS height only where CSS field-sizing is missing (Safari, Firefox)
+  const autoGrow = t => { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 9 * 21 + 18) + 'px'; };
   A['ag-retry'] = () => { S.st = ''; };
   A['ag-folder'] = (el) => { G.folder[S.role] = el.dataset.x; G.sel = null; };
-  A['ag-sel'] = (el) => { const l = lead(el.dataset.x); G.sel = l.id; l.unread = false; G.mob = 'chat'; G.panel = false; S.f.agText = ''; stickBottom(); };
-  A['ag-back'] = () => { G.mob = 'list'; };
-  A['ag-panel'] = () => { G.panel = !G.panel; };
-  A['ag-tab'] = (el) => { G.tab = el.dataset.x; };
-  A['ag-menu'] = (el) => { S.menu = S.menu === el.dataset.x ? null : el.dataset.x; };
-  A['ag-saved'] = (el) => { const l = lead(G.sel); S.f.agText = ((S.f.agText || '') + (S.f.agText ? ' ' : '') + fill(SAVED[+el.dataset.x], l)); S.menu = null; setTimeout(() => { const t = $('#b-f-agText'); if (t) t.focus(); }, 0); };
+  A['ag-sel'] = (el) => { const l = lead(el.dataset.x); G.sel = G.keep = l.id; l.unread = false; G.mob = 'chat'; DP.narrow = false; S.f.agText = ''; G.sq = null; S.menu = null; stickBottom(); };
+  A['ag-back'] = () => { G.mob = 'list'; DP.narrow = false; };
+  A['ag-tab'] = (el) => { G.tab = el.dataset.x; G.sq = null; S.menu = null; focusTa(); };
+  A['ag-menu'] = (el) => { S.menu = S.menu === el.dataset.x ? null : el.dataset.x; G.sq = null; };
+  A['ag-type'] = (el) => {
+    if (!CSS.supports('field-sizing', 'content')) autoGrow(el);
+    if (el.value.startsWith('/') && G.tab !== 'note') { G.sq = el.value.slice(1); S.menu = 'ag-saved'; return; }
+    if (G.sq != null) { G.sq = null; if (S.menu === 'ag-saved') S.menu = null; return; }
+    return false;
+  };
+  A['ag-saved'] = (el) => { const l = lead(G.sel); const t = fill(SAVED[+el.dataset.x], l), cur = S.f.agText || ''; S.f.agText = cur.startsWith('/') ? t : cur + (cur ? ' ' : '') + t; G.sq = null; S.menu = null; focusTa(); };
+  A['ag-copy'] = (el) => { const l = lead(el.dataset.x); S.menu = null; try { navigator.clipboard.writeText(l.mob).catch(() => {}); } catch (e) {} toast('Mobile number copied · ' + l.mob); };
   const take = (l, auto) => { l.paused = true; G.keep = l.id; flash(l.id); flash('ag-pause-' + l.id); l.m.push({k:'evt', text: first(S.me) + ' took over · VINA is paused in this chat', at:clock(now()), tone:'amber', i:'pause'}); log(l, 'chat', 'Took over the chat', 'VINA paused in this chat only'); if (auto) toast('You took over. VINA is paused in this chat.'); };
   A['ag-take'] = (el) => { take(lead(el.dataset.x)); stickBottom(); toast('You took over. VINA is paused in this chat.'); };
   A['ag-handback'] = (el) => { const l = lead(el.dataset.x); l.paused = false; G.keep = l.id; flash(l.id); l.m.push({k:'evt', text:'Handed back to VINA · VINA carries on in this chat', at:clock(now()), tone:'teal', i:'play'}); log(l, 'chat', 'Handed back to VINA', ''); stickBottom(); toast('VINA is replying in this chat again.'); };
@@ -311,16 +328,27 @@
       l.m.push({k:'agent', text:t, who:S.me, at:clock(now())}); log(l, 'chat', 'Message sent', t, 'by ' + meName() + ' · ' + CH[l.ch].label);
       l.unread = false; l.wait = null; l.late = false; customerReplies(l);
     }
-    S.f.agText = ''; G.keep = l.id; flash(l.id); stickBottom();
+    S.f.agText = ''; G.sq = null; S.menu = null; G.keep = l.id; flash(l.id); stickBottom();
   };
   A['ag-tpl'] = (el) => { const l = lead(G.sel); G.keep = l.id; const [n, s] = TPL[+el.dataset.x]; const t = fill(s, l); S.menu = null; l.m.push({k:'tpl', name:n, text:t, who:S.me, at:clock(now())}); log(l, 'chat', 'WhatsApp template sent · ' + n, t); if (!l.paused) l.paused = true; flash(l.id); customerReplies(l); stickBottom(); toast('Template sent. You can write freely once ' + firstName(l) + ' replies.'); };
   A['ag-file'] = (el) => { const l = lead(G.sel); if (l) G.keep = l.id; const fl = el.files && el.files[0]; if (!fl || !l) return false; if (fl.size > 16 * 1024 * 1024) { toast('That file is over 16 MB. WhatsApp cannot send it.'); return; } if (!l.paused) take(l, true); l.m.push({k:'file', text:fl.name, who:S.me, at:clock(now())}); log(l, 'chat', 'File sent', fl.name); flash(l.id); stickBottom(); };
-  A['ag-call'] = (el) => { window.startCall(el.dataset.x); };
-  A['ag-sendsales'] = (el) => { openModal('send-sales', {id:el.dataset.x}); };
-  A['ag-close'] = (el) => { openModal('close-lead', {id:el.dataset.x}); };
-  A['ag-booktd'] = (el) => { if (A['ld-book']) { G.keep = el.dataset.x; A['ld-book'](el); } else go('lead-' + el.dataset.x); };
+  A['ag-call'] = (el) => { S.menu = null; window.startCall(el.dataset.x); };
+  A['ag-sendsales'] = (el) => { S.menu = null; openModal('send-sales', {id:el.dataset.x}); };
+  A['ag-close'] = (el) => { S.menu = null; openModal('close-lead', {id:el.dataset.x}); };
+  A['ag-booktd'] = (el) => { S.menu = null; if (A['ld-book']) { G.keep = el.dataset.x; A['ld-book'](el); } else go('lead-' + el.dataset.x); };
   document.addEventListener('keydown', (ev) => {
-    if (ev.target && ev.target.id === 'b-f-agText' && ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing) { ev.preventDefault(); S.f.agText = ev.target.value; A['ag-send'](); render(); }
+    const t = ev.target;
+    if (t && t.id === 'b-f-agText') { // Enter sends, Shift+Enter adds a line, Ctrl/⌘+Enter also sends; Enter picks the first "/" match
+      if (ev.key !== 'Enter' || ev.isComposing || (ev.shiftKey && !ev.ctrlKey && !ev.metaKey)) return;
+      ev.preventDefault(); S.f.agText = t.value;
+      if (S.menu === 'ag-saved' && G.sq != null) { const m = savedFor(lead(G.sel))[0]; if (m) A['ag-saved']({dataset:{x:m[0]}}); render(); return; }
+      A['ag-send'](); render(); return;
+    }
+    if (location.hash !== '#inbox' || !isAgent() || !$('#b-f-agText, .ag-tpls')) return;
+    const k = hotkey(ev); if (!k) return;
+    const lk = k.toLowerCase();
+    if (lk === 'r' || lk === 'n') { ev.preventDefault(); G.tab = lk === 'r' ? 'reply' : 'note'; S.menu = null; G.sq = null; render(); focusTa(); }
+    else if (k === '/' && G.tab !== 'note' && $('#b-f-agText')) { ev.preventDefault(); if (!(S.f.agText || '').trim()) { S.f.agText = '/'; G.sq = ''; } else G.sq = null; S.menu = 'ag-saved'; render(); focusTa(); }
   });
 
   /* ---------- AG3 Send to sales ---------- */

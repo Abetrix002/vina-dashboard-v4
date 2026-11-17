@@ -56,17 +56,15 @@
   .mg-live{display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
   .mg-go{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--link)}
   /* M3 */
-  .mg-m3{display:grid;grid-template-columns:minmax(340px,384px) minmax(0,1fr) 300px;height:calc(100vh - 69px);min-height:560px;background:var(--card)}
-  .mg-m3>section{min-height:0;display:flex;flex-direction:column;border-inline-end:1px solid var(--line)}
-  .mg-m3>section:last-child{border-inline-end:0}
-  .mg-scroll{overflow-y:auto;min-height:0;flex:1}
+  .mg-m3{position:relative;display:grid;grid-template-columns:340px minmax(0,1fr);height:calc(100vh - 69px);min-height:560px;background:var(--card)}
+  @media (min-width:1280px){.mg-m3.dp-on{grid-template-columns:340px minmax(0,1fr) 300px}}
+  .mg-m3>section{min-height:0;min-width:0;display:flex;flex-direction:column}
+  .mg-m3>.mg-list{border-inline-end:1px solid var(--line)}
   .mg-tabs{flex:0 0 auto;padding:4px 6px 0}
   .mg-tabs .tab{flex:1 0 auto;justify-content:center;padding:0 7px;gap:5px}
   .mg-tabs .tab .n{min-width:18px;height:18px;padding:0 5px}
-  .mg-lh{position:relative;display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
-  .mg-search{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line2);background:var(--inp);color:var(--mute);flex:1;min-width:0;transition:border-color var(--d1),box-shadow var(--d2) var(--ease)}
-  .mg-search:focus-within{border-color:var(--horizon);box-shadow:0 0 0 4px var(--ring)}
-  .mg-search input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:13px;min-width:0;height:38px}
+  .mg-lh{position:relative;display:flex;flex-direction:column;gap:8px;padding:12px 12px 0}
+  .mg-lh .mg-fbtn{min-height:38px}
   .mg-fbtn[aria-expanded="true"]{background:var(--sel);border-color:var(--horizon)}
   .mg-fn{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--pri);color:var(--on-pri);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
   .mg-act .fchip{min-height:30px;font-size:12px;padding:0 6px 0 10px;gap:2px}
@@ -82,12 +80,7 @@
   .mg-pop .btn{min-height:34px;padding:0 14px;border:1px solid var(--line2);background:var(--card);border-radius:8px;font-weight:600;justify-content:center}
   .mg-pop .btn.pri{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
   .mg-pop .btn.ghost{border-color:transparent;background:transparent;color:var(--link)}
-  .mg-li{display:flex;gap:10px;width:100%;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);text-align:start;cursor:pointer;transition:background var(--d1)}
-  .mg-li:hover{background:var(--sub)} .mg-li[aria-current="true"]{background:var(--sel);box-shadow:inset 3px 0 0 var(--horizon)}
   .mg-chat{background:var(--bg)}
-  .mg-src{position:relative}
-  .mg-src:hover::after,.mg-src:focus::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);right:0;z-index:5;width:max-content;max-width:260px;padding:6px 10px;border-radius:8px;background:var(--text);color:var(--card);font-size:12px;text-decoration:none;white-space:normal;box-shadow:var(--e2)}
-  .mg-details{display:none}
   /* M4 */
   .mg-avs{display:flex;flex-wrap:wrap;gap:14px 6px}
   .mg-og{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -137,9 +130,7 @@
   @media (max-width:1180px){
     .mg-top,.mg-g2,.mg-g21{grid-template-columns:minmax(0,1fr)}
     .mg-hero{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .mg-m3{grid-template-columns:368px minmax(0,1fr)}
-    .mg-m3>.mg-cust{display:none}
-    .mg-details{display:inline-flex}
+    .mg-m3{grid-template-columns:300px minmax(0,1fr)}
   }
   @media (max-width:1180px){.mg-chg{grid-template-columns:minmax(0,1fr)}.mg-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
   @media (max-width:760px){
@@ -156,11 +147,9 @@
     .mg-area{height:min(var(--ph),230px)}
     .mg-wl .meta{flex-wrap:wrap;row-gap:2px} .mg-wl .meta .ell{white-space:normal}
     .mg-filters select.inp{flex:0 0 auto;width:auto}
-    .mg-m3{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
-    .mg-m3>section{min-width:0;border-inline-end:0}
-    .mg-m3[data-open="1"] .mg-list,.mg-m3:not([data-open="1"]) .mg-chatp{display:none}
-    .mg-chatp .mg-scroll{max-height:70vh}
-    .mg-back{display:inline-flex!important}
+    .mg-m3{grid-template-columns:minmax(0,1fr);height:calc(100vh - 118px);min-height:480px}
+    .mg-m3>.mg-list{border-inline-end:0}
+    .mg-m3[data-open="1"] .mg-list,.mg-m3:not([data-open="1"]) .mg-chatp,.mg-m3:not([data-open="1"]) .cx-dp{display:none}
     .mg-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
     .mg-hrow{grid-template-columns:100px 1fr 50px}
     .mg-fun{grid-template-columns:minmax(0,1fr) 60px 52px;grid-template-areas:"l c p" "t t t"}
@@ -345,22 +334,6 @@
       && (s.date === 'all' || (s.date === 'today' ? l.lastIn <= 16.8 : l.lastIn <= 168)) && (!s.rated || l.rating) && (!s.low || (l.rating && l.rating <= 2))
       && (!q || l.name.toLowerCase().includes(q) || l.mob.replace(/\s/g, '').includes(q.replace(/\s/g, '')))).sort((a, b) => a.lastIn - b.lastIn);
   }
-  const who = x => x.who ? first(x.who) : '';
-  function msgHtml(x, l) {
-    const fn = l.name.split(' ')[0];
-    if (x.k === 'evt') return `<div class="evt ${x.tone || ''}">${ic(x.i || 'info', 14)}<span>${txt(x.text)}${x.at ? ' · ' + esc(x.at) : ''}</span></div>`;
-    if (x.k === 'act') return `<div class="actcard"><div class="ah">${ic('bolt', 16, 'teal')}<span>${esc(x.name)}</span><span class="st">${chipC(x.st, x.st === 'Failed' ? 'red' : x.st === 'Started' ? 'blue' : 'green')}</span></div><ul>${(x.lines || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>`;
-    if (x.k === 'in') return `<div class="msg in"><div class="bub">${txt(x.text)}</div><div class="meta">${esc(fn)} · ${esc(x.at)}</div></div>`;
-    if (x.k === 'vina' || x.k === 'file') return `<div class="msg vina"><div class="bub">${x.k === 'file' ? ic('clip', 14) + ' ' : ''}${txt(x.text)}</div><div class="meta">${x.src ? `<span class="src mg-src" tabindex="0" data-tip="VINA answered from: ${esc(x.src)}" aria-label="Source: ${esc(x.src)}">${ic('book', 12)}Source</span> · ` : ''}VINA · ${esc(x.at)} ${av('VINA', 'sm')}</div></div>`;
-    if (x.k === 'note') return `<div class="msg agent note"><div class="bub">${txt(x.text)}</div><div class="meta">Note for the team · ${esc(who(x))} · ${esc(x.at)}</div></div>`;
-    if (x.k === 'tpl') return `<div class="msg agent"><div class="bub">${ic('tpl', 14)} ${txt(x.text)}</div><div class="meta">WhatsApp template · ${esc(who(x))} · ${esc(x.at)}</div></div>`;
-    return `<div class="msg agent"><div class="bub">${txt(x.text)}</div><div class="meta">${esc(who(x) || 'Team')} · ${esc(x.at)} ${av(uname(x.who), 'sm')}</div></div>`;
-  }
-  const custPanel = l => `<div class="col" style="gap:16px"><div class="col tight" style="align-items:flex-start">${av(l.name, 'lg')}<b style="font-size:16px">${esc(l.name)}</b><span class="small mute num">${esc(mob(l))}</span>${chip(l.status)}</div>
-    <div class="note vina" style="flex-direction:column;gap:4px"><b>${ic('spark', 14)} VINA summary</b><span>${esc(l.summary)}</span></div>
-    <dl class="kv"><dt>Car model</dt><dd>${esc(l.model)}${l.trim ? ' · ' + esc(l.trim) : ''}</dd><dt>Assigned to</dt><dd>${l.owner ? esc(uname(l.owner)) : '<span class="red b">Unassigned</span>'}</dd><dt>Handled by</dt><dd>${esc(l.handled)}</dd><dt>Channel</dt><dd>${CH[l.ch].label}</dd><dt>Came from</dt><dd>${esc(l.src)}</dd><dt>Language</dt><dd>${esc(l.lang)}</dd>${l.rating ? `<dt>Customer rating</dt><dd>${stars(l.rating)}</dd>` : ''}</dl>
-    <a class="btn" href="#lead-${l.id}">Open lead${ic('arrowR', 14)}</a></div>`;
-  DRAWERS['mg-cust'] = d => { const l = lead(d.lead); return drawerFrame('Customer', custPanel(l), '', 'View only'); };
   R('conversations', {id:'M3', title:'Conversations', roles:['manager','vina'], states:[['empty','No conversations yet'],['loading','Loading'],['error','Could not load']], render() {
     const s = M3(), popNew = S._m3fNew; S._m3fNew = false;
     if (S.st === 'loading') return shell({nav:'conversations', title:'Conversations', body: `<div class="g2" style="grid-template-columns:minmax(0,360px) minmax(0,1fr)">${loadingRows(8, 64)}${skel(520)}</div>`});
@@ -378,30 +351,28 @@
         </div>
         <div class="row" style="gap:4px 18px"><label class="chk small"><input ${bindChk('f.m3.rated')}>Has a rating</label><label class="chk small"><input ${bindChk('f.m3.low')}>Low rating</label></div>
         <div class="ft"><button type="button" class="btn ghost" data-a="m3-clear">Clear all</button><button type="button" class="btn pri" data-a="m3-filt">Show ${list.length} chat${list.length === 1 ? '' : 's'}</button></div></div>` : '';
-    const head = `<div class="mg-lh"><div class="row tight nowrap"><label class="mg-search">${ic('search', 15)}<span class="sr">Search conversations</span><input type="search" placeholder="Name or mobile" ${bind('f.m3.q', true)}></label>
+    const head = `<div class="mg-lh"><div class="row tight nowrap">${cxSearch('f.m3.q', 'Search conversations')}
         <button type="button" class="btn mg-fbtn" data-a="m3-filt" aria-haspopup="dialog" aria-expanded="${popOpen}">${ic('filter', 15)}Filters${act.length ? `<span class="mg-fn">${act.length}</span>` : ''}</button></div>
       ${act.length ? `<div class="fchips mg-act">${act.map(([k, t]) => `<button type="button" class="fchip" data-a="m3-unf" data-x="${k}" aria-label="Remove filter: ${esc(t)}">${esc(t)}<span class="x">${ic('x', 13)}</span></button>`).join('')}<button type="button" class="clr" data-a="m3-clear">Clear all</button></div>` : ''}${pop}</div>`;
-    const rows = list.length ? list.map(l => { const ll = lastLine(l); return `<button type="button" class="mg-li" data-a="m3-sel" data-x="${l.id}" aria-current="${sel === l}">${av(l.name)}<span class="grow" style="min-width:0;display:flex;flex-direction:column;gap:3px">
-        <span class="row tight nowrap"><span class="ell" style="font-weight:${l.unread ? 700 : 600}">${esc(l.name)}</span>${l.unread ? '<span class="unread-dot" aria-label="Unread"></span>' : ''}<span class="sp"></span><span class="xs mute" style="white-space:nowrap">${esc(ll.at)}</span></span>
-        <span class="small mute ell">${txt(ll.text)}</span>
-        <span class="row tight" style="gap:6px">${chIc(l.ch)}${chip(l.status)}<span class="xs mute">${esc(l.handled)}</span>${l.rating ? stars(l.rating, 11) : ''}</span></span></button>`; }).join('')
+    const rows = list.length ? list.map(l => { const ll = lastLine(l); return cxRow({l, a:'m3-sel', cur:sel === l, time:rowTime(ll.at), unread:l.unread, preview:txt(ll.text),
+        meta:chip(l.status) + `<span class="ell">${esc(l.handled)}</span>` + (l.rating ? stars(l.rating, 11) : '')}); }).join('')
       : empty('search', 'No conversations match', 'Try another folder or clear the filters.', act.length || s.q ? `<button type="button" class="btn sm" data-a="m3-clear">Clear filters</button>` : '');
-    const listPane = `<section class="mg-list" aria-label="Conversation list">${tabs}${head}<div class="mg-scroll" id="m3-list" data-keep>${rows}</div></section>`;
+    const listPane = `<section class="mg-list" aria-label="Conversation list">${head}${tabs}<div class="cx-list" id="m3-list" data-keep aria-keyshortcuts="J K">${rows}</div></section>`;
+    const line = [CH[sel ? sel.ch : 'wa'].label, sel && sel.model, sel && (sel.owner ? 'given to ' + uname(sel.owner) : 'not given to anyone yet')].map(esc).join(' · ');
     const chatPane = sel ? `<section class="mg-chatp mg-chat" aria-label="Conversation with ${esc(sel.name)}">
-        <div class="row nowrap" style="padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line)"><button type="button" class="ibtn sm mg-back" data-a="m3-back" aria-label="Back to the list" style="display:none">${ic('chevL')}</button>${av(sel.name)}<div class="grow" style="min-width:0"><b class="ell" style="display:block">${esc(sel.name)}</b><div class="xs mute ell">${CH[sel.ch].label} · ${esc(sel.model)} · ${sel.owner ? 'given to ' + esc(uname(sel.owner)) : 'not given to anyone yet'}</div></div>${chip(sel.status)}<button type="button" class="btn sm mg-details" data-a="m3-details" data-x="${sel.id}">Details</button></div>
-        <div class="chat mg-scroll" id="m3-chat" data-keep data-stick>${sel.m.map(x => msgHtml(x, sel)).join('')}</div>
-        <div class="note" style="border-radius:0;border-top:1px solid var(--line);background:var(--card)">${ic('eye')}<span>View only. The agent handling this lead replies to the customer.</span></div></section>`
+        ${cxHead(sel, {back:'m3-back', line, acts:`<a class="ibtn sm" href="#lead-${sel.id}" aria-label="Open lead page" title="Open lead page">${ic('ext', 16)}</a>`})}
+        ${cxThread(sel, {id:'m3-chat'})}
+        <div class="cx-ro" role="note">${ic('eye', 15)}<span>View only. The agent handling this lead replies.</span></div></section>`
       : `<section class="mg-chatp mg-chat">${empty('conv', 'Pick a conversation', 'Choose one from the list to read the full chat.')}</section>`;
-    const cust = `<section class="mg-cust" aria-label="Customer"><div class="mg-scroll" style="padding:20px">${sel ? custPanel(sel) : ''}</div></section>`;
-    return shell({nav:'conversations', title:'Conversations', flush:true, body:`<div class="mg-m3" data-open="${s.open ? 1 : 0}">${listPane}${chatPane}${cust}</div>`});
+    const dp = sel && dpOpen();
+    return shell({nav:'conversations', title:'Conversations', flush:true, body:`<div class="mg-m3 ${dp ? 'dp-on' : ''}" data-open="${s.open ? 1 : 0}">${listPane}${chatPane}${dp ? cxDetails(sel) : ''}</div>`});
   }});
   A['m3-folder'] = el => { M3().folder = el.dataset.x; M3().open = false; };
-  A['m3-sel'] = el => { S.f.m3sel = el.dataset.x; M3().open = true; stickBottom(); };
-  A['m3-back'] = () => { M3().open = false; };
+  A['m3-sel'] = el => { S.f.m3sel = el.dataset.x; M3().open = true; DP.narrow = false; stickBottom(); };
+  A['m3-back'] = () => { M3().open = false; DP.narrow = false; };
   A['m3-clear'] = () => { Object.assign(M3(), {ch:'all', st:'all', hb:'all', date:'all', rated:false, low:false, q:''}); };
   A['m3-filt'] = () => { S.menu = S.menu === 'm3f' ? null : 'm3f'; S._m3fNew = S.menu === 'm3f'; };
   A['m3-unf'] = el => { const k = el.dataset.x; M3()[k] = k === 'rated' || k === 'low' ? false : 'all'; };
-  A['m3-details'] = el => { openDrawer('mg-cust', {lead: el.dataset.x}); };
 
   /* ---------- M4 Call centre and sales ---------- */
   const STATE = id => { const st = U[id].status; return st === 'available' ? ['Online', 'green'] : st === 'busy' ? [U[id].role === 'cc' ? 'On a call' : 'Busy', 'amber'] : ['Off today', 'grey']; };

@@ -44,7 +44,7 @@ const IP = {
   search:'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
   bell:'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0',
   x:'M18 6 6 18M6 6l12 12',
-  check:'M20 6 9 17l-5-5',
+  check:'M20 6 9 17l-5-5', ticks:'M1.5 12.5 6 17 16.5 6.5M11 16l1 1 10.5-10.5',
   chevD:'m6 9 6 6 6-6', chevU:'m18 15-6-6-6 6', chevR:'m9 18 6-6-6-6', chevL:'m15 18-6-6 6-6', updown:'m7 15 5 5 5-5M7 9l5-5 5 5',
   plus:'M12 5v14M5 12h14', minus:'M5 12h14',
   filter:'M22 3H2l8 9.5V19l4 2v-8.5z',
@@ -370,6 +370,104 @@ function kpi(o) {
   return `<${tag} class="kpi ${o.hot ? 'hot' : ''} ${o.hero ? 'hero' : ''} ${o.mini ? 'mini' : ''} ${o.href ? 'lift' : ''}" ${o.href ? `href="#${o.href}" style="text-decoration:none;color:inherit"` : ''}><span class="k row tight nowrap">${o.icon === false ? '' : mic(o.k, o.hero ? 17 : o.mini ? 13 : 15)}<span>${esc(o.k)}</span>${o.hot ? pulse() : ''}</span><span class="row tight" style="align-items:baseline"><span class="v" ${countAttr(o.v)} data-k="${esc(o.k)}">${esc(o.v)}</span>${o.d ? `<span class="d c-${o.dc || 'green'}">${esc(o.d)}</span>` : ''}</span>${o.n ? `<span class="n">${o.n}</span>` : ''}${sp}</${tag}>`;
 }
 
+/* ---------- Chat parts shared by AG1 Inbox and M3 Conversations (.cx-*) ----------
+   cxRow(o) list row · cxHead(l, o) chat header · cxThread(l, o) the thread with "Jump to latest" · cxDetails(l, o) right panel.
+   ] toggles the panel, J / K move through .cx-row lists (screens add their own keys with hotkey()). */
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], MON3 = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+// "Wed 2:41 PM" | "Today 4:25 PM" | "Yesterday 10:42 PM" | "3:58 PM" -> {day: days before today, min: minute of the day, time}
+function msgWhen(at) {
+  const m = String(at || '').match(/^(?:(Today|Yesterday|Sun|Mon|Tue|Wed|Thu|Fri|Sat),?\s+)?(\d{1,2}):(\d\d)\s*([AP]M)$/i);
+  if (!m) return {day:0, min:null, time:String(at || '')};
+  const day = !m[1] || m[1] === 'Today' ? 0 : m[1] === 'Yesterday' ? 1 : (NOW0.getDay() - WD.indexOf(m[1]) + 7) % 7;
+  return {day, min:(+m[2] % 12 + (m[4].toUpperCase() === 'PM' ? 12 : 0)) * 60 + +m[3], time:m[2] + ':' + m[3] + ' ' + m[4].toUpperCase()};
+}
+const dayLabel = n => { if (!n) return 'Today'; if (n === 1) return 'Yesterday'; const d = new Date(NOW0.getTime() - n * 864e5); return WD[d.getDay()] + ' ' + d.getDate() + ' ' + MON3[d.getMonth()]; };
+const rowTime = at => { const w = msgWhen(at); return w.min == null ? w.time : !w.day ? w.time : w.day === 1 ? 'Yesterday' : WD[(NOW0.getDay() - w.day + 7) % 7]; };
+const avCh = (name, ch, size) => { const c = CH[ch] || CH.wa; return `<span class="cx-av">${av(name, size)}<span class="cx-chb c-${c.c}" title="${c.label}">${ic(c.i, 10)}</span><span class="sr">${c.label}</span></span>`; };
+// o: {l, a (action), cur, time, late, unread, preview (html), meta (html), cls}
+const cxRow = o => `<button type="button" class="cx-row ${o.unread ? 'unread' : ''} ${o.cls || ''}" data-a="${o.a}" data-x="${o.l.id}" aria-current="${!!o.cur}">${avCh(o.l.name, o.l.ch)}<span class="cx-rb"><span class="cx-r1"><span class="cx-rn ell">${esc(o.l.name)}</span>${o.unread ? '<span class="unread-dot" aria-hidden="true"></span><span class="sr">, unread</span>' : ''}<span class="cx-rt ${o.late ? 'late' : ''}">${o.late ? pulse('red') : ''}${esc(o.time)}</span></span><span class="cx-rp ell">${o.preview}</span><span class="cx-rm">${o.meta}</span></span></button>`;
+const cxSearch = (path, label) => `<label class="cx-search">${ic('search', 15)}<span class="sr">${label}</span><input type="search" placeholder="Name or mobile" ${bind(path, true)}></label>`;
+// o: {back (action), line (html), acts (html), more (html)}
+const cxHead = (l, o) => `<div class="cx-head">${o.back ? `<button type="button" class="ibtn sm bare cx-back" data-a="${o.back}" aria-label="Back to chats">${ic('chevL')}</button>` : ''}${avCh(l.name, l.ch)}<div class="cx-hn"><div class="b ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="xs mute ell">${o.line}</div></div><span class="cx-hchip">${chip(l.status)}</span>${o.acts || ''}<button type="button" class="ibtn sm cx-dpb" data-a="dp" aria-pressed="${dpOpen()}" aria-controls="cx-dp" aria-label="Customer details" title="Customer details (])">${ic('cols', 16)}</button>${o.more || ''}</div>`;
+
+const THR = {seen:{}, open:new Set(), fresh:null};
+const sideOf = m => m.k === 'in' ? 'in' : m.k === 'vina' || (m.k === 'file' && !m.who) ? 'vina' : m.k === 'note' ? 'note' : 'agent';
+const senderOf = m => m.k === 'evt' || m.k === 'act' ? '' : sideOf(m) + ':' + (m.who || '');
+function cxThreadHtml(l, o) {
+  const ms = l.m, seen = THR.seen[l.id]; THR.seen[l.id] = ms.length;
+  const anim = i => seen != null && i >= seen ? ' anim-in' : ''; // only lines that arrived since the last render rise in
+  if (!ms.length) return `<div class="cx-ev">${ic('info', 13)}No messages yet. ${esc(l.summary)}.</div>`;
+  let out = '', day = null, i = 0;
+  while (i < ms.length) {
+    const m = ms[i], w = msgWhen(m.at);
+    if (w.day !== day) { day = w.day; out += `<div class="cx-day" role="separator"><span>${dayLabel(day)}</span></div>`; }
+    if (m.k === 'evt') {
+      let j = i; while (j < ms.length && ms[j].k === 'evt' && msgWhen(ms[j].at).day === day) j++;
+      const run = ms.slice(i, j), key = l.id + ':' + i;
+      if (run.length >= 3 && !THR.open.has(key)) out += `<button type="button" class="cx-more${anim(j - 1)}" data-a="cx-evts" data-x="${key}" aria-expanded="false" title="${esc(run.map(e => e.text).join(' · '))}">${ic('history', 13)}<span>${run.length} updates</span><span aria-hidden="true">·</span><u>Show</u></button>`;
+      else out += `<div class="cx-evs ${THR.fresh === key ? 'anim-open' : ''}">${run.map((e, k) => `<div class="cx-ev ${e.tone || ''}${anim(i + k)}" style="--i:${k}">${ic(e.i || 'info', 13)}${txt(e.text)}<span class="tm"> · ${esc(msgWhen(e.at).time)}</span></div>`).join('')}</div>`;
+      i = j; continue;
+    }
+    if (m.k === 'act') { out += `<div class="actcard ${m.st === 'Failed' ? 'fail' : ''}${anim(i)}"><div class="ah">${av('VINA', 'sm')}${esc(m.name)}<span class="st">${chipC(m.st, m.st === 'Done' ? 'green' : m.st === 'Failed' ? 'red' : 'blue')}</span></div><ul>${(m.lines || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`; i++; continue; }
+    // a group: same sender, same day, each line within 5 minutes of the one before
+    const who = senderOf(m); let j = i + 1;
+    while (j < ms.length && senderOf(ms[j]) === who) { const a = msgWhen(ms[j - 1].at), b = msgWhen(ms[j].at); if (b.day !== a.day || a.min == null || b.min == null || b.min - a.min > 5) break; j++; }
+    const run = ms.slice(i, j), side = sideOf(m);
+    const name = side === 'in' ? l.name.split(' ')[0] : side === 'vina' ? 'VINA' : m.who ? first(m.who) : 'Team';
+    const avatar = side === 'in' ? av(l.name, 'sm') : side === 'vina' ? av('VINA', 'sm') : av(m.who ? uname(m.who) : 'Team', 'sm');
+    const bubs = run.map((x, k) => {
+      const body = x.k === 'file' ? `<span class="cx-file">${ic('clip', 15)}<span>${esc(x.text)}</span></span>` : x.k === 'tpl' ? `<span class="cx-tplh">${ic('tpl', 12)}WhatsApp template · ${esc(x.name)}</span>${txt(x.text)}` : txt(x.text);
+      return `<div class="cx-m${anim(i + k)}"><div class="bub" ${k ? `title="${esc(msgWhen(x.at).time)}"` : ''}>${body}</div>${x.src ? `<span class="cx-src" tabindex="0" title="VINA answered from: ${esc(x.src)}">${ic('book', 11)}Source</span>` : ''}</div>`;
+    }).join('');
+    let tick = '';
+    if (side === 'agent') { const st = ms.slice(j).some(y => y.k === 'in') ? 'Read' : anim(j - 1) ? 'Sent' : 'Delivered'; tick = `<span class="cx-tick ${st === 'Read' ? 'read' : ''}" title="${st}">${ic(st === 'Sent' ? 'check' : 'ticks', 14)}<span class="sr">${st}</span></span>`; }
+    out += `<div class="cx-g ${side}"><span class="cx-gav">${avatar}</span><div class="cx-gb"><div class="cx-gh">${side === 'note' ? ic('lock', 12) + '<span>Note for the team</span>·' : ''}<b>${esc(name)}</b><span>${esc(w.time)}</span></div>${bubs}${tick}</div></div>`;
+    i = j;
+  }
+  if (o && o.typing) out += `<div class="cx-g in"><span class="cx-gav">${av(l.name, 'sm')}</span><div class="cx-gb"><div class="typing cx-typing" aria-label="${esc(l.name.split(' ')[0])} is typing"><i></i><i></i><i></i></div></div></div>`;
+  return out;
+}
+// o: {id, typing}
+const cxThread = (l, o) => `<div class="cx-tw"><div class="chat cx-thr" id="${o.id}" data-keep data-stick aria-live="polite">${cxThreadHtml(l, o)}</div><button type="button" class="cx-jump" data-a="cx-jump" tabindex="-1" aria-hidden="true">${ic('chevD', 14)}Jump to latest</button></div>`;
+A['cx-evts'] = el => { THR.open.add(el.dataset.x); THR.fresh = el.dataset.x; };
+A['cx-jump'] = el => { const t = el.parentElement.querySelector('.cx-thr'); if (t) t.scrollTo({top:t.scrollHeight, behavior:motionOK() ? 'smooth' : 'auto'}); return false; };
+const cxJump = t => { const b = t.parentElement && t.parentElement.querySelector('.cx-jump'); if (!b) return; const far = t.scrollHeight - t.scrollTop - t.clientHeight > 160; b.classList.toggle('on', far); b.tabIndex = far ? 0 : -1; b.setAttribute('aria-hidden', String(!far)); };
+function cxSync() { THR.fresh = null; $$('.cx-thr').forEach(cxJump); }
+document.addEventListener('scroll', ev => { const t = ev.target; if (t.classList && t.classList.contains('cx-thr')) cxJump(t); }, true);
+
+// Details panel: open by default at 1280 px and wider (remembered), a closed overlay below.
+const DP = {pref:null, narrow:false, anim:false, more:false, moreNew:false};
+const dpWide = () => matchMedia('(min-width:1280px)').matches;
+const dpPref = () => { if (DP.pref == null) { try { const v = localStorage.getItem('vina-dp'); DP.pref = v == null ? true : v === '1'; } catch (e) { DP.pref = true; } } return DP.pref; };
+const dpOpen = () => dpWide() ? dpPref() : DP.narrow;
+A.dp = () => { if (dpWide()) { DP.pref = !dpPref(); try { localStorage.setItem('vina-dp', DP.pref ? '1' : '0'); } catch (e) {} } else DP.narrow = !DP.narrow; DP.anim = dpOpen(); };
+A['dp-more'] = () => { DP.more = !DP.more; DP.moreNew = DP.more; };
+// o: {cb (html, callback time)}
+function cxDetails(l, o) {
+  const anim = DP.anim, moreNew = DP.moreNew; DP.anim = DP.moreNew = false;
+  const kv = rows => `<dl class="kv">${rows.filter(r => r[1]).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+  const car = esc(l.model) + (l.trim ? ' · ' + esc(l.trim) : '') + (l.colour ? ' · ' + esc(l.colour) : '');
+  return `<aside class="cx-dp ${anim ? 'anim-in' : ''}" id="cx-dp" aria-label="Customer details">
+    <div class="cx-dph">${av(l.name, 'lg')}<div class="grow"><div class="cx-dpn ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="small mute num">${esc(mob(l))}</div></div><button type="button" class="ibtn sm bare cx-dpx" data-a="dp" aria-label="Close customer details" title="Close (])">${ic('x', 16)}</button></div>
+    <div class="row tight">${chip(l.status)}${l.vq ? vtag() : ''}</div>
+    <section class="cx-sum" aria-label="VINA summary"><div class="hd">${ic('spark', 14)}VINA summary</div><p>${esc(l.summary)}.</p>${l.facts ? `<dl class="kv">${l.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}</section>
+    <section class="cx-sec"><h3>Next step</h3>${kv([['Next step', esc(l.next)], ['Callback time', o && o.cb], ['Car model', car], ['Given to', l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone yet</span>']])}</section>
+    <section class="cx-sec"><button type="button" class="cx-dpmore" data-a="dp-more" aria-expanded="${DP.more}">Lead details${ic('chevD', 16)}</button>${DP.more ? `<div class="cx-dpg ${moreNew ? 'anim-in' : ''}">${kv([['Channel', CH[l.ch].label], ['Came from', esc(l.src)], ['Campaign', l.src === 'Walk-in' ? '' : esc(l.campaign)], ['Handled by', esc(l.handled)], ['City', esc(l.city)], ['Language', esc(l.lang)], ['Lead since', esc(l.created)]])}</div>` : ''}</section>
+    <section class="cx-sec"><h3>Customer rating</h3>${l.rating ? `<div>${stars(l.rating)}${l.ratingNote ? `<p class="xs mute" style="margin-top:6px">“${esc(l.ratingNote)}”</p>` : ''}</div>` : '<span class="small mute">Not rated yet</span>'}</section>
+  </aside>`;
+}
+// Single-key shortcuts: null while typing, with a modifier, or with a dialog or the palette open.
+const hotkey = ev => { const t = ev.target; if (ev.metaKey || ev.ctrlKey || ev.altKey || ev.isComposing || S.cmd || S.modal || S.drawer || (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)))) return null; return ev.key; };
+document.addEventListener('keydown', ev => {
+  const k = hotkey(ev); if (!k || !document.querySelector('#app .cx-head, #app .cx-row')) return;
+  if (k === ']') { ev.preventDefault(); A.dp(); render(); return; }
+  if (k !== 'j' && k !== 'k' && k !== 'J' && k !== 'K') return;
+  const rows = $$('#app .cx-row'), i = rows.findIndex(r => r.getAttribute('aria-current') === 'true');
+  const n = rows[Math.max(0, Math.min(rows.length - 1, i + (k.toLowerCase() === 'j' ? 1 : -1)))];
+  if (!n || n === rows[i]) return;
+  ev.preventDefault(); n.click(); const c = $('#app .cx-row[aria-current="true"]'); if (c) c.scrollIntoView({block:'nearest'});
+});
+
 /* ---------- Side menus (section 2 table) ---------- */
 const NAV = {
   manager:[['', [['overview','Overview','overview'],['channels','Channels','channels'],['conversations','Conversations','conv'],['leads','Leads','leads'],['team','Call centre and sales','team'],['ratings','Customer ratings','star']]]],
@@ -667,7 +765,7 @@ function render() {
   paintLayers();
   Object.keys(keep).forEach(id => { const e = document.getElementById(id); if (e) e.scrollTop = keep[id]; });
   $$('[data-stick]').forEach(e => { if (S._stick || !(e.id in keep)) e.scrollTop = e.scrollHeight; if (S._stick) { const items = e.querySelectorAll(':scope > .msg, :scope > .evt, :scope > .actcard'); const last = items[items.length - 1]; if (last) last.classList.add('anim-in'); } });
-  S._stick = false;
+  S._stick = false; cxSync();
   if (S.menu && S.menu !== S._lastMenu) $$('.menu').forEach(m => m.classList.add('anim-in')); // menus animate only when they open
   S._lastMenu = S.menu;
   if (enter) countUp(app());
