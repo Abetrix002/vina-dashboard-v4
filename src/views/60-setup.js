@@ -288,46 +288,49 @@ const tick = (path, label) => `<label class="chk"><input ${bindChk(path)}><span>
 
 function body1(id) {
   const c = cfgOf(id); const b = c.biz; const pr = PRESET[b.type] || PRESET.other;
-  return `<div class="col loose">
+  return `<div class="col loose"><section class="rx-sec"><h3>Name and type</h3>
     <div class="su-g2"><div class="field"><label for="b-${P(id, 'biz.name').replace(/\./g, '-')}">Business name</label><input class="inp" ${bind(P(id, 'biz.name'), true)}>${!b.name.trim() ? `<span class="err">${ic('alert', 14)}Write the business name. Customers see it in the chat.</span>` : ''}</div>
       <div class="field"><span class="lbl">Logo</span><div class="row tight nowrap">${b.logo ? `<img src="${b.logo}" alt="Business logo" style="width:42px;height:42px;border-radius:10px;object-fit:cover;border:1px solid var(--line)">` : `<span class="av lg c-navy" style="border-radius:10px" aria-hidden="true">${esc(initials(b.name))}</span>`}<label class="btn sm" style="min-height:40px">${ic('upload', 14)}${b.logo ? 'Change' : 'Upload logo'}<input type="file" accept="image/*" class="sr" data-ch="su-logo" data-x="${id}"></label>${b.logo ? `<button type="button" class="btn sm ghost" data-a="su-set" data-x="${P(id, 'biz.logo')}" data-v="">Remove</button>` : ''}</div></div></div>
     <div class="field"><span class="lbl" id="su-bt">What kind of business?</span><div class="su-types" role="radiogroup" aria-labelledby="su-bt">${BTYPES.map(([k, l, i, col]) => `<button type="button" class="radio-card su-type" role="radio" aria-checked="${b.type === k}" data-a="su-type" data-x="${id}" data-v="${k}"><span class="chi lg c-${col}">${ic(i, 20)}</span><b>${l}</b></button>`).join('')}</div>
-      <div class="note vina">${ic('spark')}<div>We filled in a suggested tone, rules and actions for ${esc(pr.label)}, and ${pr.n} ready-made test scenarios. You can change all of it.</div></div></div>
+      <div class="note vina">${ic('spark')}<div>We filled in a suggested tone, rules and actions for ${esc(pr.label)}, and ${pr.n} ready-made test scenarios. You can change all of it.</div></div></div></section>
+    <section class="rx-sec"><h3>Where and when</h3>
     <div class="su-g2"><div class="field"><label for="b-${P(id, 'biz.city').replace(/\./g, '-')}">City</label><input class="inp" ${bind(P(id, 'biz.city'))}></div>
       <div class="field"><label for="b-${P(id, 'biz.lang').replace(/\./g, '-')}">Main language of your team</label>${bindSel(P(id, 'biz.lang'), ['Arabic','English','Arabic and English'])}</div></div>
     <div class="field"><span class="lbl">Showrooms or branches</span><div class="row tight">${b.branches.map((x, i) => `<span class="tokens" style="min-height:36px;padding:3px"><span class="tok">${ic('pin', 13)}${esc(x)}<button type="button" data-a="su-del" data-x="${P(id, 'biz.branches')}#${i}" aria-label="Remove ${esc(x)}">${ic('x', 13)}</button></span></span>`).join('')}</div>
       <form class="row tight nowrap" data-a="su-branch" data-x="${id}"><label class="sr" for="b-f-suBranch">New showroom or branch</label><input class="inp grow" ${bind('f.suBranch')} placeholder="e.g. Al Khobar, Dammam"><button type="submit" class="btn">${ic('plus', 14)}Add another</button></form></div>
-    <div class="field"><span class="lbl">Working hours</span><div class="su-hours">${b.hours.map((h, i) => `<div class="su-hrow"><b>${h.d}</b>${sw(h.on, 'su-tog', P(id, 'biz.hours.' + i + '.on'), h.d + ' open')}${h.on ? `<label class="sr" for="b-${P(id, 'biz.hours.' + i + '.from').replace(/\./g, '-')}">${h.d} opens</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.from'))}><span class="mute">to</span><label class="sr" for="b-${P(id, 'biz.hours.' + i + '.to').replace(/\./g, '-')}">${h.d} closes</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.to'))}>` : `<span class="mute">Closed</span>`}</div>`).join('')}</div></div>
+    <div class="field"><span class="lbl">Working hours</span><div class="su-hours">${b.hours.map((h, i) => `<div class="su-hrow"><b>${h.d}</b>${sw(h.on, 'su-tog', P(id, 'biz.hours.' + i + '.on'), h.d + ' open')}${h.on ? `<label class="sr" for="b-${P(id, 'biz.hours.' + i + '.from').replace(/\./g, '-')}">${h.d} opens</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.from'))}><span class="mute">to</span><label class="sr" for="b-${P(id, 'biz.hours.' + i + '.to').replace(/\./g, '-')}">${h.d} closes</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.to'))}>` : `<span class="mute">Closed</span>`}</div>`).join('')}</div></div></section>
   </div>`;
 }
 const TONES = {Friendly:['هلا! أكيد، أرسل لك الأسعار الحين','Hi! Sure, I\'ll send you the prices now.'], Formal:['أهلاً بك. يسعدني تزويدك بالأسعار','Hello. I would be glad to share the prices with you.'], 'Short and direct':['سعر V27 يبدأ من ١٢٩,٩٠٠','The V27 starts from SAR 129,900.']};
 function body2(id) {
   const c = cfgOf(id); const a = c.agent; const p = k => P(id, 'agent.' + k);
-  return `<div class="col loose">
+  return `<div class="col loose"><section class="rx-sec"><h3>Name and job</h3>
     <div class="su-g2"><div class="field"><label for="b-${p('name').replace(/\./g, '-')}">Agent name</label><input class="inp" ${bind(p('name'), true)} placeholder="e.g. Sara">${!a.name.trim() ? `<span class="err">${ic('alert', 14)}Give the agent a name. Customers see it.</span>` : ''}</div>
       <div class="field"><span class="lbl">Avatar</span><div class="row tight" role="radiogroup" aria-label="Avatar">${AVBG.map((bg, i) => `<button type="button" role="radio" aria-checked="${a.av === String(i)}" aria-label="Avatar colour ${i + 1}" class="su-avpick" data-a="su-set" data-x="${p('av')}" data-v="${i}" style="background:${bg}">${esc((a.name || '?')[0])}</button>`).join('')}</div></div></div>
-    <div class="field"><span class="lbl" id="su-job">Job</span><div class="fchips" role="radiogroup" aria-labelledby="su-job">${['Sales','Product questions','Bookings','Customer service'].map(j => `<button type="button" class="fchip" role="radio" aria-pressed="${a.job === j}" aria-checked="${a.job === j}" data-a="su-set" data-x="${p('job')}" data-v="${j}">${j}</button>`).join('')}</div></div>
-    <div class="su-g2"><div class="field"><label for="b-${p('firstAr').replace(/\./g, '-')}">First message, Arabic</label><textarea class="inp" dir="rtl" ${bindTa(p('firstAr'), true)[0]}>${bindTa(p('firstAr'))[1]}</textarea></div>
-      <div class="field"><label for="b-${p('firstEn').replace(/\./g, '-')}">First message, English</label><textarea class="inp" ${bindTa(p('firstEn'), true)[0]}>${bindTa(p('firstEn'))[1]}</textarea></div></div>
-    <h3 class="h2">How it speaks</h3>
+    <div class="field"><span class="lbl" id="su-job">Job</span><div class="fchips" role="radiogroup" aria-labelledby="su-job">${['Sales','Product questions','Bookings','Customer service'].map(j => `<button type="button" class="fchip" role="radio" aria-pressed="${a.job === j}" aria-checked="${a.job === j}" data-a="su-set" data-x="${p('job')}" data-v="${j}">${j}</button>`).join('')}</div></div></section>
+    <section class="rx-sec"><h3>First message</h3><div class="su-g2"><div class="field"><label for="b-${p('firstAr').replace(/\./g, '-')}">First message, Arabic</label><textarea class="inp" dir="rtl" ${bindTa(p('firstAr'), true)[0]}>${bindTa(p('firstAr'))[1]}</textarea></div>
+      <div class="field"><label for="b-${p('firstEn').replace(/\./g, '-')}">First message, English</label><textarea class="inp" ${bindTa(p('firstEn'), true)[0]}>${bindTa(p('firstEn'))[1]}</textarea></div></div></section>
+    <section class="rx-sec"><h3>How it speaks</h3>
     <div class="field"><span class="lbl" id="su-tone">Tone</span><div class="su-g3" role="radiogroup" aria-labelledby="su-tone">${Object.keys(TONES).map(k => radio(p('tone'), k, k, `<span dir="rtl" class="ar">${esc(TONES[k][0])}</span>`)).join('')}</div></div>
     <div class="field"><span class="lbl" id="su-sty">Arabic style</span><div class="fchips" role="radiogroup" aria-labelledby="su-sty">${['Saudi, Hijazi','Saudi, Najdi','Formal Arabic'].map(j => `<button type="button" class="fchip" role="radio" aria-checked="${a.style === j}" aria-pressed="${a.style === j}" data-a="su-set" data-x="${p('style')}" data-v="${j}">${j}</button>`).join('')}</div></div>
     <div class="field"><span class="lbl">Languages</span><div class="row">${['Arabic','English','Arabizi'].map(l => tick(p('langs.' + l), l)).join('')}</div><span class="hint">It replies in the customer's language.</span></div>
     <div class="field"><span class="lbl" id="su-len">Reply length</span><div class="seg" role="group" aria-labelledby="su-len">${['Short','Detailed'].map(l => `<button type="button" aria-pressed="${a.length === l}" data-a="su-set" data-x="${p('length')}" data-v="${l}">${l}</button>`).join('')}</div></div>
     ${swRow(p('firstName'), 'Call the customer by first name', '"Hala Noura"')}
-    ${swRow(p('voice'), 'Answer WhatsApp voice notes', 'The agent listens and replies in text')}
+    ${swRow(p('voice'), 'Answer WhatsApp voice notes', 'The agent listens and replies in text')}</section>
   </div>`;
 }
 function body3(id) {
   const c = cfgOf(id); const r = c.rules; const p = k => P(id, 'rules.' + k);
-  return `<div class="col loose">
+  return `<div class="col loose"><section class="rx-sec"><h3>Limits</h3>
     <div class="field"><span class="lbl">Never talk about</span><div class="tokens">${r.never.map((x, i) => `<span class="tok">${esc(x)}<button type="button" data-a="su-del" data-x="${p('never')}#${i}" aria-label="Remove ${esc(x)}">${ic('x', 13)}</button></span>`).join('')}</div>
       <form class="row tight nowrap" data-a="su-never" data-x="${id}"><label class="sr" for="b-f-suNever">Add a topic</label><input class="inp grow" ${bind('f.suNever')} placeholder="Add a topic, then press Enter, e.g. Financing rates"><button type="submit" class="btn">${ic('plus', 14)}Add</button></form>
       <div class="row tight"><span class="xs mute">Suggested:</span>${['Financing rates','Prices','Used cars'].filter(x => !r.never.includes(x)).map(x => `<button type="button" class="fchip" data-a="su-never-add" data-x="${id}" data-v="${x}">${ic('plus', 12)}${x}</button>`).join('')}</div></div>
+    </section><section class="rx-sec"><h3>Handover</h3>
     <div class="field"><span class="lbl">Hand over to a person when the customer…</span><div class="col tight">${HAND.map(([k, l]) => tick(p('hand.' + k), l)).join('')}</div></div>
     <div class="field"><span class="lbl" id="su-who">Who gets the handover</span><div class="su-g2" role="radiogroup" aria-labelledby="su-who">${radio(p('who'), 'cc', 'Call centre', 'Uses the rule "Callbacks to call centre"')}${radio(p('who'), 'sales', 'Sales', 'Uses the rule "Qualified to Sales"')}</div><a class="small" href="#rules" data-keepdraft>See the assignment rules</a></div>
+    </section><section class="rx-sec"><h3>After hours and ratings</h3>
     <div class="field"><span class="lbl" id="su-aft">After working hours</span><div class="su-g2" role="radiogroup" aria-labelledby="su-aft">${radio(p('after'), 'keep', 'Keep answering', 'And take a time for the call centre to call back')}${radio(p('after'), 'closed', 'Send a "we are closed" message', '"We are open from 9 AM"')}</div></div>
-    ${swRow(p('rate'), 'Rate the chat', 'Ask for 1 to 5 stars when the chat closes')}
+    ${swRow(p('rate'), 'Rate the chat', 'Ask for 1 to 5 stars when the chat closes')}</section>
   </div>`;
 }
 const EXT_OK = /\.(pdf|docx?|xlsx?|csv|txt)$/i;
@@ -432,7 +435,6 @@ function wizard(n, id) {
   SU.done[id] = SU.done[id] || [];
   SU.step[id] = n; SU.cur = id;
   const title = STAGES[n - 1][0];
-  const intro = ['VINA uses this to suggest how the agent speaks, its rules and its actions. You can change everything later.','Give the agent a name and choose how it talks to your customers.','What the agent must never do, and when it hands the chat to a person.','The agent answers only from what you add here. Each answer shows its source.','What the agent does in the chat: collects details, books, hands over and sends files.','Connect the channels where customers will talk to the agent. You can skip this and test first.','Chat with the agent before customers do. Go live when every test scenario passes.'][n - 1];
   let main, side = preview(n, id);
   if (n === 7) { main = stage7(id); side = ''; } else main = BODY[n](id);
   const back = n > 1 ? `<a class="btn" href="#setup-${n - 1}">${ic('arrowL', 14)}Back</a>` : '';
@@ -452,7 +454,7 @@ function wizard(n, id) {
       <span class="pill c-teal su-hide-sm">VINA team</span><button type="button" class="btn sm ghost su-show-sm" data-a="su-later">Save and finish later</button><button type="button" class="ibtn su-hide-sm" data-a="theme" aria-label="Light or dark">${ic(curTheme() === 'dark' ? 'sun' : 'moon')}</button><a class="ibtn" href="#agents" aria-label="Close setup">${ic('x')}</a></header>
     <div class="su-wrap ${side ? '' : 'noside'}">
       ${stageNav(n, id)}
-      <main id="main" tabindex="-1" class="su-main"><div class="su-mhead"><h1>${title}</h1><p class="lead-in">${intro}</p></div>${main}
+      <main id="main" tabindex="-1" class="su-main"><div class="su-mhead"><h1>${title}</h1></div>${main}
         <div class="su-foot ${n === 7 ? 'su-foot7' : ''}">${foot}</div></main>
       ${side ? `<aside class="su-side" aria-label="Live preview">${side}</aside>` : ''}
     </div></div>`;
@@ -472,10 +474,10 @@ function stage7(id) {
     return `<div class="li su-sc ${now}"><span class="chi c-${col} ${now ? '' : tickIn(s.id)}">${now === 'now' ? spin() : now === 'wait' ? ic('clock', 13) : ic(res === 'pass' ? 'check' : res === 'fail' ? 'x' : res === 'check' ? 'info' : 'minus', 14)}</span><div class="grow" style="min-width:0"><div class="small b ell">${esc(s.name)}</div><div class="xs ${res === 'fail' ? 'red' : res === 'check' ? 'amber' : 'mute'}">${lab} · ${esc(s.lang)}</div>${now === 'now' ? '<span class="su-read" aria-hidden="true"><i></i></span>' : ''}</div>${!now && (res === 'fail' || res === 'check') ? `<a class="btn sm ghost" href="#scenarios-${s.id}" data-a="su-see" data-x="${id}">See why${res === 'fail' ? ' it failed' : ''}</a>` : ''}<button type="button" class="ibtn sm bare" data-a="su-run1" data-x="${id}|${s.id}" aria-label="Run again: ${esc(s.name)}" title="Run again" ${run ? 'disabled' : ''}>${ic('refresh', 15)}</button></div>`; }).join('');
   return `<div class="su-s7">${chatBox('s7-' + id, id, {sub:'Type, tap a suggestion, or send a voice note'})}
     <div class="col">
-      <section class="card su-scard"><div class="card-h"><div class="grow"><h2>Test scenarios</h2><div class="sub">${SU.scen.length} ready-made for car dealers</div></div><button type="button" class="btn sm pri" data-a="su-runall" data-x="${id}" ${run ? 'disabled' : ''}>${run ? spin() + 'Running' : ic('play', 14) + (r ? 'Run all again' : 'Run all')}</button></div>
-        <div class="col tight su-runbox">${status}</div>
-        <div class="list">${rows}</div></section>
-      <section class="card"><div class="card-h"><h2>Summary</h2><span class="sub">Stages 1 to 6</span></div><div class="list">${sum.map(([n, t, v]) => `<div class="li"><span class="su-num ok">${ic('check', 13)}</span><div class="grow"><div class="small b">${t}</div><div class="xs mute">${esc(v)}</div></div><a class="btn sm ghost" href="#setup-${n}">Edit<span class="sr"> ${t}</span></a></div>`).join('')}</div></section>
+      <section class="card rc su-scard"><header class="rc-h"><div class="grow"><h2>Test scenarios</h2><div class="sub">${SU.scen.length} ready-made for car dealers</div></div><button type="button" class="btn sm" data-a="su-runall" data-x="${id}" ${run ? 'disabled' : ''}>${run ? spin() + 'Running' : ic('play', 14) + (r ? 'Run all again' : 'Run all')}</button></header>
+        <div class="rc-b"><div class="col tight su-runbox">${status}</div>
+        <div class="list">${rows}</div></div></section>
+      <section class="card rc"><header class="rc-h"><div class="grow"><h2>Summary</h2><div class="sub">Stages 1 to 6</div></div></header><div class="rc-b"><div class="list">${sum.map(([n, t, v]) => `<div class="li"><span class="su-num ok">${ic('check', 13)}</span><div class="grow"><div class="small b">${t}</div><div class="xs mute">${esc(v)}</div></div><a class="btn sm ghost" href="#setup-${n}">Edit<span class="sr"> ${t}</span></a></div>`).join('')}</div></div></section>
     </div></div>`;
 }
 

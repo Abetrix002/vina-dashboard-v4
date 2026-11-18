@@ -1,6 +1,35 @@
 /* L1–L8 · Website log in button, dashboard log in, verify, forgot password, invite, choose a client, session expired, sign up */
 (function () {
   document.head.insertAdjacentHTML('beforeend', `<style>
+  /* Shared layout utilities for every screen outside the Manager reports (GA-style pass). They belong in core.css;
+     they live here because 10-auth loads first. rx-g3: at most 3 cards a row (2 at tablet, 1 on phones).
+     rx-tbl: a report card whose body is a table or list edge to edge. rx-more: "More options" disclosure. */
+  .rx-g3{display:grid;gap:20px;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+  .rx-g2{display:grid;gap:20px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .rx-g3>*,.rx-g2>*{min-width:0}
+  @media (max-width:1100px){.rx-g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:700px){.rx-g3,.rx-g2{grid-template-columns:minmax(0,1fr)}}
+  .rc.rx-tbl>.rc-b{padding:0}
+  .rc.rx-tbl .tbl-wrap{border:0;border-radius:0;box-shadow:none;background:transparent}
+  .rc.rx-tbl>.rc-b>.list>.li{padding-left:20px;padding-right:20px}
+  .rc .rc-h .tabs{border-bottom:0}
+  .rc-tabs{padding:4px 12px 0;border-bottom:1px solid var(--line)}
+  .rc-tabs .tabs{border-bottom:0}
+  .rx-more{border-top:1px solid var(--line);padding-top:12px}
+  .rx-more>summary{display:inline-flex;align-items:center;gap:6px;min-height:32px;cursor:pointer;font-size:13px;font-weight:600;color:var(--link);list-style:none}
+  .rx-more>summary::-webkit-details-marker{display:none}
+  .rx-more>summary .ic{transition:transform var(--d2) var(--ease)}
+  .rx-more[open]>summary .ic{transform:rotate(180deg)}
+  .rx-more>summary .m{color:var(--mute);font-weight:500}
+  .rx-more>.in{display:flex;flex-direction:column;gap:16px;margin-top:12px}
+  .rx-sec{display:flex;flex-direction:column;gap:16px;padding-top:20px;border-top:1px solid var(--line)}
+  .rx-sec:first-child{padding-top:0;border-top:0}
+  .rx-sec>h3{font-size:14px;font-weight:600;line-height:20px}
+  .rx-tbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;border-bottom:1px solid var(--line)}
+  .rx-tbar>.tabs{border-bottom:0;flex:0 1 auto;min-width:0}
+  .rx-tbar>.sp{flex:1}
+  .rx-tbar>.act{display:flex;gap:8px;align-items:center;padding-bottom:6px}
+  @media (max-width:760px){.rx-tbar>.act.hide-sm{display:none}}
   /* Brand side: navy with teal glow (core .auth .side) + one quiet product moment */
   .auth .side{justify-content:space-between}
   .au-hero{display:flex;flex-direction:column;gap:14px;max-width:460px}
@@ -347,8 +376,8 @@
       : `<ul class="au-clients">${list.map(c => card(c, CLIENTS.indexOf(c))).join('')}</ul>`;
     return `<div class="full"><div class="full-top">${LOGO()}<span class="sp"></span><span class="row tight nowrap">${av(U.lina.name)}<span class="small hide-xs"><b>Lina Haddad</b><span class="mute" style="display:block">VINA support team</span></span></span><button type="button" class="ibtn" data-a="theme" aria-label="Light or dark">${ic(curTheme() === 'dark' ? 'sun' : 'moon')}</button><button type="button" class="ibtn" data-a="logout" aria-label="Log out">${ic('logout')}</button></div>
       <div class="au-wrap">
-        <div class="col tight"><h1 style="font-size:28px;font-weight:700">Choose a client</h1><p class="mute">${S.st === 'empty' ? 'You can switch client at any time from the top of the menu.' : `${CLIENTS.length} clients${attn ? ` · <span class="red b">${attn} need${attn === 1 ? 's' : ''} attention</span>` : ''}. You can switch client at any time from the top of the menu.`}</p></div>
-        <label class="au-search">${ic('search', 16)}<span class="sr">Search clients</span><input type="search" placeholder="Search by client name or city" ${bind('f.au6q', true)}></label>
+        <h1 style="font-size:28px;font-weight:700">Choose a client</h1>
+        ${pageToolbar({left:`<label class="au-search" style="flex:1 1 320px;max-width:480px">${ic('search', 16)}<span class="sr">Search clients</span><input type="search" placeholder="Search by client name or city" ${bind('f.au6q', true)}></label>`, right: S.st === 'empty' ? '' : `<span class="small mute">${CLIENTS.length} clients${attn ? ` · <span class="red b">${attn} need${attn === 1 ? 's' : ''} attention</span>` : ''}</span>`})}
         ${body}</div></div>`;
   }});
   A['au-retry'] = () => { S.st = ''; };

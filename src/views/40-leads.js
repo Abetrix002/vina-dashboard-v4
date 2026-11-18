@@ -24,7 +24,10 @@
   .ld-bar .fchip{min-height:32px;font-size:12px;padding:0 8px 0 12px;background:var(--sel);border-color:transparent}
   .ld-bar .fchip:hover{background:var(--sub2)}
   .ld-bar .fchip .k{color:var(--mute)}
-  .ld-wait{gap:8px}
+  .rx-tbl .ld-pager{padding:10px 16px;border-top:1px solid var(--line)}
+  .rx-tbl .ld-bulk{margin:12px 16px 0}
+  .rx-tbl>.rc-b>.col[aria-busy]{padding:16px}
+  .rx-tbl .empty{padding:40px 16px}
   /* LD1 table */
   .ld-bulk{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--sel);box-shadow:inset 0 0 0 1px var(--horizon)}
   .ld-bulk .inp{min-height:36px;width:auto}
@@ -194,7 +197,7 @@
     return `<div class="tabs" role="tablist" aria-label="Saved views">${SV().map(([k, t, fn]) => `<button type="button" class="tab" role="tab" aria-selected="${s.view === k}" data-a="ld-view" data-x="${k}">${t}<span class="n">${b.filter(fn).length}</span></button>`).join('')}</div>`;
   }
   const fLabel = (f, v) => f.lab ? f.lab(v) : v;
-  function filterBar(withCols) {
+  function filterBar(withCols, cur) {
     const s = F(); const b = base(); const act = FL().filter(f => s[f.k]); const again = G.popNew ? '' : 'again';
     const fsel = f => {
       const ord = f.ord || (v => v); const vals = [...new Set(b.map(f.get))].sort((x, y) => { const a = ord(x), c = ord(y); return a > c ? 1 : a < c ? -1 : 0; });
@@ -205,7 +208,7 @@
         <div class="g">${FL().map(fsel).join('')}</div>
         <div class="ft"><button type="button" class="btn ghost" data-a="ld-clear" ${act.length ? '' : 'disabled'}>Clear all</button><span class="sp"></span><button type="button" class="btn pri" data-a="ld-filters" data-x="done">Show ${num(n)} ${n === 1 ? 'lead' : 'leads'}</button></div></div>` : '';
     const colPop = S.menu === 'ld-cols' ? `<div class="menu ld-pop r ${again}" role="group" aria-label="Extra columns" data-a="noop"><div class="mh">Extra columns</div>${OPT_COLS.map(([k, t]) => `<label class="chk"><input ${bindChk('f.ld.cols.' + k)}>${t}</label>`).join('')}</div>` : '';
-    return `<div class="ld-bar">
+    return `<div class="ld-bar ptb">${viewSwitch(cur)}
       <label class="ld-q">${ic('search', 16)}<span class="sr">Search by name or mobile</span><input type="search" placeholder="Search name or mobile" ${bind('f.ld.q', true)}></label>
       <span class="ld-rel"><button type="button" class="btn sm" id="ld-fbtn" data-a="ld-filters" aria-haspopup="dialog" aria-expanded="${S.menu === 'ld-filters'}">${ic('filter', 15)}Filters${act.length ? `<span class="n" aria-label="${act.length} on">${act.length}</span>` : ''}</button>${pop}</span>
       ${act.map(f => `<button type="button" class="fchip" data-a="ld-unf" data-x="${f.k}" aria-label="Remove filter ${esc(f.t)}: ${esc(fLabel(f, s[f.k]))}"><span class="k">${esc(f.t)}:</span>${esc(fLabel(f, s[f.k]))}${ic('x', 13, 'x')}</button>`).join('')}
@@ -274,12 +277,12 @@
   R('leads', {id:'LD1', title:'Leads', states:[['empty','No leads yet'],['nores','No results'],['loading','Loading rows'],['many','1,000+ leads']], render() {
     const rs = rows(); let body;
     if (S.st === 'loading') body = loadingRows(8, 52);
-    else if (S.st === 'empty' || !base().length) body = `<div class="card">${empty('leads', isAgent() ? 'No leads given to you yet' : 'No leads yet', isAgent() ? 'When VINA qualifies a customer and the rules give them to you, they show here and you get an alert. Make sure you are set to Available.' : 'Leads appear here as soon as VINA starts chatting with customers on your connected channels.', isAgent() ? `<button type="button" class="btn" data-a="presence-menu">Check my status</button>` : '')}</div>`;
-    else if (S.st === 'nores' || !rs.length) body = `<div class="card">${empty('search', 'No leads match these filters', 'Try another name or mobile, or clear the filters to see every lead.', `<button type="button" class="btn pri" data-a="ld-clear">Clear filters</button>`)}</div>`;
+    else if (S.st === 'empty' || !base().length) body = `${empty('leads', isAgent() ? 'No leads given to you yet' : 'No leads yet', isAgent() ? 'When VINA qualifies a customer and the rules give them to you, they show here and you get an alert. Make sure you are set to Available.' : 'Leads appear here as soon as VINA starts chatting with customers on your connected channels.', isAgent() ? `<button type="button" class="btn" data-a="presence-menu">Check my status</button>` : '')}`;
+    else if (S.st === 'nores' || !rs.length) body = `${empty('search', 'No leads match these filters', 'Try another name or mobile, or clear the filters to see every lead.', `<button type="button" class="btn" data-a="ld-clear">Clear filters</button>`)}`;
     else body = listBody(rs);
-    const un = unassigned().length;
-    return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads', after: `<span class="mute small num hide-sm">${num(S.st === 'many' ? 1248 : base().length)} leads</span>`,
-      body:`<div class="row">${viewSwitch('leads')}<span class="sp"></span>${!isAgent() && un ? `<a class="btn sm ld-wait" href="#unassigned">${pulse()}${un} unassigned waiting${ic('arrowR', 14)}</a>` : ''}</div>${savedTabs()}${filterBar(true)}${body}`});
+    // Saved views are the card's tabs (Unassigned is one of them), so no count in the header and no separate link.
+    return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads',
+      body:`${filterBar(true, 'leads')}<section class="card rc rx-tbl" aria-label="${isAgent() ? 'My leads' : 'Leads'}"><div class="rc-tabs">${savedTabs()}</div><div class="rc-b">${body}</div></section>`});
   }, after: afterUi});
   A['ld-sort'] = el => { const s = F(), k = el.dataset.x; if (s.sort === k) s.dir = s.dir === 'asc' ? 'desc' : 'asc'; else { s.sort = k; s.dir = k === 'wait' || k === 'rating' || k === 'created' ? 'desc' : 'asc'; } };
   A['ld-page'] = el => { F().page = Math.max(1, Number(el.dataset.x)); window.scrollTo(0, 0); };
@@ -362,7 +365,7 @@
     const mid = S.menu && S.menu.indexOf('ld-mv:') === 0 ? S.menu.slice(6) : null; const ml = mid && lead(mid);
     const mvMenu = ml && G.mv ? `<div class="menu ld-mvmenu ${G.popNew ? '' : 'again'}" role="menu" aria-label="Move ${esc(ml.name)} to" style="position:absolute;left:${G.mv.left}px;${G.mv.top != null ? 'top:' + G.mv.top + 'px' : 'bottom:' + G.mv.bottom + 'px;transform-origin:bottom right'}"><div class="mh">Move ${esc(ml.name.split(' ')[0])} to</div>${ST_ORDER.filter(k => k !== ml.status).map(k => `<button type="button" role="menuitem" data-a="ld-mv" data-x="${ml.id}:${k}"><span class="sw" style="background:var(--${STATUS[k].c}-f)" aria-hidden="true"></span><span class="grow">${STATUS[k].label}</span>${k === 'testdrive' ? '<span class="xs mute">Pick a time</span>' : k === 'lost' ? '<span class="xs mute">Pick a reason</span>' : ''}</button>`).join('')}</div>` : '';
     return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads',
-      body:`<div class="row">${viewSwitch('pipeline')}<span class="sp"></span><span class="small mute">${drag ? 'Drag a card to change its status, or use its menu.' : 'Cards move when the agent handling the lead changes its status.'}</span></div>${savedTabs()}${filterBar(false)}${board}${mvMenu}`});
+      body:`${filterBar(false, 'pipeline')}${savedTabs()}${board}${mvMenu}`});
   }, after() {
     const b = $('#ld-board'); if (b) { b.scrollLeft = G.bx || 0; b.onscroll = () => { if (b.scrollLeft === G.bx) return; G.bx = b.scrollLeft; if (S.menu && S.menu.indexOf('ld-mv:') === 0) { S.menu = null; render(); } }; }
     afterUi();
@@ -404,11 +407,11 @@
     const dayList = day ? items.filter(e => e.d === s.calDay) : [];
     const nTd = items.filter(e => e.kind === 'td').length, nCb = items.length - nTd;
     return shell({nav: isSales() ? 'calendar' : 'leads', title: isSales() ? 'Test drives' : (isAgent() ? 'My leads' : 'Leads'),
-      body:`<div class="row">${viewSwitch('calendar')}<div class="seg" role="group" aria-label="Calendar range">${[['day','Day'],['week','Week']].map(([k, t]) => `<button type="button" data-a="ld-cal" data-x="${k}" aria-pressed="${(k === 'day') === day}">${t}</button>`).join('')}</div>
+      body:`<div class="ptb">${viewSwitch('calendar')}<div class="seg" role="group" aria-label="Calendar range">${[['day','Day'],['week','Week']].map(([k, t]) => `<button type="button" data-a="ld-cal" data-x="${k}" aria-pressed="${(k === 'day') === day}">${t}</button>`).join('')}</div>
         ${day ? `<div class="row tight nowrap"><button type="button" class="ibtn sm" data-a="ld-cal-day" data-x="-1" ${s.calDay <= 0 ? 'disabled' : ''} aria-label="Previous day">${ic('chevL', 15)}</button><b class="num" style="min-width:86px;text-align:center">${WEEK[s.calDay][0]} ${WEEK[s.calDay][1]} Nov</b><button type="button" class="ibtn sm" data-a="ld-cal-day" data-x="1" ${s.calDay >= 6 ? 'disabled' : ''} aria-label="Next day">${ic('chevR', 15)}</button></div>` : `<b>Sat 7 to Fri 13 Nov 2026</b>`}
         <span class="sp"></span><div class="ld-legend" aria-label="Colours"><span class="c-purple"><i></i>Test drive · ${nTd}</span><span class="c-amber"><i></i>Callback · ${nCb}</span></div></div>
       ${!items.length ? `<div class="note info">${ic('info')}<span>Nothing booked this week yet. Test drives you book and callbacks with a time show here.</span></div>` : ''}
-      ${day ? `<div class="ld-2">${cal}<section class="card"><div class="card-h"><h2>${WEEK[s.calDay][0]} ${WEEK[s.calDay][1]} Nov</h2><span class="sub">${dayList.length} booked</span></div>${dayList.length ? `<div class="list">${dayList.map(e => `<a class="li" href="#lead-${e.l.id}" style="text-decoration:none;color:inherit">${chipC(e.kind === 'td' ? 'Test drive' : 'Callback', e.kind === 'td' ? 'purple' : 'amber', true)}<span class="grow"><b>${esc(e.l.name)}</b><div class="xs mute">${esc(e.sub)}</div></span><span class="num small">${hLabel(e.h)}</span></a>`).join('')}</div>` : `<p class="small mute">Nothing booked on this day.</p>`}</section></div>` : cal}`});
+      ${day ? `<div class="ld-2">${cal}${reportCard({title:`${WEEK[s.calDay][0]} ${WEEK[s.calDay][1]} Nov`, sub:`${dayList.length} booked`, cls:'rx-tbl', body: dayList.length ? `<div class="list">${dayList.map(e => `<a class="li" href="#lead-${e.l.id}" style="text-decoration:none;color:inherit">${chipC(e.kind === 'td' ? 'Test drive' : 'Callback', e.kind === 'td' ? 'purple' : 'amber', true)}<span class="grow"><b>${esc(e.l.name)}</b><div class="xs mute">${esc(e.sub)}</div></span><span class="num small">${hLabel(e.h)}</span></a>`).join('')}</div>` : `<p class="small mute" style="padding:0 20px 18px">Nothing booked on this day.</p>`})}</div>` : cal}`});
   }});
   A['ld-cal'] = el => { F().cal = el.dataset.x; F().calPick = true; };
   A['ld-cal-day'] = el => { const s = F(); s.calDay = Math.min(6, Math.max(0, s.calDay + Number(el.dataset.x))); };
@@ -479,16 +482,16 @@
           <div class="ld-meta"><span class="num">${ic('phone', 14)}${esc(mob(l))}</span><span>${chIc(l.ch)}${esc(CH[l.ch].label)}</span>${owner}</div></div>${acts}</div>
         <div class="ld-stp">${steps}</div></section>
       <div class="ld-2"><div class="col loose">
-        <section class="ld-vina" aria-labelledby="ld-vh"><div class="vh">${av('VINA', 'sm')}<h2 id="ld-vh">VINA summary</h2><span class="sp"></span>${l.vq ? `<span class="xs">Qualified by VINA</span>` : ''}</div>
+        <section class="ld-vina" aria-labelledby="ld-vh"><div class="vh">${av('VINA', 'sm')}<h2 id="ld-vh">VINA summary</h2></div>
           <dl class="ld-facts">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${txt(v)}</dd></div>`).join('')}</dl>
           <div class="ld-why"><b>Why VINA marked it qualified</b>${why ? `<p style="margin-top:4px">${esc(why)}</p><button type="button" class="btn ghost sm" data-a="ld-see-chat" data-x="${l.id}">${ic('conv', 14)}See those messages</button>` : `<p class="mute" style="margin-top:4px">VINA has not qualified this lead. ${l.status === 'new' ? 'VINA is still chatting with the customer.' : 'It was qualified by a person.'}</p>`}</div></section>
-        <section class="card"><div class="card-h"><h2>History</h2><span class="sp"></span><div class="seg" role="group" aria-label="Show in history">${[['all','All'],['chats','Chats'],['calls','Calls'],['notes','Notes']].map(([k, t]) => `<button type="button" data-a="ld-h" data-x="${k}" aria-pressed="${s.h === k}">${t}</button>`).join('')}</div></div>
-          ${agent ? `<div class="ld-compose"><label class="sr" for="b-f-ld4note">Add a note for the team</label><textarea class="inp" placeholder="Add a note for the team, e.g. trade-in value agreed" ${nta}>${ntv}</textarea><div class="row"><span class="xs mute grow">Notes are saved with your name and the time.</span><button type="button" class="btn sm pri" data-a="ld-note" data-x="${l.id}" ${(S.f.ld4note || '').trim() ? '' : 'disabled'}>${ic('note', 14)}Add note</button></div></div>` : ''}
-          ${hs.length ? `<ol class="ld-tl">${hs.map(e => { const [i, c] = HI[e.t] || ['info','grey']; return `<li class="it ${e.fid ? flashCls(e.fid) : ''}"><span class="chi c-${c}">${ic(i, 15)}</span><div class="grow"><div class="row tight"><b class="small">${esc(e.title)}</b><span class="sp"></span><span class="xs mute">${esc(e.when)}</span></div><div class="xs mute">${esc(e.by)}</div>${e.body ? `<div class="bx">${txt(e.body)}</div>` : ''}</div></li>`; }).join('')}</ol>` : `<p class="small mute" style="padding:12px 0">Nothing of this kind yet.</p>`}</section>
+        ${reportCard({title:'History', right:`<div class="seg" role="group" aria-label="Show in history">${[['all','All'],['chats','Chats'],['calls','Calls'],['notes','Notes']].map(([k, t]) => `<button type="button" data-a="ld-h" data-x="${k}" aria-pressed="${s.h === k}">${t}</button>`).join('')}</div>`, body:`
+          ${agent ? `<div class="ld-compose"><label class="sr" for="b-f-ld4note">Add a note for the team</label><textarea class="inp" placeholder="Add a note for the team, e.g. trade-in value agreed" ${nta}>${ntv}</textarea><div class="row"><span class="sp"></span><button type="button" class="btn sm" data-a="ld-note" data-x="${l.id}" ${(S.f.ld4note || '').trim() ? '' : 'disabled'}>${ic('note', 14)}Add note</button></div></div>` : ''}
+          ${hs.length ? `<ol class="ld-tl">${hs.map(e => { const [i, c] = HI[e.t] || ['info','grey']; return `<li class="it ${e.fid ? flashCls(e.fid) : ''}"><span class="chi c-${c}">${ic(i, 15)}</span><div class="grow"><div class="row tight"><b class="small">${esc(e.title)}</b><span class="sp"></span><span class="xs mute">${esc(e.when)}</span></div><div class="xs mute">${esc(e.by)}</div>${e.body ? `<div class="bx">${txt(e.body)}</div>` : ''}</div></li>`; }).join('')}</ol>` : `<p class="small mute" style="padding:12px 0">Nothing of this kind yet.</p>`}`})}
       </div><div class="col loose">
-        <section class="card"><div class="card-h"><h2>Next step</h2></div><div class="ld-nx"><span class="chi c-${l.late ? 'red' : ni[1]} lg">${ic(ni[0], 18)}</span><div class="grow"><b>${esc(l.next)}</b>${l.td && l.status === 'testdrive' ? `<div class="xs mute" style="margin-top:2px">${esc(l.td.showroom)} showroom · ${esc(l.td.car)}</div>` : ''}${l.late ? `<div class="xs red b row tight" style="margin-top:4px;gap:6px">${pulse('red')}Waiting ${mins(l.wait)}, overdue</div>` : l.wait != null ? `<div class="xs mute" style="margin-top:2px">Customer waiting ${mins(l.wait)}</div>` : ''}</div></div></section>
-        <section class="card"><div class="card-h"><h2>Lead details</h2></div><dl class="kv" style="margin:0">${[['Car model', l.model],['Trim', l.trim || '—'],['Colour', l.colour || '—'],['City', l.city],['Source', l.src],['Campaign', l.campaign],['Channel', CH[l.ch].label],['Language', l.lang],['Created', l.created]].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl></section>
-        <section class="card"><div class="card-h"><h2>Customer rating</h2></div>${l.rating ? `<div class="row tight">${stars(l.rating, 18)}<b class="num">${l.rating} of 5</b></div>${l.ratingNote ? `<p class="small" style="margin-top:8px">"${esc(l.ratingNote)}"</p>` : ''}` : `<p class="small mute">No rating yet. VINA asks for 1 to 5 stars when the chat closes.</p>`}</section>
+        ${reportCard({title:'Next step', body:`<div class="ld-nx"><span class="chi c-${l.late ? 'red' : ni[1]} lg">${ic(ni[0], 18)}</span><div class="grow"><b>${esc(l.next)}</b>${l.td && l.status === 'testdrive' ? `<div class="xs mute" style="margin-top:2px">${esc(l.td.showroom)} showroom · ${esc(l.td.car)}</div>` : ''}${l.late ? `<div class="xs red b row tight" style="margin-top:4px;gap:6px">${pulse('red')}Waiting ${mins(l.wait)}, overdue</div>` : l.wait != null ? `<div class="xs mute" style="margin-top:2px">Customer waiting ${mins(l.wait)}</div>` : ''}</div></div>`})}
+        ${reportCard({title:'Lead details', body:`<dl class="kv" style="margin:0">${[['Car model', l.model],['Trim', l.trim || '—'],['Colour', l.colour || '—'],['City', l.city],['Source', l.src],['Campaign', l.campaign],['Channel', CH[l.ch].label],['Language', l.lang],['Created', l.created]].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`})}
+        ${reportCard({title:'Customer rating', body:`${l.rating ? `<div class="row tight">${stars(l.rating, 18)}<b class="num">${l.rating} of 5</b></div>${l.ratingNote ? `<p class="small" style="margin-top:8px">"${esc(l.ratingNote)}"</p>` : ''}` : `<p class="small mute">No rating yet. VINA asks for 1 to 5 stars when the chat closes.</p>`}`})}
       </div></div>`;
     return shell({nav:'leads', title:l.name, crumb:back, body});
   }});
@@ -501,12 +504,9 @@
 
   /* ---- LD5 statuses and shared parts (reference sheet) ---- */
   R('statuses', {id:'LD5', title:'Lead statuses', render() {
-    const part = (title, sub, inner) => `<section class="card"><div class="card-h"><div class="grow"><h2>${title}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div></div>${inner}</section>`;
-    const body = `<p class="lead-in">One set of statuses, colours and parts for chips, board columns and charts, on every screen of both dashboards. Chips always carry the word, so colour never carries the meaning alone.</p>
-      ${sectionHead('Statuses', 'In the order a lead moves. Callback sits beside Qualified while the call centre phones the customer.')}
-      <div class="ld5-st">${ST_ORDER.map(k => { const n = LEADS.filter(l => l.status === k).length; return `<div class="ld5-t" style="--c:var(--${STATUS[k].c}-f)"><div class="row tight nowrap">${chip(k)}<span class="sp"></span><span class="n num" ${countAttr(n)}>${n}</span></div><p class="small">${esc(STATUS[k].means)}</p><div class="row tight xs mute nowrap"><span class="ld5-sw" aria-hidden="true"></span>${STATUS[k].colour}<span class="sp"></span>leads now</div></div>`; }).join('')}</div>
-      ${sectionHead('Shared parts', 'The same pieces wherever they appear.')}
-      <div class="g3">
+    const part = (title, sub, inner) => reportCard({title, sub, body: inner});
+    const body = `${reportCard({title:'Statuses', sub:'In the order a lead moves. Chips always carry the word, so colour never carries the meaning alone.', cls:'rx-tbl', body:`<div class="tbl-wrap"><table class="tbl"><caption class="sr">Lead statuses</caption><thead><tr><th>Status</th><th>Means</th><th>Colour</th><th class="r">Leads now</th></tr></thead><tbody>${ST_ORDER.map(k => { const n = LEADS.filter(l => l.status === k).length; return `<tr><td>${chip(k)}</td><td class="small">${esc(STATUS[k].means)}</td><td><span class="row tight nowrap small" style="--c:var(--${STATUS[k].c}-f)"><span class="ld5-sw" aria-hidden="true"></span>${STATUS[k].colour}</span></td><td class="r num b" ${countAttr(n)}>${n}</td></tr>`; }).join('')}</tbody></table></div>`})}
+      <div class="rx-g3">
         ${part('Buttons', 'One main action per area. Disabled buttons say why.', `<div class="ld-sw"><button type="button" class="btn pri" data-a="noop">Main action</button><button type="button" class="btn" data-a="noop">Other action</button><button type="button" class="btn ghost" data-a="noop">Link action</button><button type="button" class="btn danger-o" data-a="noop">Close lead</button><button type="button" class="btn" disabled title="Example of a button that cannot be used yet">Not yet</button></div>`)}
         ${part('Tags', 'View only marks pages a manager can see but not change.', `<div class="ld-sw">${vo()}${vtag()}<span class="pill c-teal">VINA team</span><span class="row tight nowrap small">${pulse()}Needs you now</span><span class="row tight nowrap small"><span class="unread-dot" aria-hidden="true"></span>Unread</span></div>`)}
         ${part('Who did it', 'Teal means VINA did it. Navy or blue means a person did it.', `<div class="ld-sw"><span class="row tight nowrap">${av('VINA')}<span class="small">VINA</span></span><span class="row tight nowrap">${av('Reem Al-Harbi')}<span class="small">A person</span></span><span class="evt teal">${ic('spark', 13)}VINA marked it qualified</span></div>`)}
