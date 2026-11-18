@@ -1642,6 +1642,35 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 /* L1–L8 · Website log in button, dashboard log in, verify, forgot password, invite, choose a client, session expired, sign up */
 (function () {
   document.head.insertAdjacentHTML('beforeend', `<style>
+  /* Shared layout utilities for every screen outside the Manager reports (GA-style pass). They belong in core.css;
+     they live here because 10-auth loads first. rx-g3: at most 3 cards a row (2 at tablet, 1 on phones).
+     rx-tbl: a report card whose body is a table or list edge to edge. rx-more: "More options" disclosure. */
+  .rx-g3{display:grid;gap:20px;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+  .rx-g2{display:grid;gap:20px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+  .rx-g3>*,.rx-g2>*{min-width:0}
+  @media (max-width:1100px){.rx-g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:700px){.rx-g3,.rx-g2{grid-template-columns:minmax(0,1fr)}}
+  .rc.rx-tbl>.rc-b{padding:0}
+  .rc.rx-tbl .tbl-wrap{border:0;border-radius:0;box-shadow:none;background:transparent}
+  .rc.rx-tbl>.rc-b>.list>.li{padding-left:20px;padding-right:20px}
+  .rc .rc-h .tabs{border-bottom:0}
+  .rc-tabs{padding:4px 12px 0;border-bottom:1px solid var(--line)}
+  .rc-tabs .tabs{border-bottom:0}
+  .rx-more{border-top:1px solid var(--line);padding-top:12px}
+  .rx-more>summary{display:inline-flex;align-items:center;gap:6px;min-height:32px;cursor:pointer;font-size:13px;font-weight:600;color:var(--link);list-style:none}
+  .rx-more>summary::-webkit-details-marker{display:none}
+  .rx-more>summary .ic{transition:transform var(--d2) var(--ease)}
+  .rx-more[open]>summary .ic{transform:rotate(180deg)}
+  .rx-more>summary .m{color:var(--mute);font-weight:500}
+  .rx-more>.in{display:flex;flex-direction:column;gap:16px;margin-top:12px}
+  .rx-sec{display:flex;flex-direction:column;gap:16px;padding-top:20px;border-top:1px solid var(--line)}
+  .rx-sec:first-child{padding-top:0;border-top:0}
+  .rx-sec>h3{font-size:14px;font-weight:600;line-height:20px}
+  .rx-tbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;border-bottom:1px solid var(--line)}
+  .rx-tbar>.tabs{border-bottom:0;flex:0 1 auto;min-width:0}
+  .rx-tbar>.sp{flex:1}
+  .rx-tbar>.act{display:flex;gap:8px;align-items:center;padding-bottom:6px}
+  @media (max-width:760px){.rx-tbar>.act.hide-sm{display:none}}
   /* Brand side: navy with teal glow (core .auth .side) + one quiet product moment */
   .auth .side{justify-content:space-between}
   .au-hero{display:flex;flex-direction:column;gap:14px;max-width:460px}
@@ -1988,8 +2017,8 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       : `<ul class="au-clients">${list.map(c => card(c, CLIENTS.indexOf(c))).join('')}</ul>`;
     return `<div class="full"><div class="full-top">${LOGO()}<span class="sp"></span><span class="row tight nowrap">${av(U.lina.name)}<span class="small hide-xs"><b>Lina Haddad</b><span class="mute" style="display:block">VINA support team</span></span></span><button type="button" class="ibtn" data-a="theme" aria-label="Light or dark">${ic(curTheme() === 'dark' ? 'sun' : 'moon')}</button><button type="button" class="ibtn" data-a="logout" aria-label="Log out">${ic('logout')}</button></div>
       <div class="au-wrap">
-        <div class="col tight"><h1 style="font-size:28px;font-weight:700">Choose a client</h1><p class="mute">${S.st === 'empty' ? 'You can switch client at any time from the top of the menu.' : `${CLIENTS.length} clients${attn ? ` · <span class="red b">${attn} need${attn === 1 ? 's' : ''} attention</span>` : ''}. You can switch client at any time from the top of the menu.`}</p></div>
-        <label class="au-search">${ic('search', 16)}<span class="sr">Search clients</span><input type="search" placeholder="Search by client name or city" ${bind('f.au6q', true)}></label>
+        <h1 style="font-size:28px;font-weight:700">Choose a client</h1>
+        ${pageToolbar({left:`<label class="au-search" style="flex:1 1 320px;max-width:480px">${ic('search', 16)}<span class="sr">Search clients</span><input type="search" placeholder="Search by client name or city" ${bind('f.au6q', true)}></label>`, right: S.st === 'empty' ? '' : `<span class="small mute">${CLIENTS.length} clients${attn ? ` · <span class="red b">${attn} need${attn === 1 ? 's' : ''} attention</span>` : ''}</span>`})}
         ${body}</div></div>`;
   }});
   A['au-retry'] = () => { S.st = ''; };
@@ -2072,7 +2101,6 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .mg-cp{flex:1;padding:18px 20px 14px;min-width:0}
   .mg-cph{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-bottom:14px}
   .mg-cph .legend{flex:1}
-  .mg-seg button{min-height:28px;padding:0 10px;font-size:12px}
   .mg-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
   .mg-si{display:flex;align-items:flex-start;gap:10px;padding:14px 20px;min-width:0}
   .mg-si+.mg-si{border-inline-start:1px solid var(--line)}
@@ -2376,11 +2404,10 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       }
       chart = lines(ax, series, opt);
     }
-    const rangeSeg = `<div class="seg mg-seg" role="group" aria-label="Chart range">${[['7','7 days'],['30','30 days']].map(([k, t]) => `<button type="button" data-a="mg-date" data-x="${k}" aria-pressed="${f.date === k}">${t}</button>`).join('')}</div>`;
     const STRIP = [['Customers who replied', num(sc(1987)), '+9%'], ['Test drive requests', num(sc(48)), '+6'], ['Not interested', num(sc(131)), '−4%'], ['Customer rating', '4.6', '+0.1']];
     const strip = `<div class="mg-strip" aria-label="More numbers">${STRIP.map(([k, v, d]) => `<div class="mg-si">${mic(k, 13)}<div style="min-width:0"><span class="k">${k}</span><div class="row tight nowrap" style="align-items:baseline"><span class="v">${fd ? '—' : v}</span>${fd ? '' : delta(d)}</div></div></div>`).join('')}</div>`;
     const summary = `<section class="card mg-sum" aria-label="Summary">${tabs}<div class="mg-cp" id="mg-panel" role="tabpanel" aria-labelledby="mg-t-${mk}">
-      ${fd ? emptyBox('Conversations, answers by VINA alone, qualified leads and cars sold will show here day by day, next to the previous period.') : `<div class="mg-cph">${lg}${rangeSeg}</div>${chart}`}</div>${strip}</section>`;
+      ${fd ? emptyBox('Conversations, answers by VINA alone, qualified leads and cars sold will show here day by day, next to the previous period.') : `<div class="mg-cph">${lg}</div>${chart}`}</div>${strip}</section>`;
     // Waiting for the team now: a live card
     const LH = [4, 5, 5, 6, 6, 7, 8, 7, 8, 9, 9, w.length];
     const mini = `<div class="mg-mini" role="img" aria-label="Customers waiting over the last hour">${LH.map((v, i) => `<i style="height:${Math.max(6, v / Math.max(1, ...LH) * 100).toFixed(0)}%" title="${clock(new Date(NOW0.getTime() - (11 - i) * 3e5))}: ${v} waiting"></i>`).join('')}</div><div class="mg-cap"><span>60 min ago</span><span>Now</span></div>`;
@@ -2634,7 +2661,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 .ag-sum{background:var(--teal-b);border-radius:var(--r-m);padding:12px 14px;font-size:13px;color:var(--text)}
 .ag-sum .hd{display:flex;align-items:center;gap:6px;color:var(--teal-f);font-weight:700;font-size:12px;letter-spacing:.02em;margin-bottom:6px}
 /* AG2 callbacks */
-.ag-daycard{padding:18px 20px}
+.ag-day .kpi.mini{background:transparent;padding:4px 0}
 .ag-day{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .ag-dayline{display:none}
 .ag-grp{overflow:hidden}
@@ -2762,21 +2789,11 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const F = [['all', 'All']].concat(types.map(k => [k, AT[k][3]]));
     const list = S.alerts.filter(a => G.alF === 'all' || a.type === G.alF);
     const n = S.alerts.filter(a => !a.read).length;
+    // Status lives in the header (and the profile menu on phones); this page keeps one toolbar and one report card.
     return shell({nav:'inbox', title:'Alerts', body:`
-      <div class="ag-alpage">
-        <section class="card"><div class="card-h"><h2>All alerts</h2><span class="sub">${n ? n + ' new' : 'Nothing new'}</span><span class="sp"></span>${readAll(n)}</div>
-          <div class="fchips" role="group" aria-label="Show">${F.map(([k, t]) => `<button type="button" class="fchip" data-a="ag-alf" data-x="${k}" aria-pressed="${G.alF === k}">${t} <span class="n">${S.alerts.filter(a => k === 'all' || a.type === k).length}</span></button>`).join('')}</div>
-          ${list.length ? alertGroups(list) : empty('bell', 'No alerts yet', 'When a lead is given to you or a callback is due, it shows here.')}
-        </section>
-        <div class="col loose">
-          <section class="card"><div class="card-h" style="margin-bottom:12px"><h2>Your status</h2></div>
-            <div class="seg" role="group" aria-label="Your status">${Object.entries(PRES).map(([k, [t]]) => `<button type="button" data-a="presence" data-x="${k}" aria-pressed="${S.presence === k}"><span class="pres ${k}" style="width:9px;height:9px;border-radius:50%;display:inline-block"></span>${t}</button>`).join('')}</div>
-            <p class="small mute" style="margin-top:12px">${S.presence === 'available' ? 'You are getting new leads and pop-ups. Only available agents get new leads.' : 'New leads go to the next available agent. Callbacks you already have still remind you.'}</p></section>
-          <section class="card"><div class="card-h" style="margin-bottom:8px"><h2>Pop-ups and sound</h2></div>
-            <div class="sw-row">${sw(S.sound, 'ag-sound', '', 'Alert sound')}<span class="grow"><b class="small">Sound</b><span class="xs mute" style="display:block">A short sound with each pop-up.</span></span></div>
-            <p class="xs mute" style="margin-top:6px">Pop-ups show at the top right when a lead is given to you, when a callback is due in 10 minutes, and when a lead is given to someone else.</p></section>
-        </div>
-      </div>`});
+      ${pageToolbar({left:`<div class="fchips" role="group" aria-label="Show">${F.map(([k, t]) => `<button type="button" class="fchip" data-a="ag-alf" data-x="${k}" aria-pressed="${G.alF === k}">${t} <span class="n">${S.alerts.filter(a => k === 'all' || a.type === k).length}</span></button>`).join('')}</div>`,
+        right:`<label class="row tight nowrap small" title="A short sound with each pop-up">${sw(S.sound, 'ag-sound', '', 'Alert sound')}Sound</label>${readAll(n)}`})}
+      ${reportCard({title:'Alerts', sub: n ? '' : 'Nothing new', body: list.length ? alertGroups(list) : empty('bell', 'No alerts yet', 'When a lead is given to you or a callback is due, it shows here.')})}`});
   }});
 
   /* ---------- AG1 Inbox ---------- */
@@ -3026,6 +3043,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     return {calls, reached, sent};
   }
   const tries = n => !n ? 'No tries yet' : n === 1 ? '1 try so far' : n + ' tries so far';
+  let cbFirst = null; // the next callback to make: the only primary Call on the page
   function cbRow(l) {
     const r = rem(l); const done = l.cb.done; const tom = l.cb.day === 'tomorrow'; const over = !done && !tom && r < 0;
     const rel = done ? esc(done) : tom ? 'Tomorrow' : over ? `${pulse('red')}${mins(-r)} late` : 'in ' + mins(r);
@@ -3034,7 +3052,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       <div class="ag-tm"><div class="tm ${over ? 'red' : ''}">${esc(l.cb.at.replace(/^Sun /, ''))}</div><div class="row tight nowrap xs ${over ? 'red b' : 'mute'}">${rel}</div></div>
       <div class="who ag-who">${av(l.name)}<div style="min-width:0"><div class="nm ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="row tight nowrap" style="margin-top:4px">${chipC(l.model, 'navy')}<span class="xs mute num ell">${esc(l.mob)}</span></div></div></div>
       <div class="ag-why"><div class="small b ell2">${esc(why)}</div><div class="xs mute" style="margin-top:2px">${tries(l.cb.tries)}</div></div>
-      <div class="ag-act row tight nowrap"><button type="button" class="btn sm" data-a="ag-open-chat" data-x="${l.id}">${ic('conv', 14)}Open chat</button>${done ? `<a class="btn sm" href="#lead-${l.id}">${ic('arrowR', 14)}Lead</a>` : `<button type="button" class="btn sm pri" data-a="ag-call" data-x="${l.id}">${ic('phone', 14)}Call</button>`}</div></div>`;
+      <div class="ag-act row tight nowrap"><button type="button" class="btn sm" data-a="ag-open-chat" data-x="${l.id}">${ic('conv', 14)}Open chat</button>${done ? `<a class="btn sm" href="#lead-${l.id}">${ic('arrowR', 14)}Lead</a>` : `<button type="button" class="btn sm ${l.id === cbFirst ? 'pri' : ''}" data-a="ag-call" data-x="${l.id}">${ic('phone', 14)}Call</button>`}</div></div>`;
   }
   R('callbacks', {id:'AG2', title:'Callbacks', roles:['cc'], states:[['empty','Nothing to call'],['loading','Loading']], render() {
     const pend = S.st === 'empty' ? [] : mine().filter(l => isOpen(l) && l.cb && !l.cb.done);
@@ -3044,18 +3062,18 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const done = S.st === 'empty' ? [] : LEADS.filter(l => l.cb && l.cb.done && (l.cbBy === S.me || l.owner === S.me));
     const d = S.st === 'empty' ? {calls:0, reached:0, sent:0} : myDay();
     const tabs = [['today', 'Today', tday.length], ['tomorrow', 'Tomorrow', tom.length], ['done', 'Done today', done.length]];
-    const grp = (title, rows, c, sub) => rows.length ? `<section class="card pad0 ag-grp" aria-label="${title}"><div class="ag-grp-h">${c === 'red' ? pulse('red') : ''}<h2${c === 'red' ? ' class="red"' : ''}>${title}</h2><span class="ag-cnt c-${c}">${rows.length}</span><span class="sp"></span><span class="xs mute">${sub}</span></div>${rows.map(cbRow).join('')}</section>` : '';
-    const list = (rows, icon, t, b) => rows.length ? `<section class="card pad0 ag-grp">${rows.map(cbRow).join('')}</section>` : `<div class="card">${empty(icon, t, b)}</div>`;
+    cbFirst = G.cbTab === 'today' ? (over[0] || hour[0] || later[0] || {}).id : null;
+    const grp = (title, rows, c, sub) => rows.length ? `<section class="card rc rx-tbl ag-grp" aria-label="${title}"><header class="rc-h"><div class="grow row tight nowrap">${c === 'red' ? pulse('red') : ''}<h2${c === 'red' ? ' class="red"' : ''}>${title}</h2><span class="ag-cnt c-${c}">${rows.length}</span></div>${sub ? `<span class="xs mute">${sub}</span>` : ''}</header><div class="rc-b">${rows.map(cbRow).join('')}</div></section>` : '';
+    const list = (rows, icon, t, b) => rows.length ? `<section class="card rc rx-tbl ag-grp"><div class="rc-b">${rows.map(cbRow).join('')}</div></section>` : `<div class="card">${empty(icon, t, b)}</div>`;
     let body;
     if (S.st === 'loading') body = loadingRows(5, 64);
-    else if (G.cbTab === 'today') body = tday.length ? grp('Overdue', over, 'red', 'Call these first') + grp('In the next hour', hour, 'amber', 'Due by ' + clock(new Date(now().getTime() + 3600000))) + grp('Later today', later, 'grey', '') : `<div class="card">${empty('phone', 'Nothing to call right now', 'New callbacks show here when VINA books one or a customer asks to be called. You get an alert 10 minutes before each one.', `<a class="btn" href="#inbox">Open my inbox</a>`)}</div>`;
+    else if (G.cbTab === 'today') body = tday.length ? grp('Overdue', over, 'red', '') + grp('In the next hour', hour, 'amber', 'Due by ' + clock(new Date(now().getTime() + 3600000))) + grp('Later today', later, 'grey', '') : `<div class="card">${empty('phone', 'Nothing to call right now', 'New callbacks show here when VINA books one or a customer asks to be called. You get an alert 10 minutes before each one.', `<a class="btn" href="#inbox">Open my inbox</a>`)}</div>`;
     else if (G.cbTab === 'tomorrow') body = list(tom, 'cal', 'Nothing booked for tomorrow', 'Callbacks for tomorrow show here.');
     else body = list(done, 'check', 'No calls done yet today', 'Calls you finish today show here with their result.');
     const rate = d.calls ? Math.round(d.reached / d.calls * 100) + '% of calls' : 'no calls yet';
     return shell({nav:'callbacks', title:'Callbacks', body:`
-      <section class="card ag-daycard" aria-label="My day"><div class="card-h" style="margin-bottom:12px"><h2>My day</h2><span class="sub">${esc(nowStr())}</span></div><div class="ag-day">
-        ${kpi({k:'Calls made', v:d.calls, n:'today', mini:true})}${kpi({k:'Reached', v:d.reached, n:rate, mini:true})}${kpi({k:'Sent to sales', v:d.sent, n:'today', mini:true})}${kpi({k:'Still to call today', v:tday.length, n: over.length ? `<span class="red b">${over.length} overdue</span>` : 'none overdue', hot: over.length > 0, mini:true})}</div></section>
-      <div class="tabs" role="tablist" aria-label="Lists">${tabs.map(([k, t, n]) => `<button type="button" role="tab" class="tab ${k === 'done' ? flashCls('ag-done') : ''}" aria-selected="${G.cbTab === k}" data-a="ag-cbtab" data-x="${k}">${t}<span class="n">${n}</span></button>`).join('')}</div>
+      <div class="rx-tbar"><div class="tabs" role="tablist" aria-label="Lists">${tabs.map(([k, t, n]) => `<button type="button" role="tab" class="tab ${k === 'done' ? flashCls('ag-done') : ''}" aria-selected="${G.cbTab === k}" data-a="ag-cbtab" data-x="${k}">${t}<span class="n">${n}</span></button>`).join('')}</div><span class="sp"></span><span class="act xs mute hide-sm">${esc(nowStr())}</span></div>
+      ${reportCard({title:'My day', cls:'ag-daycard', body:`<div class="ag-day">${kpi({k:'Calls made', v:d.calls, n:'today', mini:true})}${kpi({k:'Reached', v:d.reached, n:rate, mini:true})}${kpi({k:'Sent to sales', v:d.sent, n:'today', mini:true})}${kpi({k:'Still to call today', v:tday.length, n: over.length ? `<span class="red b">${over.length} overdue</span>` : 'none overdue', hot: over.length > 0, mini:true})}</div>`})}
       <div class="col">${body}</div>
       <p class="ag-dayline" aria-label="My day"><span class="b" style="color:var(--text)">My day</span><span><b>${d.calls}</b> calls</span><span><b>${d.reached}</b> reached</span><span><b>${d.sent}</b> sent to sales</span></p>`});
   }});
@@ -3090,7 +3108,10 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .ld-bar .fchip{min-height:32px;font-size:12px;padding:0 8px 0 12px;background:var(--sel);border-color:transparent}
   .ld-bar .fchip:hover{background:var(--sub2)}
   .ld-bar .fchip .k{color:var(--mute)}
-  .ld-wait{gap:8px}
+  .rx-tbl .ld-pager{padding:10px 16px;border-top:1px solid var(--line)}
+  .rx-tbl .ld-bulk{margin:12px 16px 0}
+  .rx-tbl>.rc-b>.col[aria-busy]{padding:16px}
+  .rx-tbl .empty{padding:40px 16px}
   /* LD1 table */
   .ld-bulk{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:var(--sel);box-shadow:inset 0 0 0 1px var(--horizon)}
   .ld-bulk .inp{min-height:36px;width:auto}
@@ -3260,7 +3281,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     return `<div class="tabs" role="tablist" aria-label="Saved views">${SV().map(([k, t, fn]) => `<button type="button" class="tab" role="tab" aria-selected="${s.view === k}" data-a="ld-view" data-x="${k}">${t}<span class="n">${b.filter(fn).length}</span></button>`).join('')}</div>`;
   }
   const fLabel = (f, v) => f.lab ? f.lab(v) : v;
-  function filterBar(withCols) {
+  function filterBar(withCols, cur) {
     const s = F(); const b = base(); const act = FL().filter(f => s[f.k]); const again = G.popNew ? '' : 'again';
     const fsel = f => {
       const ord = f.ord || (v => v); const vals = [...new Set(b.map(f.get))].sort((x, y) => { const a = ord(x), c = ord(y); return a > c ? 1 : a < c ? -1 : 0; });
@@ -3271,7 +3292,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
         <div class="g">${FL().map(fsel).join('')}</div>
         <div class="ft"><button type="button" class="btn ghost" data-a="ld-clear" ${act.length ? '' : 'disabled'}>Clear all</button><span class="sp"></span><button type="button" class="btn pri" data-a="ld-filters" data-x="done">Show ${num(n)} ${n === 1 ? 'lead' : 'leads'}</button></div></div>` : '';
     const colPop = S.menu === 'ld-cols' ? `<div class="menu ld-pop r ${again}" role="group" aria-label="Extra columns" data-a="noop"><div class="mh">Extra columns</div>${OPT_COLS.map(([k, t]) => `<label class="chk"><input ${bindChk('f.ld.cols.' + k)}>${t}</label>`).join('')}</div>` : '';
-    return `<div class="ld-bar">
+    return `<div class="ld-bar ptb">${viewSwitch(cur)}
       <label class="ld-q">${ic('search', 16)}<span class="sr">Search by name or mobile</span><input type="search" placeholder="Search name or mobile" ${bind('f.ld.q', true)}></label>
       <span class="ld-rel"><button type="button" class="btn sm" id="ld-fbtn" data-a="ld-filters" aria-haspopup="dialog" aria-expanded="${S.menu === 'ld-filters'}">${ic('filter', 15)}Filters${act.length ? `<span class="n" aria-label="${act.length} on">${act.length}</span>` : ''}</button>${pop}</span>
       ${act.map(f => `<button type="button" class="fchip" data-a="ld-unf" data-x="${f.k}" aria-label="Remove filter ${esc(f.t)}: ${esc(fLabel(f, s[f.k]))}"><span class="k">${esc(f.t)}:</span>${esc(fLabel(f, s[f.k]))}${ic('x', 13, 'x')}</button>`).join('')}
@@ -3340,12 +3361,12 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   R('leads', {id:'LD1', title:'Leads', states:[['empty','No leads yet'],['nores','No results'],['loading','Loading rows'],['many','1,000+ leads']], render() {
     const rs = rows(); let body;
     if (S.st === 'loading') body = loadingRows(8, 52);
-    else if (S.st === 'empty' || !base().length) body = `<div class="card">${empty('leads', isAgent() ? 'No leads given to you yet' : 'No leads yet', isAgent() ? 'When VINA qualifies a customer and the rules give them to you, they show here and you get an alert. Make sure you are set to Available.' : 'Leads appear here as soon as VINA starts chatting with customers on your connected channels.', isAgent() ? `<button type="button" class="btn" data-a="presence-menu">Check my status</button>` : '')}</div>`;
-    else if (S.st === 'nores' || !rs.length) body = `<div class="card">${empty('search', 'No leads match these filters', 'Try another name or mobile, or clear the filters to see every lead.', `<button type="button" class="btn pri" data-a="ld-clear">Clear filters</button>`)}</div>`;
+    else if (S.st === 'empty' || !base().length) body = `${empty('leads', isAgent() ? 'No leads given to you yet' : 'No leads yet', isAgent() ? 'When VINA qualifies a customer and the rules give them to you, they show here and you get an alert. Make sure you are set to Available.' : 'Leads appear here as soon as VINA starts chatting with customers on your connected channels.', isAgent() ? `<button type="button" class="btn" data-a="presence-menu">Check my status</button>` : '')}`;
+    else if (S.st === 'nores' || !rs.length) body = `${empty('search', 'No leads match these filters', 'Try another name or mobile, or clear the filters to see every lead.', `<button type="button" class="btn" data-a="ld-clear">Clear filters</button>`)}`;
     else body = listBody(rs);
-    const un = unassigned().length;
-    return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads', after: `<span class="mute small num hide-sm">${num(S.st === 'many' ? 1248 : base().length)} leads</span>`,
-      body:`<div class="row">${viewSwitch('leads')}<span class="sp"></span>${!isAgent() && un ? `<a class="btn sm ld-wait" href="#unassigned">${pulse()}${un} unassigned waiting${ic('arrowR', 14)}</a>` : ''}</div>${savedTabs()}${filterBar(true)}${body}`});
+    // Saved views are the card's tabs (Unassigned is one of them), so no count in the header and no separate link.
+    return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads',
+      body:`${filterBar(true, 'leads')}<section class="card rc rx-tbl" aria-label="${isAgent() ? 'My leads' : 'Leads'}"><div class="rc-tabs">${savedTabs()}</div><div class="rc-b">${body}</div></section>`});
   }, after: afterUi});
   A['ld-sort'] = el => { const s = F(), k = el.dataset.x; if (s.sort === k) s.dir = s.dir === 'asc' ? 'desc' : 'asc'; else { s.sort = k; s.dir = k === 'wait' || k === 'rating' || k === 'created' ? 'desc' : 'asc'; } };
   A['ld-page'] = el => { F().page = Math.max(1, Number(el.dataset.x)); window.scrollTo(0, 0); };
@@ -3428,7 +3449,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const mid = S.menu && S.menu.indexOf('ld-mv:') === 0 ? S.menu.slice(6) : null; const ml = mid && lead(mid);
     const mvMenu = ml && G.mv ? `<div class="menu ld-mvmenu ${G.popNew ? '' : 'again'}" role="menu" aria-label="Move ${esc(ml.name)} to" style="position:absolute;left:${G.mv.left}px;${G.mv.top != null ? 'top:' + G.mv.top + 'px' : 'bottom:' + G.mv.bottom + 'px;transform-origin:bottom right'}"><div class="mh">Move ${esc(ml.name.split(' ')[0])} to</div>${ST_ORDER.filter(k => k !== ml.status).map(k => `<button type="button" role="menuitem" data-a="ld-mv" data-x="${ml.id}:${k}"><span class="sw" style="background:var(--${STATUS[k].c}-f)" aria-hidden="true"></span><span class="grow">${STATUS[k].label}</span>${k === 'testdrive' ? '<span class="xs mute">Pick a time</span>' : k === 'lost' ? '<span class="xs mute">Pick a reason</span>' : ''}</button>`).join('')}</div>` : '';
     return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads',
-      body:`<div class="row">${viewSwitch('pipeline')}<span class="sp"></span><span class="small mute">${drag ? 'Drag a card to change its status, or use its menu.' : 'Cards move when the agent handling the lead changes its status.'}</span></div>${savedTabs()}${filterBar(false)}${board}${mvMenu}`});
+      body:`${filterBar(false, 'pipeline')}${savedTabs()}${board}${mvMenu}`});
   }, after() {
     const b = $('#ld-board'); if (b) { b.scrollLeft = G.bx || 0; b.onscroll = () => { if (b.scrollLeft === G.bx) return; G.bx = b.scrollLeft; if (S.menu && S.menu.indexOf('ld-mv:') === 0) { S.menu = null; render(); } }; }
     afterUi();
@@ -3470,11 +3491,11 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const dayList = day ? items.filter(e => e.d === s.calDay) : [];
     const nTd = items.filter(e => e.kind === 'td').length, nCb = items.length - nTd;
     return shell({nav: isSales() ? 'calendar' : 'leads', title: isSales() ? 'Test drives' : (isAgent() ? 'My leads' : 'Leads'),
-      body:`<div class="row">${viewSwitch('calendar')}<div class="seg" role="group" aria-label="Calendar range">${[['day','Day'],['week','Week']].map(([k, t]) => `<button type="button" data-a="ld-cal" data-x="${k}" aria-pressed="${(k === 'day') === day}">${t}</button>`).join('')}</div>
+      body:`<div class="ptb">${viewSwitch('calendar')}<div class="seg" role="group" aria-label="Calendar range">${[['day','Day'],['week','Week']].map(([k, t]) => `<button type="button" data-a="ld-cal" data-x="${k}" aria-pressed="${(k === 'day') === day}">${t}</button>`).join('')}</div>
         ${day ? `<div class="row tight nowrap"><button type="button" class="ibtn sm" data-a="ld-cal-day" data-x="-1" ${s.calDay <= 0 ? 'disabled' : ''} aria-label="Previous day">${ic('chevL', 15)}</button><b class="num" style="min-width:86px;text-align:center">${WEEK[s.calDay][0]} ${WEEK[s.calDay][1]} Nov</b><button type="button" class="ibtn sm" data-a="ld-cal-day" data-x="1" ${s.calDay >= 6 ? 'disabled' : ''} aria-label="Next day">${ic('chevR', 15)}</button></div>` : `<b>Sat 7 to Fri 13 Nov 2026</b>`}
         <span class="sp"></span><div class="ld-legend" aria-label="Colours"><span class="c-purple"><i></i>Test drive · ${nTd}</span><span class="c-amber"><i></i>Callback · ${nCb}</span></div></div>
       ${!items.length ? `<div class="note info">${ic('info')}<span>Nothing booked this week yet. Test drives you book and callbacks with a time show here.</span></div>` : ''}
-      ${day ? `<div class="ld-2">${cal}<section class="card"><div class="card-h"><h2>${WEEK[s.calDay][0]} ${WEEK[s.calDay][1]} Nov</h2><span class="sub">${dayList.length} booked</span></div>${dayList.length ? `<div class="list">${dayList.map(e => `<a class="li" href="#lead-${e.l.id}" style="text-decoration:none;color:inherit">${chipC(e.kind === 'td' ? 'Test drive' : 'Callback', e.kind === 'td' ? 'purple' : 'amber', true)}<span class="grow"><b>${esc(e.l.name)}</b><div class="xs mute">${esc(e.sub)}</div></span><span class="num small">${hLabel(e.h)}</span></a>`).join('')}</div>` : `<p class="small mute">Nothing booked on this day.</p>`}</section></div>` : cal}`});
+      ${day ? `<div class="ld-2">${cal}${reportCard({title:`${WEEK[s.calDay][0]} ${WEEK[s.calDay][1]} Nov`, sub:`${dayList.length} booked`, cls:'rx-tbl', body: dayList.length ? `<div class="list">${dayList.map(e => `<a class="li" href="#lead-${e.l.id}" style="text-decoration:none;color:inherit">${chipC(e.kind === 'td' ? 'Test drive' : 'Callback', e.kind === 'td' ? 'purple' : 'amber', true)}<span class="grow"><b>${esc(e.l.name)}</b><div class="xs mute">${esc(e.sub)}</div></span><span class="num small">${hLabel(e.h)}</span></a>`).join('')}</div>` : `<p class="small mute" style="padding:0 20px 18px">Nothing booked on this day.</p>`})}</div>` : cal}`});
   }});
   A['ld-cal'] = el => { F().cal = el.dataset.x; F().calPick = true; };
   A['ld-cal-day'] = el => { const s = F(); s.calDay = Math.min(6, Math.max(0, s.calDay + Number(el.dataset.x))); };
@@ -3545,16 +3566,16 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
           <div class="ld-meta"><span class="num">${ic('phone', 14)}${esc(mob(l))}</span><span>${chIc(l.ch)}${esc(CH[l.ch].label)}</span>${owner}</div></div>${acts}</div>
         <div class="ld-stp">${steps}</div></section>
       <div class="ld-2"><div class="col loose">
-        <section class="ld-vina" aria-labelledby="ld-vh"><div class="vh">${av('VINA', 'sm')}<h2 id="ld-vh">VINA summary</h2><span class="sp"></span>${l.vq ? `<span class="xs">Qualified by VINA</span>` : ''}</div>
+        <section class="ld-vina" aria-labelledby="ld-vh"><div class="vh">${av('VINA', 'sm')}<h2 id="ld-vh">VINA summary</h2></div>
           <dl class="ld-facts">${facts.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${txt(v)}</dd></div>`).join('')}</dl>
           <div class="ld-why"><b>Why VINA marked it qualified</b>${why ? `<p style="margin-top:4px">${esc(why)}</p><button type="button" class="btn ghost sm" data-a="ld-see-chat" data-x="${l.id}">${ic('conv', 14)}See those messages</button>` : `<p class="mute" style="margin-top:4px">VINA has not qualified this lead. ${l.status === 'new' ? 'VINA is still chatting with the customer.' : 'It was qualified by a person.'}</p>`}</div></section>
-        <section class="card"><div class="card-h"><h2>History</h2><span class="sp"></span><div class="seg" role="group" aria-label="Show in history">${[['all','All'],['chats','Chats'],['calls','Calls'],['notes','Notes']].map(([k, t]) => `<button type="button" data-a="ld-h" data-x="${k}" aria-pressed="${s.h === k}">${t}</button>`).join('')}</div></div>
-          ${agent ? `<div class="ld-compose"><label class="sr" for="b-f-ld4note">Add a note for the team</label><textarea class="inp" placeholder="Add a note for the team, e.g. trade-in value agreed" ${nta}>${ntv}</textarea><div class="row"><span class="xs mute grow">Notes are saved with your name and the time.</span><button type="button" class="btn sm pri" data-a="ld-note" data-x="${l.id}" ${(S.f.ld4note || '').trim() ? '' : 'disabled'}>${ic('note', 14)}Add note</button></div></div>` : ''}
-          ${hs.length ? `<ol class="ld-tl">${hs.map(e => { const [i, c] = HI[e.t] || ['info','grey']; return `<li class="it ${e.fid ? flashCls(e.fid) : ''}"><span class="chi c-${c}">${ic(i, 15)}</span><div class="grow"><div class="row tight"><b class="small">${esc(e.title)}</b><span class="sp"></span><span class="xs mute">${esc(e.when)}</span></div><div class="xs mute">${esc(e.by)}</div>${e.body ? `<div class="bx">${txt(e.body)}</div>` : ''}</div></li>`; }).join('')}</ol>` : `<p class="small mute" style="padding:12px 0">Nothing of this kind yet.</p>`}</section>
+        ${reportCard({title:'History', right:`<div class="seg" role="group" aria-label="Show in history">${[['all','All'],['chats','Chats'],['calls','Calls'],['notes','Notes']].map(([k, t]) => `<button type="button" data-a="ld-h" data-x="${k}" aria-pressed="${s.h === k}">${t}</button>`).join('')}</div>`, body:`
+          ${agent ? `<div class="ld-compose"><label class="sr" for="b-f-ld4note">Add a note for the team</label><textarea class="inp" placeholder="Add a note for the team, e.g. trade-in value agreed" ${nta}>${ntv}</textarea><div class="row"><span class="sp"></span><button type="button" class="btn sm" data-a="ld-note" data-x="${l.id}" ${(S.f.ld4note || '').trim() ? '' : 'disabled'}>${ic('note', 14)}Add note</button></div></div>` : ''}
+          ${hs.length ? `<ol class="ld-tl">${hs.map(e => { const [i, c] = HI[e.t] || ['info','grey']; return `<li class="it ${e.fid ? flashCls(e.fid) : ''}"><span class="chi c-${c}">${ic(i, 15)}</span><div class="grow"><div class="row tight"><b class="small">${esc(e.title)}</b><span class="sp"></span><span class="xs mute">${esc(e.when)}</span></div><div class="xs mute">${esc(e.by)}</div>${e.body ? `<div class="bx">${txt(e.body)}</div>` : ''}</div></li>`; }).join('')}</ol>` : `<p class="small mute" style="padding:12px 0">Nothing of this kind yet.</p>`}`})}
       </div><div class="col loose">
-        <section class="card"><div class="card-h"><h2>Next step</h2></div><div class="ld-nx"><span class="chi c-${l.late ? 'red' : ni[1]} lg">${ic(ni[0], 18)}</span><div class="grow"><b>${esc(l.next)}</b>${l.td && l.status === 'testdrive' ? `<div class="xs mute" style="margin-top:2px">${esc(l.td.showroom)} showroom · ${esc(l.td.car)}</div>` : ''}${l.late ? `<div class="xs red b row tight" style="margin-top:4px;gap:6px">${pulse('red')}Waiting ${mins(l.wait)}, overdue</div>` : l.wait != null ? `<div class="xs mute" style="margin-top:2px">Customer waiting ${mins(l.wait)}</div>` : ''}</div></div></section>
-        <section class="card"><div class="card-h"><h2>Lead details</h2></div><dl class="kv" style="margin:0">${[['Car model', l.model],['Trim', l.trim || '—'],['Colour', l.colour || '—'],['City', l.city],['Source', l.src],['Campaign', l.campaign],['Channel', CH[l.ch].label],['Language', l.lang],['Created', l.created]].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl></section>
-        <section class="card"><div class="card-h"><h2>Customer rating</h2></div>${l.rating ? `<div class="row tight">${stars(l.rating, 18)}<b class="num">${l.rating} of 5</b></div>${l.ratingNote ? `<p class="small" style="margin-top:8px">"${esc(l.ratingNote)}"</p>` : ''}` : `<p class="small mute">No rating yet. VINA asks for 1 to 5 stars when the chat closes.</p>`}</section>
+        ${reportCard({title:'Next step', body:`<div class="ld-nx"><span class="chi c-${l.late ? 'red' : ni[1]} lg">${ic(ni[0], 18)}</span><div class="grow"><b>${esc(l.next)}</b>${l.td && l.status === 'testdrive' ? `<div class="xs mute" style="margin-top:2px">${esc(l.td.showroom)} showroom · ${esc(l.td.car)}</div>` : ''}${l.late ? `<div class="xs red b row tight" style="margin-top:4px;gap:6px">${pulse('red')}Waiting ${mins(l.wait)}, overdue</div>` : l.wait != null ? `<div class="xs mute" style="margin-top:2px">Customer waiting ${mins(l.wait)}</div>` : ''}</div></div>`})}
+        ${reportCard({title:'Lead details', body:`<dl class="kv" style="margin:0">${[['Car model', l.model],['Trim', l.trim || '—'],['Colour', l.colour || '—'],['City', l.city],['Source', l.src],['Campaign', l.campaign],['Channel', CH[l.ch].label],['Language', l.lang],['Created', l.created]].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`})}
+        ${reportCard({title:'Customer rating', body:`${l.rating ? `<div class="row tight">${stars(l.rating, 18)}<b class="num">${l.rating} of 5</b></div>${l.ratingNote ? `<p class="small" style="margin-top:8px">"${esc(l.ratingNote)}"</p>` : ''}` : `<p class="small mute">No rating yet. VINA asks for 1 to 5 stars when the chat closes.</p>`}`})}
       </div></div>`;
     return shell({nav:'leads', title:l.name, crumb:back, body});
   }});
@@ -3567,12 +3588,9 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 
   /* ---- LD5 statuses and shared parts (reference sheet) ---- */
   R('statuses', {id:'LD5', title:'Lead statuses', render() {
-    const part = (title, sub, inner) => `<section class="card"><div class="card-h"><div class="grow"><h2>${title}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div></div>${inner}</section>`;
-    const body = `<p class="lead-in">One set of statuses, colours and parts for chips, board columns and charts, on every screen of both dashboards. Chips always carry the word, so colour never carries the meaning alone.</p>
-      ${sectionHead('Statuses', 'In the order a lead moves. Callback sits beside Qualified while the call centre phones the customer.')}
-      <div class="ld5-st">${ST_ORDER.map(k => { const n = LEADS.filter(l => l.status === k).length; return `<div class="ld5-t" style="--c:var(--${STATUS[k].c}-f)"><div class="row tight nowrap">${chip(k)}<span class="sp"></span><span class="n num" ${countAttr(n)}>${n}</span></div><p class="small">${esc(STATUS[k].means)}</p><div class="row tight xs mute nowrap"><span class="ld5-sw" aria-hidden="true"></span>${STATUS[k].colour}<span class="sp"></span>leads now</div></div>`; }).join('')}</div>
-      ${sectionHead('Shared parts', 'The same pieces wherever they appear.')}
-      <div class="g3">
+    const part = (title, sub, inner) => reportCard({title, sub, body: inner});
+    const body = `${reportCard({title:'Statuses', sub:'In the order a lead moves. Chips always carry the word, so colour never carries the meaning alone.', cls:'rx-tbl', body:`<div class="tbl-wrap"><table class="tbl"><caption class="sr">Lead statuses</caption><thead><tr><th>Status</th><th>Means</th><th>Colour</th><th class="r">Leads now</th></tr></thead><tbody>${ST_ORDER.map(k => { const n = LEADS.filter(l => l.status === k).length; return `<tr><td>${chip(k)}</td><td class="small">${esc(STATUS[k].means)}</td><td><span class="row tight nowrap small" style="--c:var(--${STATUS[k].c}-f)"><span class="ld5-sw" aria-hidden="true"></span>${STATUS[k].colour}</span></td><td class="r num b" ${countAttr(n)}>${n}</td></tr>`; }).join('')}</tbody></table></div>`})}
+      <div class="rx-g3">
         ${part('Buttons', 'One main action per area. Disabled buttons say why.', `<div class="ld-sw"><button type="button" class="btn pri" data-a="noop">Main action</button><button type="button" class="btn" data-a="noop">Other action</button><button type="button" class="btn ghost" data-a="noop">Link action</button><button type="button" class="btn danger-o" data-a="noop">Close lead</button><button type="button" class="btn" disabled title="Example of a button that cannot be used yet">Not yet</button></div>`)}
         ${part('Tags', 'View only marks pages a manager can see but not change.', `<div class="ld-sw">${vo()}${vtag()}<span class="pill c-teal">VINA team</span><span class="row tight nowrap small">${pulse()}Needs you now</span><span class="row tight nowrap small"><span class="unread-dot" aria-hidden="true"></span>Unread</span></div>`)}
         ${part('Who did it', 'Teal means VINA did it. Navy or blue means a person did it.', `<div class="ld-sw"><span class="row tight nowrap">${av('VINA')}<span class="small">VINA</span></span><span class="row tight nowrap">${av('Reem Al-Harbi')}<span class="small">A person</span></span><span class="evt teal">${ic('spark', 13)}VINA marked it qualified</span></div>`)}
@@ -3601,6 +3619,11 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   /* sticky Save / Cancel bar (leaves room for the prototype pill on the right) */
   .as-foot{position:sticky;bottom:16px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-inline-end:236px;padding:10px 12px 10px 18px;border-radius:var(--r-l);background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);box-shadow:var(--e3);border:1px solid var(--line)}
   .as-foot .st{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);min-width:0}
+  .as-hero .verdict{font-size:20px;line-height:30px}
+  .rc .as-rule{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:14px 20px 14px 14px}
+  .rc .as-rule:hover{box-shadow:none;background:var(--sub)}
+  .rc .as-fixed{background:transparent;border-top:1px dashed var(--line2)}
+  .as-wide{padding:0 20px}
   /* AS2 rule cards */
   .as-rule{position:relative;display:grid;grid-template-columns:18px 34px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 14px 16px 12px;background:var(--card);border:1px solid var(--card-bd);border-radius:var(--r-l);box-shadow:var(--e1);transition:box-shadow var(--d2) var(--ease),opacity var(--d2)}
   .as-rule:hover{box-shadow:var(--e2)}
@@ -3703,11 +3726,12 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     {id:'r4', name:'After hours', when:'person', only:[['Working hours','Outside']], to:'cc', by:'least', avail:false, max:20, mins:15, on:true, week:37},
     {id:'r5', name:'Phone line leads', when:'qualified', only:[['Channel','Phone line']], to:'sales', by:'turns', avail:true, max:15, mins:15, on:false, week:0},
   ];
-  const tabs = cur => isVina() ? `<nav class="tabs" aria-label="Lead assignment">${[['qualify','When a lead is qualified'],['rules','Assignment rules'],['unassigned','Unassigned leads']].map(([k, t]) => `<a class="tab" href="#${k}" ${cur === k ? 'aria-selected="true" aria-current="page"' : ''}>${t}${k === 'unassigned' ? `<span class="n">${unassigned().length}</span>` : ''}</a>`).join('')}</nav>` : '';
+  // One row: the three views on the left, the page action (if any) on the right
+  const tabs = (cur, act) => isVina() ? `<div class="rx-tbar"><nav class="tabs" aria-label="Lead assignment">${[['qualify','When a lead is qualified'],['rules','Assignment rules'],['unassigned','Unassigned leads']].map(([k, t]) => `<a class="tab" href="#${k}" ${cur === k ? 'aria-selected="true" aria-current="page"' : ''}>${t}${k === 'unassigned' ? `<span class="n">${unassigned().length}</span>` : ''}</a>`).join('')}</nav><span class="sp"></span>${act ? `<span class="act">${act}</span>` : ''}</div>` : '';
   const agents = () => Object.keys(U).filter(k => ['cc','sales'].includes(U[k].role));
   const PRES_C = {available:['Available','green'], busy:['Busy','amber'], away:['Away','grey']};
   const presChip = k => { const s = U[k].status || 'available'; const m = PRES_C[s]; return `<span class="chip c-${m[1]}"><span class="pres ${s}" style="width:7px;height:7px;border-radius:50%;display:inline-block"></span>${m[0]}</span>`; };
-  const availCard = wide => `<section class="card"><div class="card-h"><div class="grow"><h2>Who is available now</h2><div class="sub">Only available agents get new leads.</div></div></div><div class="list ${wide ? 'as-wide' : ''}">${agents().map(k => `<div class="li"><span class="avw">${av(U[k].name)}<span class="pres ${U[k].status || 'available'}" aria-hidden="true"></span></span><span class="grow"><b class="small">${esc(U[k].name)}</b><div class="xs mute">${U[k].team}${U[k].showroom ? ' · ' + U[k].showroom : ''}</div></span><span class="xs mute num">${mineCount(k)} open</span>${presChip(k)}</div>`).join('')}</div></section>`;
+  const availCard = wide => reportCard({title:'Who is available now', sub:'Only available agents get new leads.', cls:'rx-tbl', body:`<div class="list ${wide ? 'as-wide' : ''}">${agents().map(k => `<div class="li"><span class="avw">${av(U[k].name)}<span class="pres ${U[k].status || 'available'}" aria-hidden="true"></span></span><span class="grow"><b class="small">${esc(U[k].name)}</b><div class="xs mute">${U[k].team}${U[k].showroom ? ' · ' + U[k].showroom : ''}</div></span><span class="xs mute num">${mineCount(k)} open</span>${presChip(k)}</div>`).join('')}</div>`});
   const foot = (status, btns) => `<div class="as-foot" role="region" aria-label="Save changes"><span class="st grow">${status}</span><span class="sp"></span>${btns}</div>`;
 
   /* ---- AS1 ---- */
@@ -3727,17 +3751,15 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   R('qualify', {id:'AS1', title:'When is a lead qualified', roles:['vina'], render() {
     const q = Q(); const reqN = Object.values(q.req).filter(Boolean).length; const sigN = Object.values(q.sig).filter(Boolean).length;
     const body = `${tabs('qualify')}
-      <section class="as-hero" aria-labelledby="as1-eb"><div class="eyebrow" id="as1-eb">${ic('spark', 13)}In one line</div><p class="verdict ${flashCls('as1-line')}" aria-live="polite">${qLine(q)}</p>
-        <div class="meta"><span><b>${reqN}</b> details needed</span><span><b>${sigN}</b> buying signals</span><span><b>${q.never.length}</b> never qualify</span></div></section>
+      <section class="as-hero" aria-label="When a lead is qualified, in one line"><p class="verdict ${flashCls('as1-line')}" aria-live="polite" style="margin-top:0">${qLine(q)}</p></section>
       <div class="as-2"><div class="col loose">
-        <section class="card"><div class="card-h"><span class="as-step">1</span><div class="grow"><h2>Details VINA must have</h2><div class="sub">VINA asks for these in the chat before the lead can be qualified.</div></div></div><div class="g3" style="gap:4px 16px">${Object.keys(q.req).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-req" data-x="${esc(k)}" ${q.req[k] ? 'checked' : ''}>${esc(k)}</label>`).join('')}</div>${!reqN ? `<div class="note err" style="margin-top:10px">${ic('alert')}<span>Tick at least one detail.</span></div>` : ''}</section>
-        <section class="card"><div class="card-h"><span class="as-step">2</span><div class="grow"><h2>Buying signals</h2><div class="sub">Any one of these is enough.</div></div></div><div class="col tight">${Object.keys(q.sig).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-sig" data-x="${esc(k)}" ${q.sig[k] ? 'checked' : ''}><span class="grow"><b class="small">${esc(k)}</b><div class="xs mute">For example: <span dir="rtl" class="ar">${esc(SIG_EX[k])}</span></div></span></label>`).join('')}</div>${!sigN ? `<div class="note warn" style="margin-top:10px">${ic('alert')}<span>Without a buying signal, VINA will never qualify a lead.</span></div>` : ''}</section>
-        <section class="card"><div class="card-h"><span class="as-step">3</span><div class="grow"><h2>Never qualify</h2><div class="sub">VINA closes these politely or sends them elsewhere.</div></div></div>
-          <div class="tokens">${q.never.map((n, i) => `<span class="tok">${esc(n)}<button type="button" data-a="as1-rm" data-x="${i}" aria-label="Remove ${esc(n)}">${ic('x', 13)}</button></span>`).join('')}<form data-a="as1-add" style="flex:1;display:flex;min-width:160px"><label class="sr" for="b-f-as1-add">Add a topic VINA should never qualify</label><input ${bind('f.as1.add')} placeholder="Add, e.g. Service and repairs"></form></div></section>
+        ${reportCard({title:'Details VINA must have', sub:'VINA asks for these in the chat before the lead can be qualified.', body:`<div class="g3" style="gap:4px 16px">${Object.keys(q.req).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-req" data-x="${esc(k)}" ${q.req[k] ? 'checked' : ''}>${esc(k)}</label>`).join('')}</div>${!reqN ? `<div class="note err" style="margin-top:10px">${ic('alert')}<span>Tick at least one detail.</span></div>` : ''}`})}
+        ${reportCard({title:'Buying signals', sub:'Any one of these is enough.', body:`<div class="col tight">${Object.keys(q.sig).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-sig" data-x="${esc(k)}" ${q.sig[k] ? 'checked' : ''}><span class="grow"><b class="small">${esc(k)}</b><div class="xs mute">For example: <span dir="rtl" class="ar">${esc(SIG_EX[k])}</span></div></span></label>`).join('')}</div>${!sigN ? `<div class="note warn" style="margin-top:10px">${ic('alert')}<span>Without a buying signal, VINA will never qualify a lead.</span></div>` : ''}`})}
+        ${reportCard({title:'Never qualify', sub:'VINA closes these politely or sends them elsewhere.', body:`
+          <div class="tokens">${q.never.map((n, i) => `<span class="tok">${esc(n)}<button type="button" data-a="as1-rm" data-x="${i}" aria-label="Remove ${esc(n)}">${ic('x', 13)}</button></span>`).join('')}<form data-a="as1-add" style="flex:1;display:flex;min-width:160px"><label class="sr" for="b-f-as1-add">Add a topic VINA should never qualify</label><input ${bind('f.as1.add')} placeholder="Add, e.g. Service and repairs"></form></div>`})}
       </div><div class="col loose">
-        <section class="card"><div class="card-h"><h2>Last 7 days with these settings</h2></div><div class="row tight" style="align-items:baseline"><span class="num" style="font-family:var(--f-display);font-size:32px;font-weight:700" ${countAttr(612)}>612</span><span class="small mute">qualified of 2,436 chats</span></div><div class="bar-h" style="margin:10px 0 14px"><i style="width:25%;background:var(--aqua)"></i></div>
-          <div class="list">${[['Asked for price or financing',268],['Wanted a test drive',151],['Asked to be called',119],['Asked for a person',74]].map(([k, v]) => `<div class="li small"><span class="grow">${k}</span><b class="num">${v}</b></div>`).join('')}</div></section>
-        <section class="card flat"><div class="card-h"><h2>What happens next</h2></div><p class="small">VINA marks the lead ${chip('qualified')}, writes a summary for the team, and the <a href="#rules">assignment rules</a> choose the agent.</p></section>
+        ${reportCard({title:'Last 7 days with these settings', body:`<div class="row tight" style="align-items:baseline">${mic('qualified')}<span class="num" style="font-family:var(--f-display);font-size:32px;font-weight:700" ${countAttr(612)}>612</span><span class="small mute">qualified of 2,436 chats</span></div><div class="bar-h" style="margin:10px 0 14px"><i style="width:25%;background:var(--aqua)"></i></div>
+          <div class="list">${[['Asked for price or financing',268],['Wanted a test drive',151],['Asked to be called',119],['Asked for a person',74]].map(([k, v]) => `<div class="li small"><span class="grow">${k}</span><b class="num">${v}</b></div>`).join('')}</div>`})}
       </div></div>
       ${foot(q.dirty ? `${pulse()}<span>Unsaved changes</span>` : `<span class="ell">Last changed by ${esc(q.saved)}</span>`, `<button type="button" class="btn" data-a="as1-reset" ${q.dirty ? '' : 'disabled title="Nothing to undo"'}>Cancel</button><button type="button" class="btn pri" data-a="as1-save" ${q.dirty && reqN ? '' : `disabled title="${reqN ? 'No changes to save' : 'Tick at least one detail first'}"`}>Save</button>`)}`;
     return shell({nav:'qualify', title:'Lead assignment', cp:true, viewOnly:false, body});
@@ -3772,14 +3794,13 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   }
   R('rules', {id:'AS2', title:'Assignment rules', roles:['vina'], render() {
     const un = unassigned().length;
-    const body = `${tabs('rules')}
-      <div class="row"><p class="lead-in grow">Rules are checked in order. The top one is checked first, and the first rule that fits gives the lead to an agent. Drag a rule to change the order, or use its menu.</p><a class="btn pri" href="#rule-new">${ic('plus', 15)}New rule</a></div>
-      <div class="as-2"><div class="col" aria-label="Rules in order">${RULES.map(ruleRow).join('')}
+    const body = `${tabs('rules', `<a class="btn pri" href="#rule-new">${ic('plus', 15)}New rule</a>`)}
+      <div class="as-2"><section class="card rc rx-tbl" aria-label="Rules in order"><header class="rc-h"><div class="grow"><h2>Rules in order</h2><div class="sub">The top rule is checked first. Drag to change the order.</div></div></header><div class="rc-b">${RULES.map(ruleRow).join('')}
         <article class="as-rule as-fixed" aria-label="Last rule, Everything else goes to Unassigned. Always last."><span class="grip" aria-hidden="true">${ic('lock', 15)}</span><span class="n num" aria-hidden="true">${RULES.length + 1}</span>
           <div class="main" style="min-width:0"><div class="row tight"><b class="as-nm">Everything else goes to Unassigned</b><span class="chip c-grey">${ic('lock', 11)}Always last</span></div><div class="xs mute" style="margin-top:6px">It cannot be moved, turned off or deleted. The manager sees these leads and the VINA team assigns them by hand.</div></div>
           <div class="act"><a class="btn sm" href="#unassigned">${un ? pulse() : ''}${un} waiting${ic('arrowR', 14)}</a></div></article>
-      </div><div class="col loose">${availCard()}
-        <section class="card flat"><div class="card-h"><h2>For every rule</h2></div><div class="col tight small"><div class="sw-row">${ic('check', 16, 'green')}<span>Only give leads to agents who are <b>Available</b></span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Not opened within <b>15 minutes</b>: give it to the next agent and alert the manager</span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Outside working hours: keep until 9 AM, then assign</span></div></div></section>
+      </div></section><div class="col loose">${availCard()}
+        ${reportCard({title:'For every rule', body:`<div class="col tight small"><div class="sw-row">${ic('check', 16, 'green')}<span>Only give leads to agents who are <b>Available</b></span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Not opened within <b>15 minutes</b>: give it to the next agent and alert the manager</span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Outside working hours: keep until 9 AM, then assign</span></div></div>`})}
       </div></div>`;
     return shell({nav:'rules', title:'Lead assignment', cp:true, viewOnly:false, body});
   }, after: afterUi});
@@ -3798,7 +3819,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     return S.f.as3;
   }
   const radio = (grp, k, t, d, cur) => `<button type="button" class="radio-card" role="radio" aria-checked="${cur === k}" data-a="as3-set" data-x="${grp}:${k}"><span class="as-rd" aria-hidden="true"></span><span class="grow"><b class="small">${t}</b>${d ? `<div class="xs mute">${d}</div>` : ''}</span></button>`;
-  const grp = (n, t, sub, inner) => `<section class="card as-grp"><div class="card-h"><span class="as-step">${n}</span><div class="grow"><h2>${t}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div></div><div class="col loose">${inner}</div></section>`;
+  const grp = (n, t, sub, inner) => reportCard({title:t, sub, body:`<div class="col loose">${inner}</div>`});
   R('rule', {id:'AS3', title:'Rule editor', roles:['vina'], render(param) {
     const e = E(param);
     if (!e) return shell({nav:'rules', title:'Rule', crumb:['Assignment rules','rules'], cp:true, viewOnly:false, body:`<div class="card">${empty('route', 'We could not find this rule', 'It may have been deleted.', `<a class="btn pri" href="#rules">Back to rules</a>`)}</div>`});
@@ -3810,9 +3831,9 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       ${grp(1, 'Name', 'So the team knows why a lead came to them.', `<div class="field"><label for="b-f-as3-d-name">Rule name</label><input class="inp ${e.err ? 'bad' : ''}" ${bind('f.as3.d.name')} placeholder="e.g. Qualified to Sales" aria-describedby="as3-err" aria-invalid="${!!e.err}">${e.err ? `<span class="err" id="as3-err">${ic('alert', 14)}${esc(e.err)}</span>` : ''}</div>`)}
       ${grp(2, 'Which leads', 'When the rule starts, and the leads it applies to.', `
         <div class="field"><span class="lbl" id="as3-when">When</span><div class="as-opts" role="radiogroup" aria-labelledby="as3-when">${Object.keys(WHEN).map(k => radio('when', k, WHEN[k], '', d.when)).join('')}</div></div>
-        <div class="field"><span class="lbl">Only if <span class="mute" style="font-weight:400">(optional)</span></span>
+        <details class="rx-more" ${S.f.as3open ? 'open' : ''}><summary data-a="as3-more">${ic('chevD', 14)}Only if (optional)<span class="m">${d.only.length ? '· ' + d.only.length + (d.only.length === 1 ? ' condition' : ' conditions') : '· any lead'}</span></summary><div class="in"><div class="field">
           ${d.only.length ? `<div class="col tight">${d.only.map(([a, v], i) => `<div class="as-cond"><span class="j">${i ? 'And' : 'If'}</span><b class="small">${esc(a)}</b><span class="small mute">is</span>${chipC(v, 'blue')}<span class="sp"></span><button type="button" class="ibtn sm bare" data-a="as3-rm" data-x="${i}" aria-label="Remove condition ${esc(a)} is ${esc(v)}">${ic('x', 15)}</button></div>`).join('')}</div>` : `<p class="small mute">No conditions. The rule applies to every lead.</p>`}
-          <div class="row tight as-addc"><label class="sr" for="b-f-as3-ca">Condition</label>${bindSel('f.as3.ca', Object.keys(COND))}<label class="sr" for="b-f-as3-cv">Value</label>${bindSel('f.as3.cv', COND[e.ca] || [])}<button type="button" class="btn sm" data-a="as3-add" style="min-height:42px">${ic('plus', 14)}Add condition</button></div></div>`)}
+          <div class="row tight as-addc"><label class="sr" for="b-f-as3-ca">Condition</label>${bindSel('f.as3.ca', Object.keys(COND))}<label class="sr" for="b-f-as3-cv">Value</label>${bindSel('f.as3.cv', COND[e.ca] || [])}<button type="button" class="btn sm" data-a="as3-add" style="min-height:42px">${ic('plus', 14)}Add condition</button></div></div></div></details>`)}
       ${grp(3, 'Who gets them', 'The team or person, and how the agent is chosen.', `
         <div class="field"><span class="lbl" id="as3-to">Send to</span><div class="as-opts" role="radiogroup" aria-labelledby="as3-to">${radio('to', 'cc', 'Call centre team', agents().filter(k => U[k].role === 'cc').length + ' agents', d.to)}${radio('to', 'sales', 'Sales team', 'Madinah Road · ' + agents().filter(k => U[k].role === 'sales').length + ' agents', d.to)}${radio('to', 'one', 'One agent', 'Pick a name', d.to)}</div>
           ${d.to === 'one' ? `<label class="sr" for="b-f-as3-d-agent">Agent</label>${bindSel('f.as3.d.agent', agents().map(k => [k, U[k].name + ' · ' + U[k].team]))}` : ''}</div>
@@ -3824,12 +3845,13 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
         <div class="row"><label class="small b" for="b-f-as3-d-mins">Not opened within</label><input class="inp as-num num" type="number" min="1" max="240" ${bind('f.as3.d.mins')}><span class="small">minutes: give it to the next agent and alert the manager</span></div>`)}
       </div>
       <div class="col loose">
-        <section class="card"><div class="card-h"><div class="grow"><h2>If this rule ran last week</h2><div class="sub">Based on the ${num(d.week || 318)} leads it would have matched.</div></div></div><div class="col">${sim.map(([k, v, w]) => `<div><div class="row small"><span class="grow b">${esc(U[k].name)}</span><span class="num">${num(v)} leads</span></div><div class="bar-h" style="margin-top:6px"><i style="width:${w}%;background:var(--ch-a)"></i></div>${U[k].status === 'away' && d.avail ? '<div class="xs mute" style="margin-top:4px">Away today, so gets no leads</div>' : ''}</div>`).join('') || '<p class="small mute">Nobody in this team yet.</p>'}</div></section>
-        <section class="card flat"><div class="card-h"><h2>History</h2></div><p class="small mute">${param === 'new' ? 'New rule. Saved with your name and the time.' : 'Changed by Lina Haddad on Mon 2 Nov: most open leads from 20 to 15.'}</p>${param !== 'new' ? `<div class="hr" style="margin:14px 0"></div><button type="button" class="btn sm danger-o" data-a="as3-del">${ic('trash', 14)}Delete rule</button>` : ''}</section>
+        ${reportCard({title:'If this rule ran last week', sub:`Based on the ${num(d.week || 318)} leads it would have matched.`, body:`<div class="col">${sim.map(([k, v, w]) => `<div><div class="row small"><span class="grow b">${esc(U[k].name)}</span><span class="num">${num(v)} leads</span></div><div class="bar-h" style="margin-top:6px"><i style="width:${w}%;background:var(--ch-a)"></i></div>${U[k].status === 'away' && d.avail ? '<div class="xs mute" style="margin-top:4px">Away today, so gets no leads</div>' : ''}</div>`).join('') || '<p class="small mute">Nobody in this team yet.</p>'}</div>`})}
+        ${reportCard({title:'History', body:`<p class="small mute">${param === 'new' ? 'New rule. Saved with your name and the time.' : 'Changed by Lina Haddad on Mon 2 Nov: most open leads from 20 to 15.'}</p>${param !== 'new' ? `<div class="hr" style="margin:14px 0"></div><button type="button" class="btn sm danger-o" data-a="as3-del">${ic('trash', 14)}Delete rule</button>` : ''}`})}
       </div></div>
       ${foot(dirty ? `${pulse()}<span>Unsaved changes</span>` : `<span>${param === 'new' ? 'New rule' : 'No changes yet'}</span>`, `<button type="button" class="btn" data-a="as3-cancel">Cancel</button><button type="button" class="btn pri" data-a="as3-save">${ic('check', 15)}Save rule</button>`)}`;
     return shell({nav:'rules', title: param === 'new' ? 'New rule' : 'Edit rule', crumb:['Assignment rules','rules'], cp:true, viewOnly:false, body});
   }});
+  A['as3-more'] = (el, ev) => { if (ev) ev.preventDefault(); S.f.as3open = !S.f.as3open; };
   A['as3-set'] = el => { const [g, k] = el.dataset.x.split(':'); S.f.as3.d[g] = k; };
   A['as3-avail'] = () => { S.f.as3.d.avail = !S.f.as3.d.avail; };
   A['as3-rm'] = el => { S.f.as3.d.only.splice(Number(el.dataset.x), 1); };
@@ -3852,18 +3874,17 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const rs = S.st === 'empty' ? [] : unassigned().slice().sort((a, b) => (b.wait || 0) - (a.wait || 0));
     const longest = rs[0]; const late = rs.filter(l => l.late).length;
     const stats = [
-      kpi({k:'Waiting now', v:String(rs.length), n: late ? `${late} overdue, waiting over 15 minutes` : 'Leads not given to anyone', hot: late > 0}),
-      kpi({k:'Longest wait', v: longest ? mins(longest.wait) : '—', n: longest ? esc(longest.name) : 'Nobody waiting'}),
+      kpi({mini:true, k:'Waiting now', v:String(rs.length), n: late ? `${late} overdue, waiting over 15 minutes` : 'Leads not given to anyone', hot: late > 0}),
+      kpi({mini:true, k:'Longest wait', v: longest ? mins(longest.wait) : '—', n: longest ? esc(longest.name) : 'Nobody waiting'}),
       kpi({k:'No agent available', v:String(rs.filter(l => /no salesperson|Most open|outside working/i.test(l.unWhy || '')).length), n:'All agents busy, off or full', mini:true}),
       kpi({k:'No rule matched', v:String(rs.filter(l => /No rule/i.test(l.unWhy || '')).length), n:'For example Phone line leads', mini:true})];
-    const table = S.st === 'loading' ? loadingRows(6, 56) : !rs.length ? `<div class="card">${empty('check', 'Every lead has an agent', 'When no rule can place a lead, it waits here and the manager gets an alert.')}</div>`
+    const table = S.st === 'loading' ? `<div style="padding:16px">${loadingRows(6, 56)}</div>` : !rs.length ? empty('check', 'Every lead has an agent', 'When no rule can place a lead, it waits here and the manager gets an alert.')
       : `<div class="tbl-wrap"><table class="tbl"><caption class="sr">Unassigned leads, longest wait first</caption><thead><tr><th>Customer</th><th>Car model</th><th>${ic('spark', 12, 'teal')} VINA summary</th><th>Why it is here</th><th>Waiting</th>${isVina() ? '<th><span class="sr">Assign</span></th>' : ''}</tr></thead><tbody>${rs.map(l => `<tr class="${flashCls(l.id)}">
         <td><a href="#lead-${l.id}" class="who" style="text-decoration:none;color:inherit">${av(l.name, 'sm')}<span style="min-width:0"><span class="nm ell" style="display:block">${esc(l.name)}</span><span class="xs mute num" style="display:block">${esc(mob(l))}</span></span></a></td>
         <td><div class="row tight nowrap" style="white-space:nowrap">${chIc(l.ch)}<b>${esc(l.model)}</b></div></td><td><div class="small ell2" style="min-width:220px;max-width:380px" title="${esc(l.summary)}">${esc(l.summary)}</div></td><td class="small mute" style="min-width:180px;max-width:280px">${esc(l.unWhy || 'No rule matched')}</td>
         <td class="num" style="white-space:nowrap">${l.late ? `<span class="as-late">${pulse('red')}${mins(l.wait)}</span><div class="xs red">Overdue</div>` : `<span class="mute">${mins(l.wait)}</span>`}</td>${isVina() ? `<td class="r"><button type="button" class="btn sm pri" data-a="as-assign" data-x="${l.id}" aria-label="Assign ${esc(l.name)}">${ic('user', 14)}Assign</button></td>` : ''}</tr>`).join('')}</tbody></table></div>`;
-    const body = `${tabs('unassigned')}<div class="g4 as-k">${stats.join('')}</div>
-      ${isMgr() ? `<div class="note info">${ic('info')}<span>The VINA team has been told and gives these leads to an agent by hand.</span></div>` : ''}
-      ${table}${isVina() ? availCard(true) : ''}`;
+    const body = `${tabs('unassigned')}${reportCard({title:'Waiting for an agent', body:`<div class="g4 as-k">${stats.join('')}</div>`})}
+      ${reportCard({title:'Unassigned leads', sub: isMgr() ? 'The VINA team has been told and gives these leads to an agent by hand.' : 'Longest wait first.', cls:'rx-tbl', body: table})}${isVina() ? availCard(true) : ''}`;
     return shell({nav:'unassigned', title: isVina() ? 'Lead assignment' : 'Unassigned leads', crumb: isMgr() ? ['Leads','leads'] : null, cp:true, viewOnly: isMgr(), body});
   }});
   A['as-assign'] = el => { openAssign(el.dataset.x); };
@@ -4195,46 +4216,49 @@ const tick = (path, label) => `<label class="chk"><input ${bindChk(path)}><span>
 
 function body1(id) {
   const c = cfgOf(id); const b = c.biz; const pr = PRESET[b.type] || PRESET.other;
-  return `<div class="col loose">
+  return `<div class="col loose"><section class="rx-sec"><h3>Name and type</h3>
     <div class="su-g2"><div class="field"><label for="b-${P(id, 'biz.name').replace(/\./g, '-')}">Business name</label><input class="inp" ${bind(P(id, 'biz.name'), true)}>${!b.name.trim() ? `<span class="err">${ic('alert', 14)}Write the business name. Customers see it in the chat.</span>` : ''}</div>
       <div class="field"><span class="lbl">Logo</span><div class="row tight nowrap">${b.logo ? `<img src="${b.logo}" alt="Business logo" style="width:42px;height:42px;border-radius:10px;object-fit:cover;border:1px solid var(--line)">` : `<span class="av lg c-navy" style="border-radius:10px" aria-hidden="true">${esc(initials(b.name))}</span>`}<label class="btn sm" style="min-height:40px">${ic('upload', 14)}${b.logo ? 'Change' : 'Upload logo'}<input type="file" accept="image/*" class="sr" data-ch="su-logo" data-x="${id}"></label>${b.logo ? `<button type="button" class="btn sm ghost" data-a="su-set" data-x="${P(id, 'biz.logo')}" data-v="">Remove</button>` : ''}</div></div></div>
     <div class="field"><span class="lbl" id="su-bt">What kind of business?</span><div class="su-types" role="radiogroup" aria-labelledby="su-bt">${BTYPES.map(([k, l, i, col]) => `<button type="button" class="radio-card su-type" role="radio" aria-checked="${b.type === k}" data-a="su-type" data-x="${id}" data-v="${k}"><span class="chi lg c-${col}">${ic(i, 20)}</span><b>${l}</b></button>`).join('')}</div>
-      <div class="note vina">${ic('spark')}<div>We filled in a suggested tone, rules and actions for ${esc(pr.label)}, and ${pr.n} ready-made test scenarios. You can change all of it.</div></div></div>
+      <div class="note vina">${ic('spark')}<div>We filled in a suggested tone, rules and actions for ${esc(pr.label)}, and ${pr.n} ready-made test scenarios. You can change all of it.</div></div></div></section>
+    <section class="rx-sec"><h3>Where and when</h3>
     <div class="su-g2"><div class="field"><label for="b-${P(id, 'biz.city').replace(/\./g, '-')}">City</label><input class="inp" ${bind(P(id, 'biz.city'))}></div>
       <div class="field"><label for="b-${P(id, 'biz.lang').replace(/\./g, '-')}">Main language of your team</label>${bindSel(P(id, 'biz.lang'), ['Arabic','English','Arabic and English'])}</div></div>
     <div class="field"><span class="lbl">Showrooms or branches</span><div class="row tight">${b.branches.map((x, i) => `<span class="tokens" style="min-height:36px;padding:3px"><span class="tok">${ic('pin', 13)}${esc(x)}<button type="button" data-a="su-del" data-x="${P(id, 'biz.branches')}#${i}" aria-label="Remove ${esc(x)}">${ic('x', 13)}</button></span></span>`).join('')}</div>
       <form class="row tight nowrap" data-a="su-branch" data-x="${id}"><label class="sr" for="b-f-suBranch">New showroom or branch</label><input class="inp grow" ${bind('f.suBranch')} placeholder="e.g. Al Khobar, Dammam"><button type="submit" class="btn">${ic('plus', 14)}Add another</button></form></div>
-    <div class="field"><span class="lbl">Working hours</span><div class="su-hours">${b.hours.map((h, i) => `<div class="su-hrow"><b>${h.d}</b>${sw(h.on, 'su-tog', P(id, 'biz.hours.' + i + '.on'), h.d + ' open')}${h.on ? `<label class="sr" for="b-${P(id, 'biz.hours.' + i + '.from').replace(/\./g, '-')}">${h.d} opens</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.from'))}><span class="mute">to</span><label class="sr" for="b-${P(id, 'biz.hours.' + i + '.to').replace(/\./g, '-')}">${h.d} closes</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.to'))}>` : `<span class="mute">Closed</span>`}</div>`).join('')}</div></div>
+    <div class="field"><span class="lbl">Working hours</span><div class="su-hours">${b.hours.map((h, i) => `<div class="su-hrow"><b>${h.d}</b>${sw(h.on, 'su-tog', P(id, 'biz.hours.' + i + '.on'), h.d + ' open')}${h.on ? `<label class="sr" for="b-${P(id, 'biz.hours.' + i + '.from').replace(/\./g, '-')}">${h.d} opens</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.from'))}><span class="mute">to</span><label class="sr" for="b-${P(id, 'biz.hours.' + i + '.to').replace(/\./g, '-')}">${h.d} closes</label><input type="time" class="inp" ${bind(P(id, 'biz.hours.' + i + '.to'))}>` : `<span class="mute">Closed</span>`}</div>`).join('')}</div></div></section>
   </div>`;
 }
 const TONES = {Friendly:['هلا! أكيد، أرسل لك الأسعار الحين','Hi! Sure, I\'ll send you the prices now.'], Formal:['أهلاً بك. يسعدني تزويدك بالأسعار','Hello. I would be glad to share the prices with you.'], 'Short and direct':['سعر V27 يبدأ من ١٢٩,٩٠٠','The V27 starts from SAR 129,900.']};
 function body2(id) {
   const c = cfgOf(id); const a = c.agent; const p = k => P(id, 'agent.' + k);
-  return `<div class="col loose">
+  return `<div class="col loose"><section class="rx-sec"><h3>Name and job</h3>
     <div class="su-g2"><div class="field"><label for="b-${p('name').replace(/\./g, '-')}">Agent name</label><input class="inp" ${bind(p('name'), true)} placeholder="e.g. Sara">${!a.name.trim() ? `<span class="err">${ic('alert', 14)}Give the agent a name. Customers see it.</span>` : ''}</div>
       <div class="field"><span class="lbl">Avatar</span><div class="row tight" role="radiogroup" aria-label="Avatar">${AVBG.map((bg, i) => `<button type="button" role="radio" aria-checked="${a.av === String(i)}" aria-label="Avatar colour ${i + 1}" class="su-avpick" data-a="su-set" data-x="${p('av')}" data-v="${i}" style="background:${bg}">${esc((a.name || '?')[0])}</button>`).join('')}</div></div></div>
-    <div class="field"><span class="lbl" id="su-job">Job</span><div class="fchips" role="radiogroup" aria-labelledby="su-job">${['Sales','Product questions','Bookings','Customer service'].map(j => `<button type="button" class="fchip" role="radio" aria-pressed="${a.job === j}" aria-checked="${a.job === j}" data-a="su-set" data-x="${p('job')}" data-v="${j}">${j}</button>`).join('')}</div></div>
-    <div class="su-g2"><div class="field"><label for="b-${p('firstAr').replace(/\./g, '-')}">First message, Arabic</label><textarea class="inp" dir="rtl" ${bindTa(p('firstAr'), true)[0]}>${bindTa(p('firstAr'))[1]}</textarea></div>
-      <div class="field"><label for="b-${p('firstEn').replace(/\./g, '-')}">First message, English</label><textarea class="inp" ${bindTa(p('firstEn'), true)[0]}>${bindTa(p('firstEn'))[1]}</textarea></div></div>
-    <h3 class="h2">How it speaks</h3>
+    <div class="field"><span class="lbl" id="su-job">Job</span><div class="fchips" role="radiogroup" aria-labelledby="su-job">${['Sales','Product questions','Bookings','Customer service'].map(j => `<button type="button" class="fchip" role="radio" aria-pressed="${a.job === j}" aria-checked="${a.job === j}" data-a="su-set" data-x="${p('job')}" data-v="${j}">${j}</button>`).join('')}</div></div></section>
+    <section class="rx-sec"><h3>First message</h3><div class="su-g2"><div class="field"><label for="b-${p('firstAr').replace(/\./g, '-')}">First message, Arabic</label><textarea class="inp" dir="rtl" ${bindTa(p('firstAr'), true)[0]}>${bindTa(p('firstAr'))[1]}</textarea></div>
+      <div class="field"><label for="b-${p('firstEn').replace(/\./g, '-')}">First message, English</label><textarea class="inp" ${bindTa(p('firstEn'), true)[0]}>${bindTa(p('firstEn'))[1]}</textarea></div></div></section>
+    <section class="rx-sec"><h3>How it speaks</h3>
     <div class="field"><span class="lbl" id="su-tone">Tone</span><div class="su-g3" role="radiogroup" aria-labelledby="su-tone">${Object.keys(TONES).map(k => radio(p('tone'), k, k, `<span dir="rtl" class="ar">${esc(TONES[k][0])}</span>`)).join('')}</div></div>
     <div class="field"><span class="lbl" id="su-sty">Arabic style</span><div class="fchips" role="radiogroup" aria-labelledby="su-sty">${['Saudi, Hijazi','Saudi, Najdi','Formal Arabic'].map(j => `<button type="button" class="fchip" role="radio" aria-checked="${a.style === j}" aria-pressed="${a.style === j}" data-a="su-set" data-x="${p('style')}" data-v="${j}">${j}</button>`).join('')}</div></div>
     <div class="field"><span class="lbl">Languages</span><div class="row">${['Arabic','English','Arabizi'].map(l => tick(p('langs.' + l), l)).join('')}</div><span class="hint">It replies in the customer's language.</span></div>
     <div class="field"><span class="lbl" id="su-len">Reply length</span><div class="seg" role="group" aria-labelledby="su-len">${['Short','Detailed'].map(l => `<button type="button" aria-pressed="${a.length === l}" data-a="su-set" data-x="${p('length')}" data-v="${l}">${l}</button>`).join('')}</div></div>
     ${swRow(p('firstName'), 'Call the customer by first name', '"Hala Noura"')}
-    ${swRow(p('voice'), 'Answer WhatsApp voice notes', 'The agent listens and replies in text')}
+    ${swRow(p('voice'), 'Answer WhatsApp voice notes', 'The agent listens and replies in text')}</section>
   </div>`;
 }
 function body3(id) {
   const c = cfgOf(id); const r = c.rules; const p = k => P(id, 'rules.' + k);
-  return `<div class="col loose">
+  return `<div class="col loose"><section class="rx-sec"><h3>Limits</h3>
     <div class="field"><span class="lbl">Never talk about</span><div class="tokens">${r.never.map((x, i) => `<span class="tok">${esc(x)}<button type="button" data-a="su-del" data-x="${p('never')}#${i}" aria-label="Remove ${esc(x)}">${ic('x', 13)}</button></span>`).join('')}</div>
       <form class="row tight nowrap" data-a="su-never" data-x="${id}"><label class="sr" for="b-f-suNever">Add a topic</label><input class="inp grow" ${bind('f.suNever')} placeholder="Add a topic, then press Enter, e.g. Financing rates"><button type="submit" class="btn">${ic('plus', 14)}Add</button></form>
       <div class="row tight"><span class="xs mute">Suggested:</span>${['Financing rates','Prices','Used cars'].filter(x => !r.never.includes(x)).map(x => `<button type="button" class="fchip" data-a="su-never-add" data-x="${id}" data-v="${x}">${ic('plus', 12)}${x}</button>`).join('')}</div></div>
+    </section><section class="rx-sec"><h3>Handover</h3>
     <div class="field"><span class="lbl">Hand over to a person when the customer…</span><div class="col tight">${HAND.map(([k, l]) => tick(p('hand.' + k), l)).join('')}</div></div>
     <div class="field"><span class="lbl" id="su-who">Who gets the handover</span><div class="su-g2" role="radiogroup" aria-labelledby="su-who">${radio(p('who'), 'cc', 'Call centre', 'Uses the rule "Callbacks to call centre"')}${radio(p('who'), 'sales', 'Sales', 'Uses the rule "Qualified to Sales"')}</div><a class="small" href="#rules" data-keepdraft>See the assignment rules</a></div>
+    </section><section class="rx-sec"><h3>After hours and ratings</h3>
     <div class="field"><span class="lbl" id="su-aft">After working hours</span><div class="su-g2" role="radiogroup" aria-labelledby="su-aft">${radio(p('after'), 'keep', 'Keep answering', 'And take a time for the call centre to call back')}${radio(p('after'), 'closed', 'Send a "we are closed" message', '"We are open from 9 AM"')}</div></div>
-    ${swRow(p('rate'), 'Rate the chat', 'Ask for 1 to 5 stars when the chat closes')}
+    ${swRow(p('rate'), 'Rate the chat', 'Ask for 1 to 5 stars when the chat closes')}</section>
   </div>`;
 }
 const EXT_OK = /\.(pdf|docx?|xlsx?|csv|txt)$/i;
@@ -4339,7 +4363,6 @@ function wizard(n, id) {
   SU.done[id] = SU.done[id] || [];
   SU.step[id] = n; SU.cur = id;
   const title = STAGES[n - 1][0];
-  const intro = ['VINA uses this to suggest how the agent speaks, its rules and its actions. You can change everything later.','Give the agent a name and choose how it talks to your customers.','What the agent must never do, and when it hands the chat to a person.','The agent answers only from what you add here. Each answer shows its source.','What the agent does in the chat: collects details, books, hands over and sends files.','Connect the channels where customers will talk to the agent. You can skip this and test first.','Chat with the agent before customers do. Go live when every test scenario passes.'][n - 1];
   let main, side = preview(n, id);
   if (n === 7) { main = stage7(id); side = ''; } else main = BODY[n](id);
   const back = n > 1 ? `<a class="btn" href="#setup-${n - 1}">${ic('arrowL', 14)}Back</a>` : '';
@@ -4359,7 +4382,7 @@ function wizard(n, id) {
       <span class="pill c-teal su-hide-sm">VINA team</span><button type="button" class="btn sm ghost su-show-sm" data-a="su-later">Save and finish later</button><button type="button" class="ibtn su-hide-sm" data-a="theme" aria-label="Light or dark">${ic(curTheme() === 'dark' ? 'sun' : 'moon')}</button><a class="ibtn" href="#agents" aria-label="Close setup">${ic('x')}</a></header>
     <div class="su-wrap ${side ? '' : 'noside'}">
       ${stageNav(n, id)}
-      <main id="main" tabindex="-1" class="su-main"><div class="su-mhead"><h1>${title}</h1><p class="lead-in">${intro}</p></div>${main}
+      <main id="main" tabindex="-1" class="su-main"><div class="su-mhead"><h1>${title}</h1></div>${main}
         <div class="su-foot ${n === 7 ? 'su-foot7' : ''}">${foot}</div></main>
       ${side ? `<aside class="su-side" aria-label="Live preview">${side}</aside>` : ''}
     </div></div>`;
@@ -4379,10 +4402,10 @@ function stage7(id) {
     return `<div class="li su-sc ${now}"><span class="chi c-${col} ${now ? '' : tickIn(s.id)}">${now === 'now' ? spin() : now === 'wait' ? ic('clock', 13) : ic(res === 'pass' ? 'check' : res === 'fail' ? 'x' : res === 'check' ? 'info' : 'minus', 14)}</span><div class="grow" style="min-width:0"><div class="small b ell">${esc(s.name)}</div><div class="xs ${res === 'fail' ? 'red' : res === 'check' ? 'amber' : 'mute'}">${lab} · ${esc(s.lang)}</div>${now === 'now' ? '<span class="su-read" aria-hidden="true"><i></i></span>' : ''}</div>${!now && (res === 'fail' || res === 'check') ? `<a class="btn sm ghost" href="#scenarios-${s.id}" data-a="su-see" data-x="${id}">See why${res === 'fail' ? ' it failed' : ''}</a>` : ''}<button type="button" class="ibtn sm bare" data-a="su-run1" data-x="${id}|${s.id}" aria-label="Run again: ${esc(s.name)}" title="Run again" ${run ? 'disabled' : ''}>${ic('refresh', 15)}</button></div>`; }).join('');
   return `<div class="su-s7">${chatBox('s7-' + id, id, {sub:'Type, tap a suggestion, or send a voice note'})}
     <div class="col">
-      <section class="card su-scard"><div class="card-h"><div class="grow"><h2>Test scenarios</h2><div class="sub">${SU.scen.length} ready-made for car dealers</div></div><button type="button" class="btn sm pri" data-a="su-runall" data-x="${id}" ${run ? 'disabled' : ''}>${run ? spin() + 'Running' : ic('play', 14) + (r ? 'Run all again' : 'Run all')}</button></div>
-        <div class="col tight su-runbox">${status}</div>
-        <div class="list">${rows}</div></section>
-      <section class="card"><div class="card-h"><h2>Summary</h2><span class="sub">Stages 1 to 6</span></div><div class="list">${sum.map(([n, t, v]) => `<div class="li"><span class="su-num ok">${ic('check', 13)}</span><div class="grow"><div class="small b">${t}</div><div class="xs mute">${esc(v)}</div></div><a class="btn sm ghost" href="#setup-${n}">Edit<span class="sr"> ${t}</span></a></div>`).join('')}</div></section>
+      <section class="card rc su-scard"><header class="rc-h"><div class="grow"><h2>Test scenarios</h2><div class="sub">${SU.scen.length} ready-made for car dealers</div></div><button type="button" class="btn sm" data-a="su-runall" data-x="${id}" ${run ? 'disabled' : ''}>${run ? spin() + 'Running' : ic('play', 14) + (r ? 'Run all again' : 'Run all')}</button></header>
+        <div class="rc-b"><div class="col tight su-runbox">${status}</div>
+        <div class="list">${rows}</div></div></section>
+      <section class="card rc"><header class="rc-h"><div class="grow"><h2>Summary</h2><div class="sub">Stages 1 to 6</div></div></header><div class="rc-b"><div class="list">${sum.map(([n, t, v]) => `<div class="li"><span class="su-num ok">${ic('check', 13)}</span><div class="grow"><div class="small b">${t}</div><div class="xs mute">${esc(v)}</div></div><a class="btn sm ghost" href="#setup-${n}">Edit<span class="sr"> ${t}</span></a></div>`).join('')}</div></div></section>
     </div></div>`;
 }
 
@@ -4630,11 +4653,11 @@ R('agents', {id:'A1', title:'Agents', roles:['vina'], states:[['empty','No agent
       <div class="grow" style="flex:1 1 240px;min-width:0"><div class="row tight"><b class="ag2-aname">${esc(agentName(a.id) || 'New agent')}</b>${stChip(a)}</div><div class="small mute" style="margin-top:4px">${esc(c.agent.job)} · ${esc(Object.keys(c.agent.langs).filter(l => c.agent.langs[l]).join(', '))} · speaks ${esc(c.agent.tone)}</div>
         <div class="row tight" style="margin-top:10px">${chs.length ? chs.map(([kk, l, i, col]) => { const v = chOf(a.id, kk); return `<span class="chip c-${v === 'Paused' ? 'grey' : v === 'Needs attention' ? 'red' : col}" title="${l}: ${v}">${ic(v === 'Needs attention' ? 'alert' : i, 12)}${l}${v === 'Needs attention' ? '<span class="sr">, needs attention</span>' : ''}</span>`; }).join('') : chipC('No channel yet', 'grey')}</div></div>
       <dl class="ag2-stats">${stats.map(([kk, v, col, bar]) => `<div><dt class="xs mute mk" style="gap:6px">${mic(kk, 11)}${kk}</dt><dd class="num ${col || ''}" ${countAttr(v)}>${esc(v)}</dd>${bar != null ? `<div class="bar-h ag2-mbar"><i style="width:${bar}%;background:var(--${col === 'amber' ? 'amber' : kk === 'Setup stage' ? 'horizon' : 'green'})"></i></div>` : ''}</div>`).join('')}</dl>
-      <div class="row tight">${a.st === 'setup' ? `<button type="button" class="btn danger-o" data-a="ag2-del" data-x="${a.id}">Delete</button><button type="button" class="btn pri" data-a="ag2-continue" data-x="${a.id}">Continue setup</button>`
-        : `<button type="button" class="btn" data-a="${a.st === 'live' ? 'ag2-pause' : 'ag2-resume'}" data-x="${a.id}">${a.st === 'live' ? ic('pause', 14) + 'Pause' : ic('play', 14) + 'Resume'}</button><a class="btn pri" href="#agent-${a.id}">Open</a>`}</div>
+      <div class="row tight">${a.st === 'setup' ? `<button type="button" class="btn danger-o" data-a="ag2-del" data-x="${a.id}">Delete</button><button type="button" class="btn" data-a="ag2-continue" data-x="${a.id}">Continue setup</button>`
+        : `<button type="button" class="btn" data-a="${a.st === 'live' ? 'ag2-pause' : 'ag2-resume'}" data-x="${a.id}">${a.st === 'live' ? ic('pause', 14) + 'Pause' : ic('play', 14) + 'Resume'}</button><a class="btn" href="#agent-${a.id}">Open</a>`}</div>
       <div class="ag2-foot">${foot.filter(Boolean).map(f => `<span>${esc(f)}</span>`).join('')}</div></section>`;
   }).join('');
-  return shell({nav:'agents', title:'Agents', cp:true, viewOnly:false, body:`<div class="row"><p class="lead-in grow">Each agent has its own name, rules, knowledge and actions. A channel is answered by one agent.</p><button type="button" class="btn pri" data-a="ag2-new">${ic('plus', 14)}New agent</button></div>
+  return shell({nav:'agents', title:'Agents', cp:true, viewOnly:false, body:`${pageToolbar({left: list.length ? `<span class="small mute">${list.length} agents · ${list.filter(a => a.st === 'live').length} live</span>` : '', right:`<button type="button" class="btn pri" data-a="ag2-new">${ic('plus', 14)}New agent</button>`})}
     ${list.length ? `<div class="col">${cards}</div>` : `<div class="card">${empty('bot', 'No agents yet', 'Set up the first agent for ' + esc(client().name) + '. It takes 7 short stages, and you can test it before customers see it.', `<button type="button" class="btn pri" data-a="ag2-new">${ic('plus', 14)}New agent</button>`)}</div>`}`});
 }});
 A['ag2-new'] = () => { let n = 1; while (cfgOf('agent' + n)) n++; const id = 'agent' + n; SU.drafts[id] = X.newCfg(); SU.live[id] = null; SU.ver[id] = 0; SU.hist[id] = []; SU.done[id] = []; SU.agents.push({id, st:'setup', started:'Today', by:meName()}); SU.wiz = id; go('setup-1'); };
@@ -4661,13 +4684,13 @@ R('agent', {id:'A2', title:'Agent editor', roles:['vina'], states:[['leaving','U
   if (!SU.live[id]) return shell({nav:'agents', title:'Agent editor', cp:true, viewOnly:false, body:`<div class="card">${empty('bot', esc(agentName(id) || 'This agent') + ' is not live yet', 'Finish the setup first. After it goes live, you change it here.', `<button type="button" class="btn pri" data-a="ag2-continue" data-x="${id}">Continue setup</button>`)}</div>`});
   const secs = STAGES.map(([t], i) => ({n:i + 1, t, dot:secDirty(id, i + 1)}));
   const k = counts(id); const r = runOf(id);
-  const sum7 = `<div class="col tight">${r ? `<div class="row tight">${chipC(k.pass + ' passed', 'green')}${k.fail ? chipC(k.fail + ' failed', 'red') : ''}${k.check ? chipC(k.check + ' to check', 'amber') : ''}<span class="xs mute">${esc(r.when)} · ${r.ver === 'draft' ? 'draft' : 'live version'}${fresh(id) ? '' : ' · before your last change'}</span></div>` : '<p class="small mute">Not run yet.</p>'}<p class="small mute">Changes go live only after all test scenarios pass.</p><a class="btn" href="#scenarios" data-keepdraft style="align-self:flex-start">${ic('tests', 14)}Open test scenarios</a></div>`;
+  const sum7 = `<div class="col tight">${r ? `<div class="row tight">${chipC(k.pass + ' passed', 'green')}${k.fail ? chipC(k.fail + ' failed', 'red') : ''}${k.check ? chipC(k.check + ' to check', 'amber') : ''}<span class="xs mute">${esc(r.when)} · ${r.ver === 'draft' ? 'draft' : 'live version'}${fresh(id) ? '' : ' · before your last change'}</span></div>` : '<p class="small mute">Not run yet.</p>'}<a class="btn" href="#scenarios" data-keepdraft style="align-self:flex-start">${ic('tests', 14)}Open test scenarios</a></div>`;
   const nd = secs.filter(x => x.dot).length;
   const stat = `${a.st === 'paused' ? pulse('amber') + 'Paused' : pulse('green') + 'Live'} · version ${SU.ver[id]} · ${n ? `<b class="amber">${n} unsaved change${n > 1 ? 's' : ''}</b>` : 'no unsaved changes'}`;
   const body = `<div class="card ag2-bar" id="ag2-bar" role="region" aria-label="${esc(c.agent.name)} status">
       <a class="ibtn sm bare ag2-back" href="#agents" aria-label="Back to agents" title="Agents">${ic('chevL', 16)}</a>${agAv(id)}
       <div class="grow" style="min-width:0"><div class="row tight"><b class="ag2-aname">${esc(c.agent.name)}</b><span class="ag2-stat">${stat}</span></div><div class="xs mute">Changes go live only after all test scenarios pass.</div></div>
-      <div class="row tight ag2-btns"><button type="button" class="btn" data-a="ag2-hist" data-x="${id}">${ic('history', 14)}Change history</button><button type="button" class="btn" data-a="ag2-discard" data-x="${id}" ${n ? '' : 'disabled'}>Discard</button><a class="btn" href="#scenarios" data-keepdraft>${ic('play', 14)}Run tests</a><button type="button" class="btn pri" data-a="ag2-save" data-x="${id}" ${!n ? 'disabled' : b ? 'aria-disabled="true" aria-describedby="ag2-why"' : ''}>Save changes</button></div>
+      <div class="row tight ag2-btns"><button type="button" class="ibtn" data-a="ag2-hist" data-x="${id}" aria-label="Change history" title="Change history">${ic('history', 16)}</button><button type="button" class="btn ghost" data-a="ag2-discard" data-x="${id}" ${n ? '' : 'disabled'}>Discard</button><a class="btn" href="#scenarios" data-keepdraft>${ic('play', 14)}Run tests</a><button type="button" class="btn pri" data-a="ag2-save" data-x="${id}" ${!n ? 'disabled' : b ? 'aria-disabled="true" aria-describedby="ag2-why"' : ''}>Save changes</button></div>
       ${n && b ? `<div class="ag2-block" id="ag2-why" role="status">${ic('lock', 15)}<div class="grow">${b === 'fail' ? `<b>Saving is blocked.</b> ${k.fail} test scenario${k.fail > 1 ? 's' : ''} failed on these changes.` : `<b>Saving is blocked</b> until the test scenarios run on these changes.`}</div><a class="btn sm" href="#scenarios" data-keepdraft>${b === 'fail' ? 'See what failed' : 'Run the tests'}</a></div>` : ''}</div>
     <div class="ag2-ed">
       <nav class="ag2-secnav" aria-label="Sections"><div class="eyebrow ag2-navh">Sections${nd ? ` · <span class="amber">${nd} changed</span>` : ''}</div>${secs.map(s => `<button type="button" data-a="ag2-jump" data-x="${s.n}" class="${s.dot ? 'dirty' : ''}"><span class="su-num">${s.n}</span><span class="grow">${s.t}</span>${s.dot ? '<span class="ag2-dot" title="Unsaved change"><span class="sr">Unsaved change</span></span>' : ''}</button>`).join('')}</nav>
@@ -4798,8 +4821,10 @@ R('scenarios', {id:'A4', title:'Test scenarios', roles:['vina'], states:[['runni
         : `<div class="row tight" style="margin-top:6px;align-items:baseline">${mic('Test scenarios', 15)}<b class="num ag2-big" ${countAttr(SU.scen.length)}>${SU.scen.length}</b><span class="small mute">scenarios</span>${chipC(k.pass + ' passed', 'green')}${k.fail ? chipC(k.fail + ' failed', 'red') : ''}${k.check ? chipC(k.check + ' to check', 'amber') : ''}</div>`}
       ${r && !fresh(id) && !run && !allp ? `<div class="xs amber" style="margin-top:6px">${esc(agentName(id))} changed after this run. Run all to test the changes.</div>` : ''}</div>
     ${k.fail && !run && !demoRun ? `<div class="note err ag2-blocked" role="alert">${ic('lock')}<div><b>Saving is blocked until the failed scenarios pass</b></div></div>` : allp ? `<div class="note ok">${ic('check')}<div><b>All passed.</b> You can save the changes.</div></div>` : ''}
-    <div class="row tight"><button type="button" class="btn" data-a="ag2-sc-new">${ic('plus', 14)}New scenario</button><button type="button" class="btn pri" data-a="ag2-sc-run" ${run || demoRun ? 'disabled' : ''}>${run || demoRun ? spin() + 'Running' : ic('play', 14) + 'Run all'}</button></div></div>`;
+    </div>`;
   const filters = [['all', 'All', SU.scen.length], ['fail', 'Failed', k.fail], ['check', 'To check', k.check], ['pass', 'Passed', k.pass]];
+  const toolbar = pageToolbar({left:`<div class="fchips" role="group" aria-label="Filter">${filters.map(([f, l, n]) => `<button type="button" class="fchip" data-a="su-set" data-x="su.a4.filter" data-v="${f}" aria-pressed="${a4.filter === f}">${l} <span class="n">${n}</span></button>`).join('')}</div>${a4.act ? `<span class="tokens" style="min-height:34px;padding:2px"><span class="tok">Action: ${esc(actName(a4.act))}<button type="button" data-a="su-set" data-x="su.a4.act" data-v="" aria-label="Show all actions">${ic('x', 12)}</button></span></span>` : ''}`,
+    right:`<button type="button" class="btn" data-a="ag2-sc-new">${ic('plus', 14)}New scenario</button><button type="button" class="btn pri" data-a="ag2-sc-run" ${run || demoRun ? 'disabled' : ''}>${run || demoRun ? spin() + 'Running' : ic('play', 14) + 'Run all'}</button>`});
   const rows = scen.map(s => { const x = resOf(s); const ri = RI[x || '']; const st = rs(s); return `<button type="button" class="ag2-srow ${s.id === sel.id ? 'sel' : ''} ${st}" data-a="ag2-sc-sel" data-x="${s.id}" aria-pressed="${s.id === sel.id}">${st === 'now' ? '<span class="su-read ag2-rowbar" aria-hidden="true"><i></i></span>' : ''}<span class="chi c-${st === 'wait' ? 'grey' : ri[1]} ${st ? '' : tickIn(s.id)}" title="${st === 'wait' ? 'Waiting' : ri[2]}">${st === 'now' ? spin() : ic(ri[0], 14)}<span class="sr">${st === 'wait' ? 'Waiting' : ri[2]}</span></span><span class="grow" style="min-width:0"><span class="small b" style="display:block">${esc(s.name)}</span><span class="xs mute ell" style="display:block" ${isAr(s.first) ? 'dir="rtl"' : ''}>${esc(s.first)}</span></span><span class="xs mute ag2-c">${esc(s.lang)}</span><span class="xs ag2-c ${x === 'fail' ? 'red' : x === 'check' ? 'amber' : 'mute'}">${esc(sumTxt(s))}</span><span class="xs mute num ag2-c">${x && x !== 'run' ? esc(time) : ''}</span></button>`; }).join('');
   const ri = RI[sres || ''];
   const convo = det.convo.map(m => m.w === 'c' ? `<div class="msg in"><div class="bub" ${isAr(m.t) ? 'dir="rtl"' : ''}>${esc(m.t)}</div></div>`
@@ -4809,10 +4834,10 @@ R('scenarios', {id:'A4', title:'Test scenarios', roles:['vina'], states:[['runni
     <div class="col tight"><div class="eyebrow">Checks</div>${det.checks.map(q => `<div class="row nowrap su-at ag2-chk"><span class="chi c-${q.ok === true ? 'green' : q.ok === false ? 'red' : 'amber'}">${ic(q.ok === true ? 'check' : q.ok === false ? 'x' : 'info', 14)}<span class="sr">${q.ok === true ? 'Passed' : q.ok === false ? 'Failed' : 'To check'}</span></span><div class="grow small"><span class="mute">${esc(q.type)}:</span> <b>${esc(q.t)}</b>${q.ok === false && q.got ? `<div class="red xs" style="margin-top:2px">${esc(q.got)}</div>` : q.ok == null && q.got ? `<div class="amber xs" style="margin-top:2px">${esc(q.got)}</div>` : ''}</div></div>`).join('')}</div>
     <div class="col tight"><div class="eyebrow">What happened</div><div class="chat ag2-replay ${SU._a4seq > Date.now() ? 'su-seq' : ''}">${convo}</div></div>
     ${(sres === 'fail' || sres === 'check') && det.why && !allp ? `<div class="note ${sres === 'fail' ? 'err' : 'warn'}">${ic('info')}<div><b>Why</b><div style="margin-top:2px">${det.why}</div></div></div>` : ''}
-    ${sres === 'check' && !allp ? `<div class="row tight"><span class="small grow">Is this answer right?</span><button type="button" class="btn" data-a="ag2-sc-mark" data-x="${sel.id}|wrong">${ic('x', 14)}Mark as wrong</button><button type="button" class="btn pri" data-a="ag2-sc-mark" data-x="${sel.id}|right">${ic('check', 14)}Mark as right</button></div>` : ''}
-    <div class="row tight">${(det.fixes || []).map(([l, kind]) => `<button type="button" class="btn" data-a="ag2-fix" data-x="${id}|${kind}">${esc(l)}</button>`).join('')}<span class="sp"></span><button type="button" class="btn pri" data-a="ag2-sc-one" data-x="${sel.id}" ${run ? 'disabled' : ''}>${ic('refresh', 14)}Run again</button></div></section>`;
-  return shell({nav:'scenarios', title:'Test scenarios', cp:true, viewOnly:false, tools:pick('Agent:'), search:false, body:`${pickM()}${head}
-    <div class="ag2-a4"><section class="card pad0 col" style="gap:0;min-width:0"><div class="row tight" style="padding:14px 16px;border-bottom:1px solid var(--line)"><div class="fchips" role="group" aria-label="Filter">${filters.map(([f, l, n]) => `<button type="button" class="fchip" data-a="su-set" data-x="su.a4.filter" data-v="${f}" aria-pressed="${a4.filter === f}">${l} <span class="n">${n}</span></button>`).join('')}</div>${a4.act ? `<span class="tokens" style="min-height:34px;padding:2px"><span class="tok">Action: ${esc(actName(a4.act))}<button type="button" data-a="su-set" data-x="su.a4.act" data-v="" aria-label="Show all actions">${ic('x', 12)}</button></span></span>` : ''}</div>
+    ${sres === 'check' && !allp ? `<div class="row tight"><span class="small grow">Is this answer right?</span><button type="button" class="btn" data-a="ag2-sc-mark" data-x="${sel.id}|wrong">${ic('x', 14)}Mark as wrong</button><button type="button" class="btn" data-a="ag2-sc-mark" data-x="${sel.id}|right">${ic('check', 14)}Mark as right</button></div>` : ''}
+    <div class="row tight">${(det.fixes || []).map(([l, kind]) => `<button type="button" class="btn" data-a="ag2-fix" data-x="${id}|${kind}">${esc(l)}</button>`).join('')}<span class="sp"></span><button type="button" class="btn" data-a="ag2-sc-one" data-x="${sel.id}" ${run ? 'disabled' : ''}>${ic('refresh', 14)}Run again</button></div></section>`;
+  return shell({nav:'scenarios', title:'Test scenarios', cp:true, viewOnly:false, tools:pick('Agent:'), search:false, body:`${pickM()}${toolbar}${head}
+    <div class="ag2-a4"><section class="card pad0 col" style="gap:0;min-width:0">
       <div class="ag2-shead xs mute"><span></span><span>Scenario</span><span class="ag2-c">Language</span><span class="ag2-c">Checks</span><span class="ag2-c">Time</span></div>
       <div class="col" style="gap:0">${rows || `<div style="padding:16px">${empty('tests', 'Nothing here', a4.filter === 'fail' ? 'No failed scenarios. Good.' : 'No scenarios match this filter.')}</div>`}</div></section>${panel}</div>`});
 }});
@@ -5032,6 +5057,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 
   /* B1 */
   .cp-plan{background:radial-gradient(500px 200px at 100% 0%,var(--teal-b),transparent 70%),var(--card)}
+  .cp-kt{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;line-height:20px;margin-bottom:4px}
   .cp-big{font-family:var(--f-display);font-size:30px;line-height:36px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .cp-meter .bar-h{height:10px}
   .cp-stack{display:flex;gap:3px;height:12px;border-radius:999px;overflow:hidden}
@@ -5039,7 +5065,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
   .cp-inv td{white-space:nowrap}
   .cp-paid{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:8px 0}
   .cp-paid .ok{width:60px;height:60px;border-radius:50%;background:var(--green-b);color:var(--green-f);display:flex;align-items:center;justify-content:center;animation:cp-tick 520ms var(--spring) both}
-  @media (max-width:760px){.cp-save{bottom:72px}.cp-seat{min-width:0;width:100%}.cp-search{width:100%}}
+  @media (max-width:760px){.rc-h:has(>.cp-seat){flex-wrap:wrap}.rc-h:has(>.cp-seat)>.grow{flex:1 1 100%}.cp-save{bottom:72px}.cp-seat{min-width:0;width:100%}.cp-search{width:100%}}
   .cp-utbl .who .nm,.cp-utbl .who .xs{white-space:nowrap}
   </style>`);
 
@@ -5067,7 +5093,8 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 
   /* ---------- Shared page bits ---------- */
   const page = (nav, title, body, o) => shell(Object.assign({nav, title, body, cp:true, viewOnly:false}, o || {}));
-  const sec = (title, sub, body, right) => `<section class="card"><div class="card-h"><div class="grow"><h2>${title}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div>${right || ''}</div>${body}</section>`;
+  // Report-card structure (core .rc): short title, optional one-line sub, body. Title and sub are trusted HTML here.
+  const sec = (title, sub, body, right, cls) => `<section class="card rc ${cls || ''}"><header class="rc-h"><div class="grow"><h2>${title}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div>${right || ''}</header><div class="rc-b">${body}</div></section>`;
   const kv = rows => `<dl class="kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`;
   const stateWrap = (body, retryText) => S.st === 'loading' ? loadingRows(6, 72) : S.st === 'error' ? errorBox(retryText || 'We could not load this page', 'Check your internet connection, then try again. Nothing you saved is lost.', 'cp-retry') : body;
   A['cp-retry'] = () => { S.st = ''; };
@@ -5089,7 +5116,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     ];
     const live = chans.filter(c => c.st === 'ok').length;
     const card = c => {
-      const btn = c.st === 'ok' ? `<a class="btn sm" href="#${c.go}">Manage</a>` : c.st === 'warn' ? `<a class="btn sm danger" href="#${c.go}">Reconnect</a>` : c.st === 'wait' ? `<a class="btn sm" href="#${c.go}">See progress</a>` : `<a class="btn sm pri" href="#${c.go}">Connect</a>`;
+      const btn = c.st === 'ok' ? `<a class="btn sm" href="#${c.go}">Manage</a>` : c.st === 'warn' ? `<a class="btn sm danger" href="#${c.go}">Reconnect</a>` : c.st === 'wait' ? `<a class="btn sm" href="#${c.go}">See progress</a>` : `<a class="btn sm" href="#${c.go}">Connect</a>`;
       return `<section class="card lift cp-ch ${c.st === 'warn' ? 'warn' : ''}" aria-labelledby="cp-c-${c.k}">
         <div class="hd">${chIc(c.k, true)}<div class="grow" style="min-width:0"><h2 class="h2" id="cp-c-${c.k}">${c.t}</h2><div class="small mute">${c.what}</div></div>${stChip(c.st)}</div>
         ${kv(c.facts)}
@@ -5099,7 +5126,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     const problem = w === 'warn' ? `<div class="g2">
       <div class="note err" role="alert">${ic('alert')}<div><b>WhatsApp is disconnected.</b> Customers on WhatsApp are not getting replies since 4:12 PM. 6 messages are waiting. The red bar shows on every page for the VINA team until it is fixed, and the VINA support team got an email at 4:13 PM.<div style="margin-top:10px"><a class="btn sm danger" href="#conn-whatsapp">Reconnect WhatsApp</a></div></div></div>
       <div class="card flat col tight"><span class="eyebrow">What managers see</span><div class="small mute">On Channels in the Manager dashboard. No reconnect button.</div><div class="cp-mgr">${chIc('wa', true)}<div class="grow"><b>WhatsApp</b><div class="xs mute">The VINA team has been told.</div></div>${stChip('warn')}</div></div></div>` : '';
-    return page('connections', 'Connections', stateWrap(`<div class="col tight"><p class="lead-in">Connect and check every channel. For the website, the client installs the VINA plugin. Each channel is answered by one agent.</p></div>${problem}<div class="cp-cards">${chans.map(card).join('')}</div>`));
+    return page('connections', 'Connections', stateWrap(`${problem}<div class="cp-cards">${chans.map(card).join('')}</div>`));
   }});
 
   /* ---------- C2 Website · Get the plugin ---------- */
@@ -5137,7 +5164,6 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     const left = w.pos === 'left';
     const steps = INSTALL[w.tab];
     const body = `
-      <p class="lead-in">Put the VINA chat on ${esc(client().name)}'s website. It takes about 10 minutes. The chat is answered by ${esc(w.name)}.</p>
       <div class="g2" style="align-items:start">
       <div class="col loose">
         ${sec('Get the plugin', check === 'live' ? 'All four steps are done.' : 'Four steps. Each one ticks when it is done.', vsteps([
@@ -5155,11 +5181,11 @@ document.head.insertAdjacentHTML('beforeend', `<style>
           <div class="row"><span class="sp"></span><button type="button" class="btn" data-a="cp-look-reset">Cancel</button><button type="button" class="btn pri" data-a="cp-look-save">Save</button></div>
         </div>`)}
       </div>
-      <section class="card col" aria-label="Preview on a sample page" style="position:sticky;top:84px"><div class="row tight"><span class="eyebrow grow">Live preview</span><span class="xs mute">Sample page</span></div>
+      <section class="card rc" aria-label="Preview on a sample page" style="position:sticky;top:84px"><header class="rc-h"><div class="grow"><h2>Live preview</h2><div class="sub">Sample page</div></div></header><div class="rc-b col">
         <div class="cp-site ${left ? 'left' : ''}" id="cp-prev" style="--wc:${w.color};--wf:${fg}" aria-hidden="true"><div class="bar">iCaur Alghanim<span class="sp"></span><i></i><i></i><i></i></div><div class="hero"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:52%"></div><div class="ln" style="width:60%"></div>
           <div class="cp-win"><div class="wh"><span class="av sm" data-t="i">${esc((w.name || 'S')[0])}</span><span data-t="n">${esc(w.name || 'Sara')}</span><span class="sp"></span>${ic('x', 14)}</div><div class="wb"><span class="bub" dir="auto" data-t="g">${esc(w.greet)}</span><span class="in">Write a message…${ic('send', 14)}</span></div></div>
           <div class="cp-fab">${ic('conv', 22)}</div></div>
-        <div class="xs mute">Shown on: ${esc(w.pages)}</div></section>
+        <div class="xs mute">Shown on: ${esc(w.pages)}</div></div></section>
       </div>`;
     return page('conn-website', 'Website', body, {crumb:['Connections', 'connections']});
   }});
@@ -5214,7 +5240,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     else if (disc) top = `<div class="note err" role="alert">${ic('alert')}<div><b>WhatsApp was disconnected</b> on Today 4:12 PM. Customers are not getting replies. A red bar shows on every page for the VINA team. Continue with Meta to connect it again.</div></div>`;
     else if (S.st === 'checking') top = `<div class="note warn" role="status">${ic('clock')}<div><b>Meta is still checking.</b> This can take some time. You can leave this page; we will email you.</div></div>`;
     const side = sec('Good to know', '', `<ul class="small" style="margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:8px"><li>The number cannot be used on the WhatsApp app at the same time.</li><li>Meta's checks usually take 1 to 3 days. You can leave this page.</li><li>If something is blocked, the step says what to do.</li></ul>`);
-    const body = `<p class="lead-in">Connect ${esc(client().name)}'s WhatsApp Business number through Meta. VINA answers every WhatsApp chat on this number.</p>${top}
+    const body = `${top}
       ${st === 'ok' || down ? `<div class="g2" style="align-items:start">${manage}${setupDone}</div>` : `<div class="g2" style="align-items:start">${step === 0 ? before : ''}${progress}${step === 0 ? '' : side}</div>`}`;
     return page('conn-whatsapp', 'WhatsApp', body, {crumb:['Connections', 'connections']});
   }});
@@ -5266,7 +5292,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
   R('conn-phone', {id:'C4', title:'Phone line', roles:['vina'], states:[['loading','Loading'],['error','Could not save']], render() {
     const p = S.f.cpp;
     const own = p.num === 'own', on = CS.ph.st === 'ok', s = on ? 'done' : 'num';
-    const body = `<p class="lead-in">Let ${esc(p.agent)} answer phone calls for ${esc(client().name)}. Calls that need a person go to the call centre.</p>
+    const body = `
     ${S.st === 'error' ? errorBox('We could not set up the phone line', 'The number provider did not answer. Try again in a minute. Your settings are kept.', 'cp-retry') : ''}
     ${on ? `<div class="note ok">${ic('check')}<div><b>The phone line is connected.</b> ${esc(p.agent)} answers on ${esc(CS.ph.number)}.</div></div>` : ''}
     <div class="g2" style="align-items:start">
@@ -5312,7 +5338,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     const sel = PAGES.filter(pg => S.f.cpm[pg.id]).length;
     const pst = pg => S.st === 'disconnected' && pg.id === 'fb' ? 'warn' : pg.st;
     const anyOn = PAGES.some(pg => pg.st === 'ok');
-    const body = `<p class="lead-in">Connect Messenger for your Facebook pages. It goes through Meta.</p>
+    const body = `
     ${S.st === 'disconnected' ? `<div class="note err" role="alert">${ic('alert')}<div class="grow"><b>Messenger is disconnected.</b> The page password was changed, so Meta disconnected it. Customers on Messenger are not getting replies.</div><button type="button" class="btn sm danger" data-a="cp-meta-open" data-x="meta">Reconnect</button></div>` : ''}
     <div class="g2" style="align-items:start">
     ${sec('Connect through Meta', signed ? 'Signed in as iCaur Alghanim Business' : 'Sign in with the Meta business account that owns the pages.', `${vsteps([
@@ -5358,11 +5384,10 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     </tbody></table></div>` : `<div class="card">${empty('search', 'No one matches', 'Nobody on the team has that name or role. Clear the search or add people.', `<button type="button" class="btn" data-a="cp-u-clear">Clear search</button>`)}</div>`;
     const waiting = PEOPLE.filter(p => p.status === 'Invite waiting').length;
     const body = stateWrap(`
-      <div class="row" style="align-items:flex-end"><div class="col tight grow" style="min-width:min(100%,320px)"><p class="lead-in">People get an email invite to set their own password.</p></div>${seatBar(used())}<button type="button" class="btn pri" data-a="cp-add" ${full ? 'disabled title="All users on the plan are used"' : ''}>${ic('plus', 16)}Add people</button></div>
+      ${pageToolbar({left:`<label class="cp-search">${ic('search', 16)}<span class="sr">Search by name</span><input type="search" placeholder="Search by name or email" ${bind('f.cpu.q', true)}></label><div class="fchips" role="group" aria-label="Filter by role">${[['', 'All']].concat(ROLES.map(r => [r, r])).map(([v, t]) => `<button type="button" class="fchip" aria-pressed="${rf === v}" data-a="cp-u-role" data-x="${v}">${t} <span class="n">${v ? PEOPLE.filter(p => p.role === v).length : PEOPLE.length}</span></button>`).join('')}</div>`,
+        right:`<button type="button" class="btn pri" data-a="cp-add" ${full ? 'disabled title="All users on the plan are used"' : ''}>${ic('plus', 16)}Add people</button>`})}
       ${full ? `<div class="note warn">${ic('info')}<div>All ${LIMIT} users on the plan are used, so Add people is off. Turn someone off, or <a href="#plan">change the plan</a> to add more people.</div></div>` : ''}
-      <div class="row"><div class="fchips" role="group" aria-label="Filter by role">${[['', 'All']].concat(ROLES.map(r => [r, r])).map(([v, t]) => `<button type="button" class="fchip" aria-pressed="${rf === v}" data-a="cp-u-role" data-x="${v}">${t} <span class="n">${v ? PEOPLE.filter(p => p.role === v).length : PEOPLE.length}</span></button>`).join('')}</div><span class="sp"></span>
-        <label class="cp-search">${ic('search', 16)}<span class="sr">Search by name</span><input type="search" placeholder="Search by name or email" ${bind('f.cpu.q', true)}></label></div>
-      ${table}
+      ${rows.length ? sec('People', 'Each person gets an email invite to set their own password.', table, seatBar(used()), 'rx-tbl') : table}
       ${sec('Roles and what they can do', 'Roles are the same for every client.', `<div class="tbl-wrap" style="box-shadow:none;background:var(--sub)"><table class="tbl cp-roles"><thead><tr><th style="background:var(--sub)">Can…</th><th style="background:var(--sub)">Account admin, Manager</th><th style="background:var(--sub)">Call centre agent</th><th style="background:var(--sub)">Sales agent</th></tr></thead><tbody>${['Open the Manager dashboard','See all conversations and leads','Work their own chats and leads','Send a lead to sales','Book test drives','Download CSV','Use the control panel'].map(k => `<tr><td>${k}</td>${can(k).map(v => `<td>${v === 'Yes' ? `<span class="green">${ic('check', 16)}</span><span class="sr">Yes</span>` : v === '—' ? '<span class="faint" aria-label="No">—</span>' : `<span class="chip c-grey">${v}</span>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`)}`);
     return page('users', 'Users and roles', body);
   }});
@@ -5473,12 +5498,12 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     const conv = 2436, convMax = 10000, u = used();
     const lines = [['Pro plan','November 2026',750,'navy'],['Meta WhatsApp charges','Passed through at cost · 1,742 conversations',418,'green'],['AI usage','Passed through at cost',236,'teal'],['Phone minutes', CS.ph.st === 'ok' ? 'Passed through at cost · 0 minutes' : 'Not used',0,'grey']];
     const sub = lines.reduce((a, l) => a + l[2], 0);
-    const meter = (k, v, of, pct, tone, n) => `<div class="card cp-meter col tight"><span class="eyebrow mk">${mic(k, 13)}${k}</span><div class="row tight" style="align-items:baseline"><span class="cp-big" ${countAttr(v)}>${v}</span><span class="mute">of ${of}</span></div><div class="bar-h" role="progressbar" aria-label="${k}" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div><span class="xs mute">${n}</span></div>`;
+    const meter = (k, v, of, pct, tone, n) => `<div class="card cp-meter col tight"><span class="cp-kt">${mic(k, 13)}${k}</span><div class="row tight" style="align-items:baseline"><span class="cp-big" ${countAttr(v)}>${v}</span><span class="mute">of ${of}</span></div><div class="bar-h" role="progressbar" aria-label="${k}" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div><span class="xs mute">${n}</span></div>`;
     const unpaid = inv.filter(i => !i.paid);
     const body = stateWrap(`${tabs('plan')}
       ${unpaid.length ? `<div class="note warn" role="status">${ic('info')}<div class="grow">The October invoice of <b>${sar(withVat(unpaid[0].base))}</b> is not paid yet. It was due on 5 November.</div><button type="button" class="btn sm pri" data-a="cp-pay" data-x="${unpaid[0].no}">Pay now</button></div>` : ''}
-      <div class="g3">
-        <div class="card cp-plan col tight"><span class="eyebrow mk">${mic('plan', 13)}Your plan</span><span class="cp-big">Pro</span><span>${sar(750)} a month, before VAT</span><span class="xs mute">3 agents and ${LIMIT} users included · renews 1 December 2026</span><div class="row tight" style="margin-top:auto;padding-top:10px"><button type="button" class="btn sm" data-a="cp-plan-change">Change plan</button><button type="button" class="btn sm ghost" data-a="cp-plan-talk">Talk to us</button></div></div>
+      <div class="rx-g3">
+        <div class="card cp-plan col tight"><span class="cp-kt">${mic('plan', 13)}Your plan</span><span class="cp-big">Pro</span><span>${sar(750)} a month, before VAT</span><span class="xs mute">3 agents and ${LIMIT} users included · renews 1 December 2026</span><div class="row tight" style="margin-top:auto;padding-top:10px"><button type="button" class="btn sm" data-a="cp-plan-change">Change plan</button><button type="button" class="btn sm ghost" data-a="cp-plan-talk">Talk to us</button></div></div>
         ${meter('Conversations this month', num(conv), num(convMax), conv / convMax * 100, 'horizon', '1 to 7 November · resets 1 December')}
         ${meter('Users', String(u), LIMIT, u / LIMIT * 100, u >= LIMIT ? 'red' : u >= LIMIT - 2 ? 'amber' : 'green', 'Agents: 3 of 3 · <a href="#users">Users and roles</a>')}
       </div>
@@ -5486,7 +5511,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
         <div class="legend" style="margin-bottom:12px">${lines.filter(l => l[2]).map(l => `<span><i style="background:var(--${l[3]}-f)"></i>${l[0]}</span>`).join('')}</div>
         <div class="tbl-wrap" style="box-shadow:none"><table class="tbl"><tbody>${lines.map(([k, n, v]) => `<tr><td><b>${k}</b><div class="xs mute">${n}</div></td><td class="r num b">${sar(v)}</td></tr>`).join('')}
         <tr><td><b>Total so far</b><div class="xs mute">Before VAT</div></td><td class="r num bb">${sar(sub)}</td></tr><tr><td class="mute">VAT 15%</td><td class="r num mute">${sar(Math.round(sub * VAT * 100) / 100)}</td></tr><tr><td><b>Total with VAT</b></td><td class="r num bb" style="font-size:15px">${sar(withVat(sub))}</td></tr></tbody></table></div>`)}
-      ${sec('Invoices', 'Amounts include 15% VAT.', `<div class="tbl-wrap" style="box-shadow:none"><table class="tbl cp-inv"><thead><tr><th>Month</th><th>Invoice</th><th class="r">Amount</th><th>Status</th><th><span class="sr">Action</span></th></tr></thead><tbody>${inv.map(i => `<tr class="${flashCls(i.no)}"><td class="b">${i.m}</td><td class="mute num">${i.no}</td><td class="r num b">${sar(withVat(i.base))}</td><td>${i.paid ? chipC('Paid', 'green', true) : chipC('Not paid', 'red', true)}</td><td class="r">${i.paid ? `<button type="button" class="btn sm ghost" data-a="cp-inv-dl" data-x="${i.no}" aria-label="Download ${i.no}">${ic('download', 14)}Download</button>` : `<button type="button" class="btn sm pri" data-a="cp-pay" data-x="${i.no}">Pay now</button>`}</td></tr>`).join('')}</tbody></table></div>`)}`);
+      ${sec('Invoices', 'Amounts include 15% VAT.', `<div class="tbl-wrap" style="box-shadow:none"><table class="tbl cp-inv"><thead><tr><th>Month</th><th>Invoice</th><th class="r">Amount</th><th>Status</th><th><span class="sr">Action</span></th></tr></thead><tbody>${inv.map(i => `<tr class="${flashCls(i.no)}"><td class="b">${i.m}</td><td class="mute num">${i.no}</td><td class="r num b">${sar(withVat(i.base))}</td><td>${i.paid ? chipC('Paid', 'green', true) : chipC('Not paid', 'red', true)}</td><td class="r">${i.paid ? `<button type="button" class="btn sm ghost" data-a="cp-inv-dl" data-x="${i.no}" aria-label="Download ${i.no}">${ic('download', 14)}Download</button>` : `<button type="button" class="btn sm" data-a="cp-pay" data-x="${i.no}">Pay now</button>`}</td></tr>`).join('')}</tbody></table></div>`)}`);
     return page('plan', 'Plan and usage', body);
   }});
   A['cp-plan-change'] = () => { toast('Plan changes are made with VINA support for now. We will call the account admin.'); };

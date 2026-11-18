@@ -17,14 +17,17 @@ export default [
       document.querySelectorAll('#app .kpi, #app .mg-stats > div, #app .cp-meter, #app .ag2-stats > div').forEach(k => { if (!k.querySelector('.mic, svg.ic')) miss.push(role + '/' + r + ': ' + k.textContent.trim().slice(0, 30)); });
     }
     return !miss.length || miss.slice(0, 6).join('; ');`],
-  ['V3: date pill slides to the new choice and the numbers roll', `${G}
-    signIn('manager'); await tick(150); await go2('overview'); await tick(900);
-    const seg = document.querySelector('#app .seg'); if (!seg) return 'no seg'; const ind = seg.querySelector(':scope > .ind'); if (!ind) return 'no indicator';
-    const x0 = ind.style.transform; const v0 = document.querySelector('[data-k="Answered by VINA alone"]')?.textContent;
-    const b = [...seg.querySelectorAll('button')].find(b => /30 days/.test(b.textContent)); if (!b) return 'no 30 days'; b.click(); await tick(30);
-    const ind2 = document.querySelector('#app .seg > .ind'); const moving = ind2 && ind2.style.transform !== x0;
-    const kp = document.querySelector('[data-count][data-k]'); const mid = kp && kp.textContent; await tick(700); const end = kp && document.querySelector('[data-count][data-k]').textContent;
-    return (moving || 'indicator did not move') === true ? true : 'indicator did not move';`],
+  ['V3: the tab underline slides to the new choice (saved views on Leads)', `${G}
+    signIn('manager'); await tick(150); await go2('leads'); await tick(900);
+    const tabs = [...document.querySelectorAll('#app .tabs')].find(t => t.querySelector(':scope > .ind')); if (!tabs) return 'no tabs with an indicator';
+    const x0 = tabs.querySelector(':scope > .ind').style.transform;
+    const b = [...tabs.querySelectorAll('[aria-selected="false"]')].find(b => /Qualified/.test(b.textContent)) || tabs.querySelector('[aria-selected="false"]'); if (!b) return 'no other tab'; b.click(); await tick(30);
+    const t2 = [...document.querySelectorAll('#app .tabs')].find(t => t.querySelector(':scope > .ind'));
+    return (t2 && t2.querySelector(':scope > .ind').style.transform !== x0) || 'indicator did not move';`],
+  ['GA layout: one date button, no second date switch on Overview', `${G}
+    signIn('manager'); await tick(150); await go2('overview');
+    const dateBtns = document.querySelectorAll('#app .ptb-date').length; const segs = [...document.querySelectorAll('#app .seg')].filter(s => /days/i.test(s.textContent)).length;
+    return (dateBtns === 1 && segs === 0) || 'date buttons ' + dateBtns + ', date switches ' + segs;`],
   ['V3: tooltips show the exact value on chart bars and icon buttons', `${G}
     signIn('manager'); await tick(150); await go2('overview'); await tick(900);
     const bar = document.querySelector('.mg-st i[title], .mg-st i[data-tip]'); if (!bar) return 'no chart bar with a value';

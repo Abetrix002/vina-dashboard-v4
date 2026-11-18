@@ -35,7 +35,6 @@
   .mg-cp{flex:1;padding:18px 20px 14px;min-width:0}
   .mg-cph{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-bottom:14px}
   .mg-cph .legend{flex:1}
-  .mg-seg button{min-height:28px;padding:0 10px;font-size:12px}
   .mg-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
   .mg-si{display:flex;align-items:flex-start;gap:10px;padding:14px 20px;min-width:0}
   .mg-si+.mg-si{border-inline-start:1px solid var(--line)}
@@ -339,11 +338,10 @@
       }
       chart = lines(ax, series, opt);
     }
-    const rangeSeg = `<div class="seg mg-seg" role="group" aria-label="Chart range">${[['7','7 days'],['30','30 days']].map(([k, t]) => `<button type="button" data-a="mg-date" data-x="${k}" aria-pressed="${f.date === k}">${t}</button>`).join('')}</div>`;
     const STRIP = [['Customers who replied', num(sc(1987)), '+9%'], ['Test drive requests', num(sc(48)), '+6'], ['Not interested', num(sc(131)), '−4%'], ['Customer rating', '4.6', '+0.1']];
     const strip = `<div class="mg-strip" aria-label="More numbers">${STRIP.map(([k, v, d]) => `<div class="mg-si">${mic(k, 13)}<div style="min-width:0"><span class="k">${k}</span><div class="row tight nowrap" style="align-items:baseline"><span class="v">${fd ? '—' : v}</span>${fd ? '' : delta(d)}</div></div></div>`).join('')}</div>`;
     const summary = `<section class="card mg-sum" aria-label="Summary">${tabs}<div class="mg-cp" id="mg-panel" role="tabpanel" aria-labelledby="mg-t-${mk}">
-      ${fd ? emptyBox('Conversations, answers by VINA alone, qualified leads and cars sold will show here day by day, next to the previous period.') : `<div class="mg-cph">${lg}${rangeSeg}</div>${chart}`}</div>${strip}</section>`;
+      ${fd ? emptyBox('Conversations, answers by VINA alone, qualified leads and cars sold will show here day by day, next to the previous period.') : `<div class="mg-cph">${lg}</div>${chart}`}</div>${strip}</section>`;
     // Waiting for the team now: a live card
     const LH = [4, 5, 5, 6, 6, 7, 8, 7, 8, 9, 9, w.length];
     const mini = `<div class="mg-mini" role="img" aria-label="Customers waiting over the last hour">${LH.map((v, i) => `<i style="height:${Math.max(6, v / Math.max(1, ...LH) * 100).toFixed(0)}%" title="${clock(new Date(NOW0.getTime() - (11 - i) * 3e5))}: ${v} waiting"></i>`).join('')}</div><div class="mg-cap"><span>60 min ago</span><span>Now</span></div>`;
