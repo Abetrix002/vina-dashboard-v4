@@ -214,7 +214,7 @@
   const TPL = [['Follow up', 'Hello {first}, this is iCaur Alghanim. Are you still interested in the {model}? Reply to this message and we will help you.'], ['New offer', 'Hello {first}, there is a new offer on the {model} this month. Reply YES to hear more.'], ['Test drive reminder', 'Hello {first}, a reminder of your test drive at our Madinah Road showroom. Reply to change the time.']];
   const REPLY = {Arabic:['تمام، شكراً لك', 'طيب، أنتظر اتصالك', 'ممتاز، يناسبني'], English:['Great, thank you.', 'Okay, that works for me.', 'Perfect, talk soon.']};
   const savedFor = l => SAVED.map((s, i) => [i, fill(s, l)]).filter(([, t]) => !G.sq || t.toLowerCase().includes(G.sq.toLowerCase()));
-  const focusTa = () => setTimeout(() => { const t = $('#b-f-agText'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }, 0);
+  const focusTa = () => setTimeout(() => { const t = $('#b-f-agText'); if (t) { t.focus({preventScroll:true}); t.setSelectionRange(t.value.length, t.value.length); } }, 0);
   const cbTxt = l => { if (!l.cb || l.cb.done) return ''; const r = rem(l); return `${esc(l.cb.at)} · ${r < 0 ? `<span class="red b">${mins(-r)} late</span>` : 'in ' + mins(r)}`; };
   const winChip = l => {
     if (l.ch !== 'wa') return ''; const h = 24 - l.lastIn;

@@ -251,7 +251,7 @@
   A['cp-dl'] = () => { toast('vina-chat.zip is ready. In this prototype, files are not downloaded.'); };
   A['cp-snippet'] = () => { S.f.cpw.tab = 'Other'; toast('Code snippet steps are under Other.'); };
   A['cp-copy'] = () => {
-    const sel = () => { const e = $('#cp-key'); if (e) { e.focus(); e.select(); } toast('Press Ctrl+C or ⌘C to copy the selected key.'); paintLayers(); };
+    const sel = () => { const e = $('#cp-key'); if (e) { e.focus({preventScroll:true}); e.select(); } toast('Press Ctrl+C or ⌘C to copy the selected key.'); paintLayers(); };
     try { navigator.clipboard.writeText(SITE_KEY).then(() => { toast('Site key copied.'); paintLayers(); }, sel); } catch (e) { sel(); }
     return false;
   };

@@ -280,13 +280,13 @@
   A['au-digit'] = (el) => {
     const v = S.f.au3, i = +el.dataset.i, d = el.value.replace(/\D/g, '');
     const land = e => { e.classList.toggle('has', !!e.value); e.classList.remove('bad', 'pop'); if (e.value) { void e.offsetWidth; e.classList.add('pop'); } };
-    if (d.length > 1) { d.slice(0, 6 - i).split('').forEach((c, j) => { v.d[i + j] = c; const e = $('#au-d' + (i + j)); if (e) { e.value = c; land(e); } }); const n = Math.min(5, i + d.length); $('#au-d' + n).focus(); }
-    else { v.d[i] = d; el.value = d; land(el); if (d && i < 5) $('#au-d' + (i + 1)).focus(); }
+    if (d.length > 1) { d.slice(0, 6 - i).split('').forEach((c, j) => { v.d[i + j] = c; const e = $('#au-d' + (i + j)); if (e) { e.value = c; land(e); } }); const n = Math.min(5, i + d.length); $('#au-d' + n).focus({preventScroll:true}); }
+    else { v.d[i] = d; el.value = d; land(el); if (d && i < 5) $('#au-d' + (i + 1)).focus({preventScroll:true}); }
     if (v.d.join('').length === 6) $('#au-d5').form.requestSubmit();
     return false;
   };
-  document.addEventListener('keydown', (ev) => { const el = ev.target; if (el.dataset && el.dataset.in === 'au-digit' && ev.key === 'Backspace' && !el.value) { const p = $('#au-d' + (+el.dataset.i - 1)); if (p) { p.focus(); p.value = ''; p.classList.remove('has'); S.f.au3.d[+el.dataset.i - 1] = ''; ev.preventDefault(); } } });
-  document.addEventListener('paste', (ev) => { const el = ev.target; if (!(el.dataset && el.dataset.in === 'au-digit')) return; const d = (ev.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6); if (!d) return; ev.preventDefault(); const v = S.f.au3; d.split('').forEach((c, j) => { v.d[j] = c; }); render(); const e = $('#au-d' + Math.min(5, d.length - 1)); if (e) e.focus(); if (d.length === 6) setTimeout(() => { const fm = $('.au-otp'); if (fm) fm.closest('form').requestSubmit(); }, 50); });
+  document.addEventListener('keydown', (ev) => { const el = ev.target; if (el.dataset && el.dataset.in === 'au-digit' && ev.key === 'Backspace' && !el.value) { const p = $('#au-d' + (+el.dataset.i - 1)); if (p) { p.focus({preventScroll:true}); p.value = ''; p.classList.remove('has'); S.f.au3.d[+el.dataset.i - 1] = ''; ev.preventDefault(); } } });
+  document.addEventListener('paste', (ev) => { const el = ev.target; if (!(el.dataset && el.dataset.in === 'au-digit')) return; const d = (ev.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6); if (!d) return; ev.preventDefault(); const v = S.f.au3; d.split('').forEach((c, j) => { v.d[j] = c; }); render(); const e = $('#au-d' + Math.min(5, d.length - 1)); if (e) e.focus({preventScroll:true}); if (d.length === 6) setTimeout(() => { const fm = $('.au-otp'); if (fm) fm.closest('form').requestSubmit(); }, 50); });
   A['au-resend-ready'] = () => {};
   A['au-resend'] = () => { const v = S.f.au3; v.until = Date.now() + 42000; v.err = null; v.d = ['','','','','','']; S.st = ''; toast('We sent a new code.'); };
   A['au-use-email'] = () => { S.f.au3.email = !S.f.au3.email; S.f.au3.until = Date.now() + 42000; toast(S.f.au3.email ? 'We sent the code to your email.' : 'We sent the code on WhatsApp.'); };
@@ -297,7 +297,7 @@
     v.busy = true; v.err = null; render();
     setTimeout(() => {
       v.busy = false;
-      if (code.length < 6 || code === '000000' || S.st === 'wrong') { v.err = 'wrong'; v.shakeAt = Date.now(); v.d = ['','','','','','']; S.st = ''; render(); const e = $('#au-d0'); if (e) e.focus(); return; }
+      if (code.length < 6 || code === '000000' || S.st === 'wrong') { v.err = 'wrong'; v.shakeAt = Date.now(); v.d = ['','','','','','']; S.st = ''; render(); const e = $('#au-d0'); if (e) e.focus({preventScroll:true}); return; }
       finish();
     }, 500);
     return false;

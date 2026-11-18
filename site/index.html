@@ -832,6 +832,9 @@ details[open]>summary .ic:last-child{transform:rotate(180deg)}
 /* Audit pass: the menu fits a 900px-tall screen even for the VINA team (13 items) */
 @media (max-height:960px) and (min-width:1025px){.nav .item{min-height:36px}.nav .grp{padding-top:10px;padding-bottom:4px}.nav .brand{margin-bottom:12px}.nav .client{min-height:48px;margin-bottom:10px}}
 
+/* The app redraws whole regions; browser scroll anchoring would nudge the page on each redraw */
+html,body{overflow-anchor:none}
+
 </style>
 </head>
 <body>
@@ -1601,6 +1604,9 @@ function render() {
   }
   // keep focus, caret and inner scroll positions across re-render
   const ae = document.activeElement; const fid = ae && ae.id; let ss = null, se = null;
+  // a control without an id (menu buttons, filters, date) gets focus back by its action, so focus never falls to the page
+  const fsig = !fid && ae && ae !== document.body && ae.dataset && ae.dataset.a ? [ae.dataset.a, ae.dataset.x] : null;
+  const sx = scrollX, sy = scrollY; // a redraw never moves the page; only route changes and explicit scrolls do
   try { ss = ae.selectionStart; se = ae.selectionEnd; } catch (e) {}
   const keep = {}; $$('[data-keep]').forEach(e => { if (e.id) keep[e.id] = e.scrollTop; });
   const snap = snapUI(r.name);
@@ -1623,9 +1629,11 @@ function render() {
   if (enter) countUp(app());
   replayUI(snap, enter, r.name);
   nameMovers(); originFromTrigger();
-  if (S.cmd) { const q = document.getElementById('cmd-q'); if (q) { if (S._cmdNew || document.activeElement !== q) q.focus(); const opt = document.getElementById('co-' + S.cmd.i); if (opt) opt.scrollIntoView({block:'nearest'}); } S._cmdNew = false; }
-  else if (S._focusModal) { S._focusModal = false; const m = $('#layers .modal:not(.ghost .modal), #layers .drawer:not(.ghost)'); const t = m && (m.querySelector('[autofocus]') || m.querySelector('input,select,textarea,button:not([data-a="close-modal"]):not([data-a="close-drawer"])')); if (t) t.focus(); }
-  else if (fid) { const e = document.getElementById(fid); if (e) { e.focus(); try { if (ss != null) e.setSelectionRange(ss, se); } catch (er) {} } }
+  if (S.cmd) { const q = document.getElementById('cmd-q'); if (q) { if (S._cmdNew || document.activeElement !== q) q.focus({preventScroll:true}); const opt = document.getElementById('co-' + S.cmd.i); if (opt) opt.scrollIntoView({block:'nearest'}); } S._cmdNew = false; }
+  else if (S._focusModal) { S._focusModal = false; const m = $('#layers .modal:not(.ghost .modal), #layers .drawer:not(.ghost)'); const t = m && (m.querySelector('[autofocus]') || m.querySelector('input,select,textarea,button:not([data-a="close-modal"]):not([data-a="close-drawer"])')); if (t) t.focus({preventScroll:true}); }
+  else if (fid) { const e = document.getElementById(fid); if (e) { e.focus({preventScroll:true}); try { if (ss != null) e.setSelectionRange(ss, se); } catch (er) {} } }
+  else if (fsig && (!document.activeElement || document.activeElement === document.body)) { const e = $$('#app [data-a="' + fsig[0] + '"]').find(x => fsig[1] == null || x.dataset.x === fsig[1]); if (e) e.focus({preventScroll:true}); }
+  if (!enter && (scrollX !== sx || scrollY !== sy)) window.scrollTo(sx, sy);
   if (r.def.after) try { r.def.after(r.param); } catch (e) { console.error(e); }
 }
 const stickBottom = () => { S._stick = true; };
@@ -1691,8 +1699,8 @@ document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Tab' && (S.modal || S.drawer)) { // keep focus inside the open dialog
     const box = $('#layers .modal') || $('#layers .drawer'); if (!box) return;
     const fs = $$('a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])', box); if (!fs.length) return;
-    if (ev.shiftKey && document.activeElement === fs[0]) { ev.preventDefault(); fs[fs.length - 1].focus(); }
-    else if (!ev.shiftKey && document.activeElement === fs[fs.length - 1]) { ev.preventDefault(); fs[0].focus(); }
+    if (ev.shiftKey && document.activeElement === fs[0]) { ev.preventDefault(); fs[fs.length - 1].focus({preventScroll:true}); }
+    else if (!ev.shiftKey && document.activeElement === fs[fs.length - 1]) { ev.preventDefault(); fs[0].focus({preventScroll:true}); }
   }
 });
 // Drag and drop: [draggable=true][data-drag=kind][data-x=id] onto [data-drop=action][data-x=target]
@@ -1991,13 +1999,13 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   A['au-digit'] = (el) => {
     const v = S.f.au3, i = +el.dataset.i, d = el.value.replace(/\D/g, '');
     const land = e => { e.classList.toggle('has', !!e.value); e.classList.remove('bad', 'pop'); if (e.value) { void e.offsetWidth; e.classList.add('pop'); } };
-    if (d.length > 1) { d.slice(0, 6 - i).split('').forEach((c, j) => { v.d[i + j] = c; const e = $('#au-d' + (i + j)); if (e) { e.value = c; land(e); } }); const n = Math.min(5, i + d.length); $('#au-d' + n).focus(); }
-    else { v.d[i] = d; el.value = d; land(el); if (d && i < 5) $('#au-d' + (i + 1)).focus(); }
+    if (d.length > 1) { d.slice(0, 6 - i).split('').forEach((c, j) => { v.d[i + j] = c; const e = $('#au-d' + (i + j)); if (e) { e.value = c; land(e); } }); const n = Math.min(5, i + d.length); $('#au-d' + n).focus({preventScroll:true}); }
+    else { v.d[i] = d; el.value = d; land(el); if (d && i < 5) $('#au-d' + (i + 1)).focus({preventScroll:true}); }
     if (v.d.join('').length === 6) $('#au-d5').form.requestSubmit();
     return false;
   };
-  document.addEventListener('keydown', (ev) => { const el = ev.target; if (el.dataset && el.dataset.in === 'au-digit' && ev.key === 'Backspace' && !el.value) { const p = $('#au-d' + (+el.dataset.i - 1)); if (p) { p.focus(); p.value = ''; p.classList.remove('has'); S.f.au3.d[+el.dataset.i - 1] = ''; ev.preventDefault(); } } });
-  document.addEventListener('paste', (ev) => { const el = ev.target; if (!(el.dataset && el.dataset.in === 'au-digit')) return; const d = (ev.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6); if (!d) return; ev.preventDefault(); const v = S.f.au3; d.split('').forEach((c, j) => { v.d[j] = c; }); render(); const e = $('#au-d' + Math.min(5, d.length - 1)); if (e) e.focus(); if (d.length === 6) setTimeout(() => { const fm = $('.au-otp'); if (fm) fm.closest('form').requestSubmit(); }, 50); });
+  document.addEventListener('keydown', (ev) => { const el = ev.target; if (el.dataset && el.dataset.in === 'au-digit' && ev.key === 'Backspace' && !el.value) { const p = $('#au-d' + (+el.dataset.i - 1)); if (p) { p.focus({preventScroll:true}); p.value = ''; p.classList.remove('has'); S.f.au3.d[+el.dataset.i - 1] = ''; ev.preventDefault(); } } });
+  document.addEventListener('paste', (ev) => { const el = ev.target; if (!(el.dataset && el.dataset.in === 'au-digit')) return; const d = (ev.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6); if (!d) return; ev.preventDefault(); const v = S.f.au3; d.split('').forEach((c, j) => { v.d[j] = c; }); render(); const e = $('#au-d' + Math.min(5, d.length - 1)); if (e) e.focus({preventScroll:true}); if (d.length === 6) setTimeout(() => { const fm = $('.au-otp'); if (fm) fm.closest('form').requestSubmit(); }, 50); });
   A['au-resend-ready'] = () => {};
   A['au-resend'] = () => { const v = S.f.au3; v.until = Date.now() + 42000; v.err = null; v.d = ['','','','','','']; S.st = ''; toast('We sent a new code.'); };
   A['au-use-email'] = () => { S.f.au3.email = !S.f.au3.email; S.f.au3.until = Date.now() + 42000; toast(S.f.au3.email ? 'We sent the code to your email.' : 'We sent the code on WhatsApp.'); };
@@ -2008,7 +2016,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     v.busy = true; v.err = null; render();
     setTimeout(() => {
       v.busy = false;
-      if (code.length < 6 || code === '000000' || S.st === 'wrong') { v.err = 'wrong'; v.shakeAt = Date.now(); v.d = ['','','','','','']; S.st = ''; render(); const e = $('#au-d0'); if (e) e.focus(); return; }
+      if (code.length < 6 || code === '000000' || S.st === 'wrong') { v.err = 'wrong'; v.shakeAt = Date.now(); v.d = ['','','','','','']; S.st = ''; render(); const e = $('#au-d0'); if (e) e.focus({preventScroll:true}); return; }
       finish();
     }, 500);
     return false;
@@ -2915,7 +2923,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   const TPL = [['Follow up', 'Hello {first}, this is iCaur Alghanim. Are you still interested in the {model}? Reply to this message and we will help you.'], ['New offer', 'Hello {first}, there is a new offer on the {model} this month. Reply YES to hear more.'], ['Test drive reminder', 'Hello {first}, a reminder of your test drive at our Madinah Road showroom. Reply to change the time.']];
   const REPLY = {Arabic:['تمام، شكراً لك', 'طيب، أنتظر اتصالك', 'ممتاز، يناسبني'], English:['Great, thank you.', 'Okay, that works for me.', 'Perfect, talk soon.']};
   const savedFor = l => SAVED.map((s, i) => [i, fill(s, l)]).filter(([, t]) => !G.sq || t.toLowerCase().includes(G.sq.toLowerCase()));
-  const focusTa = () => setTimeout(() => { const t = $('#b-f-agText'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }, 0);
+  const focusTa = () => setTimeout(() => { const t = $('#b-f-agText'); if (t) { t.focus({preventScroll:true}); t.setSelectionRange(t.value.length, t.value.length); } }, 0);
   const cbTxt = l => { if (!l.cb || l.cb.done) return ''; const r = rem(l); return `${esc(l.cb.at)} · ${r < 0 ? `<span class="red b">${mins(-r)} late</span>` : 'in ' + mins(r)}`; };
   const winChip = l => {
     if (l.ch !== 'wa') return ''; const h = 24 - l.lastIn;
@@ -3424,10 +3432,10 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   function toggleMenu(key, el) { const was = S.menu === key; S.menu = was ? null : key; G.popNew = !was; G.focusIn = !was; G.ret = el && el.id; }
   function afterUi() {
     G.popNew = false;
-    if (G.focusIn) { G.focusIn = false; const m = $('#app .menu'); const t = m && m.querySelector('select,button:not([disabled]),a[href],input'); if (t) t.focus(); }
+    if (G.focusIn) { G.focusIn = false; const m = $('#app .menu'); const t = m && m.querySelector('select,button:not([disabled]),a[href],input'); if (t) t.focus({preventScroll:true}); }
     if (G.focusId) { const e = document.getElementById(G.focusId); G.focusId = null; if (e && !S.modal) e.focus({preventScroll:true}); }
   }
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && G.ret && (document.activeElement === document.body || !document.activeElement)) { const e = document.getElementById(G.ret); G.ret = null; if (e) e.focus(); } });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && G.ret && (document.activeElement === document.body || !document.activeElement)) { const e = document.getElementById(G.ret); G.ret = null; if (e) e.focus({preventScroll:true}); } });
 
   /* ---- shared toolbar (LD1, LD2, LD3) ---- */
   function viewSwitch(cur) {
@@ -3875,10 +3883,10 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   const toggleMenu = (key, el) => { const was = S.menu === key; S.menu = was ? null : key; G.popNew = !was; G.focusIn = !was; G.ret = el && el.id; };
   const afterUi = () => {
     G.popNew = false;
-    if (G.focusIn) { G.focusIn = false; const m = $('#app .menu'); const t = m && m.querySelector('button:not([disabled]),a[href]'); if (t) t.focus(); }
+    if (G.focusIn) { G.focusIn = false; const m = $('#app .menu'); const t = m && m.querySelector('button:not([disabled]),a[href]'); if (t) t.focus({preventScroll:true}); }
     if (G.focusId) { const e = document.getElementById(G.focusId); G.focusId = null; if (e && !S.modal) e.focus({preventScroll:true}); }
   };
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && G.ret && (document.activeElement === document.body || !document.activeElement)) { const e = document.getElementById(G.ret); G.ret = null; if (e) e.focus(); } });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && G.ret && (document.activeElement === document.body || !document.activeElement)) { const e = document.getElementById(G.ret); G.ret = null; if (e) e.focus({preventScroll:true}); } });
 
   const WHEN = {qualified:'Lead becomes Qualified', callback:'Customer asks for a call', person:'Customer asks for a person'};
   const BY = {turns:['Take turns','Each agent in order'], least:['Least busy','Fewest open leads'], same:['Same agent as last time','For returning customers']};
@@ -5383,7 +5391,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
   A['cp-dl'] = () => { toast('vina-chat.zip is ready. In this prototype, files are not downloaded.'); };
   A['cp-snippet'] = () => { S.f.cpw.tab = 'Other'; toast('Code snippet steps are under Other.'); };
   A['cp-copy'] = () => {
-    const sel = () => { const e = $('#cp-key'); if (e) { e.focus(); e.select(); } toast('Press Ctrl+C or ⌘C to copy the selected key.'); paintLayers(); };
+    const sel = () => { const e = $('#cp-key'); if (e) { e.focus({preventScroll:true}); e.select(); } toast('Press Ctrl+C or ⌘C to copy the selected key.'); paintLayers(); };
     try { navigator.clipboard.writeText(SITE_KEY).then(() => { toast('Site key copied.'); paintLayers(); }, sel); } catch (e) { sel(); }
     return false;
   };

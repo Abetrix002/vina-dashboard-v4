@@ -759,6 +759,9 @@ function render() {
   }
   // keep focus, caret and inner scroll positions across re-render
   const ae = document.activeElement; const fid = ae && ae.id; let ss = null, se = null;
+  // a control without an id (menu buttons, filters, date) gets focus back by its action, so focus never falls to the page
+  const fsig = !fid && ae && ae !== document.body && ae.dataset && ae.dataset.a ? [ae.dataset.a, ae.dataset.x] : null;
+  const sx = scrollX, sy = scrollY; // a redraw never moves the page; only route changes and explicit scrolls do
   try { ss = ae.selectionStart; se = ae.selectionEnd; } catch (e) {}
   const keep = {}; $$('[data-keep]').forEach(e => { if (e.id) keep[e.id] = e.scrollTop; });
   const snap = snapUI(r.name);
@@ -781,9 +784,11 @@ function render() {
   if (enter) countUp(app());
   replayUI(snap, enter, r.name);
   nameMovers(); originFromTrigger();
-  if (S.cmd) { const q = document.getElementById('cmd-q'); if (q) { if (S._cmdNew || document.activeElement !== q) q.focus(); const opt = document.getElementById('co-' + S.cmd.i); if (opt) opt.scrollIntoView({block:'nearest'}); } S._cmdNew = false; }
-  else if (S._focusModal) { S._focusModal = false; const m = $('#layers .modal:not(.ghost .modal), #layers .drawer:not(.ghost)'); const t = m && (m.querySelector('[autofocus]') || m.querySelector('input,select,textarea,button:not([data-a="close-modal"]):not([data-a="close-drawer"])')); if (t) t.focus(); }
-  else if (fid) { const e = document.getElementById(fid); if (e) { e.focus(); try { if (ss != null) e.setSelectionRange(ss, se); } catch (er) {} } }
+  if (S.cmd) { const q = document.getElementById('cmd-q'); if (q) { if (S._cmdNew || document.activeElement !== q) q.focus({preventScroll:true}); const opt = document.getElementById('co-' + S.cmd.i); if (opt) opt.scrollIntoView({block:'nearest'}); } S._cmdNew = false; }
+  else if (S._focusModal) { S._focusModal = false; const m = $('#layers .modal:not(.ghost .modal), #layers .drawer:not(.ghost)'); const t = m && (m.querySelector('[autofocus]') || m.querySelector('input,select,textarea,button:not([data-a="close-modal"]):not([data-a="close-drawer"])')); if (t) t.focus({preventScroll:true}); }
+  else if (fid) { const e = document.getElementById(fid); if (e) { e.focus({preventScroll:true}); try { if (ss != null) e.setSelectionRange(ss, se); } catch (er) {} } }
+  else if (fsig && (!document.activeElement || document.activeElement === document.body)) { const e = $$('#app [data-a="' + fsig[0] + '"]').find(x => fsig[1] == null || x.dataset.x === fsig[1]); if (e) e.focus({preventScroll:true}); }
+  if (!enter && (scrollX !== sx || scrollY !== sy)) window.scrollTo(sx, sy);
   if (r.def.after) try { r.def.after(r.param); } catch (e) { console.error(e); }
 }
 const stickBottom = () => { S._stick = true; };
@@ -849,8 +854,8 @@ document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Tab' && (S.modal || S.drawer)) { // keep focus inside the open dialog
     const box = $('#layers .modal') || $('#layers .drawer'); if (!box) return;
     const fs = $$('a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])', box); if (!fs.length) return;
-    if (ev.shiftKey && document.activeElement === fs[0]) { ev.preventDefault(); fs[fs.length - 1].focus(); }
-    else if (!ev.shiftKey && document.activeElement === fs[fs.length - 1]) { ev.preventDefault(); fs[0].focus(); }
+    if (ev.shiftKey && document.activeElement === fs[0]) { ev.preventDefault(); fs[fs.length - 1].focus({preventScroll:true}); }
+    else if (!ev.shiftKey && document.activeElement === fs[fs.length - 1]) { ev.preventDefault(); fs[0].focus({preventScroll:true}); }
   }
 });
 // Drag and drop: [draggable=true][data-drag=kind][data-x=id] onto [data-drop=action][data-x=target]

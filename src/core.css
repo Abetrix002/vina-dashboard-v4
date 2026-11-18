@@ -818,3 +818,6 @@ details[open]>summary .ic:last-child{transform:rotate(180deg)}
 
 /* Audit pass: the menu fits a 900px-tall screen even for the VINA team (13 items) */
 @media (max-height:960px) and (min-width:1025px){.nav .item{min-height:36px}.nav .grp{padding-top:10px;padding-bottom:4px}.nav .brand{margin-bottom:12px}.nav .client{min-height:48px;margin-bottom:10px}}
+
+/* The app redraws whole regions; browser scroll anchoring would nudge the page on each redraw */
+html,body{overflow-anchor:none}

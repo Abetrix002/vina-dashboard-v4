@@ -108,10 +108,10 @@
   const toggleMenu = (key, el) => { const was = S.menu === key; S.menu = was ? null : key; G.popNew = !was; G.focusIn = !was; G.ret = el && el.id; };
   const afterUi = () => {
     G.popNew = false;
-    if (G.focusIn) { G.focusIn = false; const m = $('#app .menu'); const t = m && m.querySelector('button:not([disabled]),a[href]'); if (t) t.focus(); }
+    if (G.focusIn) { G.focusIn = false; const m = $('#app .menu'); const t = m && m.querySelector('button:not([disabled]),a[href]'); if (t) t.focus({preventScroll:true}); }
     if (G.focusId) { const e = document.getElementById(G.focusId); G.focusId = null; if (e && !S.modal) e.focus({preventScroll:true}); }
   };
-  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && G.ret && (document.activeElement === document.body || !document.activeElement)) { const e = document.getElementById(G.ret); G.ret = null; if (e) e.focus(); } });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && G.ret && (document.activeElement === document.body || !document.activeElement)) { const e = document.getElementById(G.ret); G.ret = null; if (e) e.focus({preventScroll:true}); } });
 
   const WHEN = {qualified:'Lead becomes Qualified', callback:'Customer asks for a call', person:'Customer asks for a person'};
   const BY = {turns:['Take turns','Each agent in order'], least:['Least busy','Fewest open leads'], same:['Same agent as last time','For returning customers']};
