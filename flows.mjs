@@ -192,4 +192,39 @@ export default [
     const n = lead('l03').m.length; ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', shiftKey:true, bubbles:true})); await tick(); if (lead('l03').m.length !== n) return 'Shift+Enter sent';
     ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', ctrlKey:true, bubbles:true})); await tick(100);
     return (lead('l03').m.some(x => x.k === 'agent' && /Madinah Road showroom/.test(x.text)) && lead('l03').h[0].title === 'Message sent') || 'Ctrl+Enter did not send';`],
+  ['Lead routing: one name for menu, page and tabs; AS3 goes back to it', `${G}
+    signIn('vina'); await tick(150); await go2('rules');
+    const nav = document.querySelector('.nav [aria-current="page"]'); const h = document.querySelector('#app h1');
+    const tabs = [...document.querySelectorAll('#app .rx-tbar .tab')].map(t => t.textContent.replace(/\\d+/g, '').trim()).join('|');
+    if (!nav || !/Lead routing/.test(nav.textContent) || !h || h.textContent.trim().indexOf('Lead routing') !== 0) return 'menu ' + (nav && nav.textContent.trim()) + ' title ' + (h && h.textContent);
+    if (tabs !== 'Qualifying|Rules|Unassigned') return 'tabs ' + tabs;
+    await go2('rule-r2'); if (!/Lead routing/.test(txt())) return 'rule editor has no Lead routing breadcrumb';
+    return !/Assignment rules|Lead assignment/.test(txt()) || 'old name still shown';`],
+  ['Unassigned: row actions are secondary, availability is one line that links to Rules', `${G}
+    signIn('vina'); await tick(150); await go2('unassigned');
+    if (document.querySelector('#app [data-a="as-assign"].pri')) return 'Assign is still a main button';
+    if (/Who is available now/.test(txt())) return 'full availability list repeated';
+    const l = document.querySelector('#app .as-avl'); return (!!l && l.getAttribute('href') === '#rules' && /available/.test(l.textContent)) || 'no availability line';`],
+  ['Agent editor shows one section at a time; the Sections list switches it', `${G}
+    signIn('vina'); await tick(150); S.su.a2sec = 1; await go2('agent-sara');
+    if (document.querySelectorAll('#app .ag2-sec').length !== 1) return 'sections shown ' + document.querySelectorAll('#app .ag2-sec').length;
+    if (!/changed/.test(document.querySelector('.ag2-navh').textContent)) return 'changed count gone';
+    const b = document.getElementById('ag2-nb3'); b.focus(); b.click(); await tick();
+    const cur = document.querySelector('.ag2-secnav [aria-current="true"]');
+    if (!cur || cur.id !== 'ag2-nb3' || !/Rules/.test(document.querySelector('#ag2-panel h2').textContent)) return 'did not switch to Rules';
+    return document.activeElement && document.activeElement.id === 'ag2-nb3' || 'focus lost to ' + (document.activeElement && document.activeElement.tagName);`],
+  ['Actions: lower sections start closed with a summary line and open on click', `${G}
+    signIn('vina'); await tick(150); S.su.a3open = null; S.su.a3sel = 'testdrive'; await go2('actions');
+    const d = [...document.querySelectorAll('#app details.ag2-cs')]; if (d.length !== 3 || d.some(x => x.open)) return 'collapsibles ' + d.length + ' open ' + d.filter(x => x.open).length;
+    if (!/3 cases:/.test(d[2].querySelector('summary').textContent)) return 'no summary line';
+    d[2].querySelector('summary').click(); await tick();
+    const f = document.querySelector('#app details.ag2-cs[open] .ag2-failv'); return (!!f && f.tagName === 'TEXTAREA') || 'did not open, or the answer box does not wrap';`],
+  ['Users: the last account admin cannot be demoted or turned off', `${G}
+    signIn('vina'); await tick(150); await go2('users');
+    const sel = document.getElementById('cp-r-sami'); if (!sel) return 'no role menu for Sami';
+    sel.value = 'Manager'; sel.dispatchEvent(new Event('change', {bubbles:true})); await tick();
+    if (U.sami.label !== 'Account admin' || document.getElementById('cp-r-sami').value !== 'Account admin') return 'Sami was demoted';
+    if (!/only account admin/.test(txt())) return 'no reason given';
+    const off = document.querySelector('[data-a="cp-off"][data-x="sami"]'); off.click(); await tick();
+    return !/Sami Al-Rashid can no longer log in/.test(txt()) || 'Sami was turned off';`],
 ];

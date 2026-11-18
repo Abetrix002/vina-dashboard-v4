@@ -425,6 +425,8 @@
   const used = () => S.st === 'limit' ? LIMIT : PEOPLE.filter(p => p.status !== 'Off').length;
   const teamOf = p => RK[p.role] === 'sales' ? p.showroom : RK[p.role] === 'cc' ? 'Call centre' : 'Management';
   const PST = {'Active':'green','Invite waiting':'amber','Off':'grey'};
+  const lastAdmin = p => p.role === 'Account admin' && p.status === 'Active' && PEOPLE.filter(x => x.role === 'Account admin' && x.status === 'Active').length === 1;
+  const LAST_WHY = ' is the only account admin. Make someone else an account admin first.';
   const seatBar = (u, extra) => { const pct = Math.min(100, u / LIMIT * 100), tone = u > LIMIT ? 'red' : u >= LIMIT ? 'red' : u >= LIMIT - 2 ? 'amber' : 'green'; return `<div class="cp-seat"><div class="row tight small" style="justify-content:space-between"><span><b class="num">${u}</b> <span class="mute">of ${LIMIT} users on the plan</span></span>${extra || ''}</div><div class="bar-h" role="progressbar" aria-label="Users on the plan" aria-valuenow="${u}" aria-valuemin="0" aria-valuemax="${LIMIT}"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div></div>`; };
   if (!S.f.cpu) S.f.cpu = {q:'', role:''};
   R('users', {id:'U1', title:'Users', roles:['vina'], states:[['loading','Loading'],['error','Could not load'],['limit','User limit reached']], render() {
@@ -434,9 +436,9 @@
     const can = (k) => ({'Open the Manager dashboard':['Yes','—','—'],'See all conversations and leads':['View only','—','—'],'Work their own chats and leads':['—','Yes','Yes'],'Send a lead to sales':['—','Yes','—'],'Book test drives':['—','—','Yes'],'Download CSV':['Yes','—','—'],'Use the control panel':['Later','—','—']})[k];
     const table = rows.length ? `<div class="tbl-wrap"><table class="tbl cp-utbl"><thead><tr><th>Name</th><th>Role</th><th>Team or showroom</th><th>Status</th><th>Last active</th><th><span class="sr">Actions</span></th></tr></thead><tbody>
       ${rows.map(p => `<tr class="${flashCls(p.id)}"><td><div class="who">${av(p.name)}<div style="min-width:0"><div class="nm">${esc(p.name)}</div><div class="xs mute">${esc(p.email)}</div></div></div></td>
-        <td><label class="sr" for="cp-r-${p.id}">Role for ${esc(p.name)}</label><select class="inp cp-rsel" id="cp-r-${p.id}" data-ch="cp-role" data-x="${p.id}">${ROLES.map(r => `<option ${r === p.role ? 'selected' : ''}>${r}</option>`).join('')}</select></td>
+        <td><label class="sr" for="cp-r-${p.id}">Role for ${esc(p.name)}</label><select class="inp cp-rsel" id="cp-r-${p.id}" data-ch="cp-role" data-x="${p.id}" ${lastAdmin(p) ? `aria-describedby="cp-la-${p.id}"` : ''}>${ROLES.map(r => `<option ${r === p.role ? 'selected' : lastAdmin(p) ? 'disabled' : ''}>${r}</option>`).join('')}</select>${lastAdmin(p) ? `<div class="xs mute" id="cp-la-${p.id}" style="margin-top:4px">The only account admin</div>` : ''}</td>
         <td class="mute">${esc(teamOf(p))}</td><td>${chipC(p.status, PST[p.status], true)}</td><td class="mute num">${esc(p.last)}</td>
-        <td class="r">${p.status === 'Invite waiting' ? `<button type="button" class="btn sm" data-a="cp-resend" data-x="${p.id}" aria-label="Resend invite to ${esc(p.name)}">${ic('send', 14)}Resend</button>` : p.status === 'Active' ? `<button type="button" class="btn sm ghost" data-a="cp-off" data-x="${p.id}" aria-label="Turn off ${esc(p.name)}">Turn off</button>` : `<button type="button" class="btn sm" data-a="cp-on" data-x="${p.id}" ${full ? 'disabled title="All users on the plan are used"' : ''} aria-label="Turn on ${esc(p.name)}">Turn on</button>`}</td></tr>`).join('')}
+        <td class="r">${p.status === 'Invite waiting' ? `<button type="button" class="btn sm" data-a="cp-resend" data-x="${p.id}" aria-label="Resend invite to ${esc(p.name)}">${ic('send', 14)}Resend</button>` : p.status === 'Active' ? `<button type="button" class="btn sm ghost" data-a="cp-off" data-x="${p.id}" aria-label="Turn off ${esc(p.name)}" ${lastAdmin(p) ? `aria-disabled="true" title="${esc(p.name + LAST_WHY)}"` : ''}>Turn off</button>` : `<button type="button" class="btn sm" data-a="cp-on" data-x="${p.id}" ${full ? 'disabled title="All users on the plan are used"' : ''} aria-label="Turn on ${esc(p.name)}">Turn on</button>`}</td></tr>`).join('')}
     </tbody></table></div>` : `<div class="card">${empty('search', 'No one matches', 'Nobody on the team has that name or role. Clear the search or add people.', `<button type="button" class="btn" data-a="cp-u-clear">Clear search</button>`)}</div>`;
     const waiting = PEOPLE.filter(p => p.status === 'Invite waiting').length;
     const body = stateWrap(`
@@ -450,13 +452,15 @@
   A['cp-u-role'] = el => { S.f.cpu.role = el.dataset.x; };
   A['cp-u-clear'] = () => { S.f.cpu.q = ''; S.f.cpu.role = ''; };
   A['cp-role'] = el => {
-    const p = PEOPLE.find(x => x.id === el.dataset.x); const was = p.role; p.role = el.value;
+    const p = PEOPLE.find(x => x.id === el.dataset.x); const was = p.role;
+    if (el.value !== was && lastAdmin(p)) { el.value = was; toast(p.name + LAST_WHY); return; }
+    p.role = el.value;
     if (U[p.id]) { U[p.id].label = p.role; U[p.id].role = RK[p.role]; U[p.id].team = teamOf(p); }
     flash(p.id);
-    toast(p.name + ' is now ' + (p.role === 'Account admin' ? 'an ' : 'a ') + p.role + '. It applies next time they log in.', () => { p.role = was; if (U[p.id]) { U[p.id].label = was; U[p.id].role = RK[was]; } flash(p.id); render(); });
+    toast(p.name + ' is now ' + (p.role === 'Account admin' ? 'an ' : 'a ') + p.role + '. It applies next time they log in.', () => { if (lastAdmin(p)) { toast(p.name + LAST_WHY); render(); return; } p.role = was; if (U[p.id]) { U[p.id].label = was; U[p.id].role = RK[was]; } flash(p.id); render(); });
   };
   A['cp-resend'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); p.last = 'Invited ' + nowStr().replace('Today ', 'today '); flash(p.id); toast('Invite sent again to ' + p.email + '.'); };
-  A['cp-off'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); p.status = 'Off'; flash(p.id); toast(p.name + ' can no longer log in. Their leads stay with them until reassigned.', () => { p.status = 'Active'; flash(p.id); render(); }); };
+  A['cp-off'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); if (lastAdmin(p)) { toast(p.name + LAST_WHY); return; } p.status = 'Off'; flash(p.id); toast(p.name + ' can no longer log in. Their leads stay with them until reassigned.', () => { p.status = 'Active'; flash(p.id); render(); }); };
   A['cp-on'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); p.status = 'Active'; flash(p.id); toast(p.name + ' can log in again.'); };
 
   /* ---------- U2 Add people ---------- */
@@ -552,7 +556,7 @@
   R('plan', {id:'B1', title:'Plan and usage', roles:['vina'], states:[['loading','Loading'],['error','Could not load'],['paid','All paid']], render() {
     const inv = INV.map(i => Object.assign({}, i, {paid: i.paid || S.st === 'paid'}));
     const conv = 2436, convMax = 10000, u = used();
-    const lines = [['Pro plan','November 2026',750,'navy'],['Meta WhatsApp charges','Passed through at cost · 1,742 conversations',418,'green'],['AI usage','Passed through at cost',236,'teal'],['Phone minutes', CS.ph.st === 'ok' ? 'Passed through at cost · 0 minutes' : 'Not used',0,'grey']];
+    const lines = [['Pro plan','November 2026',750,'ch-c'],['Meta WhatsApp charges','Passed through at cost · 1,742 conversations',418,'ch-b'],['AI usage','Passed through at cost',236,'ch-f'],['Phone minutes', CS.ph.st === 'ok' ? 'Passed through at cost · 0 minutes' : 'Not used',0,'ch-d']];
     const sub = lines.reduce((a, l) => a + l[2], 0);
     const meter = (k, v, of, pct, tone, n) => `<div class="card cp-meter col tight"><span class="cp-kt">${mic(k, 13)}${k}</span><div class="row tight" style="align-items:baseline"><span class="cp-big" ${countAttr(v)}>${v}</span><span class="mute">of ${of}</span></div><div class="bar-h" role="progressbar" aria-label="${k}" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div><span class="xs mute">${n}</span></div>`;
     const unpaid = inv.filter(i => !i.paid);
@@ -563,8 +567,8 @@
         ${meter('Conversations this month', num(conv), num(convMax), conv / convMax * 100, 'horizon', '1 to 7 November · resets 1 December')}
         ${meter('Users', String(u), LIMIT, u / LIMIT * 100, u >= LIMIT ? 'red' : u >= LIMIT - 2 ? 'amber' : 'green', 'Agents: 3 of 3 · <a href="#users">Users and roles</a>')}
       </div>
-      ${sec('This month so far', '1 to 7 November 2026 · Meta and AI charges are passed through at cost, with nothing added.', `<div class="grow-x" style="margin-bottom:12px"><div class="cp-stack" role="img" aria-label="Charges so far: ${lines.filter(l => l[2]).map(l => l[0] + ' ' + sar(l[2])).join(', ')}">${lines.filter(l => l[2]).map(l => `<i style="flex:${l[2]} 1 0;background:var(--${l[3]}-f)"></i>`).join('')}</div></div>
-        <div class="legend" style="margin-bottom:12px">${lines.filter(l => l[2]).map(l => `<span><i style="background:var(--${l[3]}-f)"></i>${l[0]}</span>`).join('')}</div>
+      ${sec('This month so far', '1 to 7 November 2026 · Meta and AI charges are passed through at cost, with nothing added.', `<div class="grow-x" style="margin-bottom:12px"><div class="cp-stack" role="img" aria-label="Charges so far: ${lines.filter(l => l[2]).map(l => l[0] + ' ' + sar(l[2])).join(', ')}">${lines.filter(l => l[2]).map(l => `<i style="flex:${l[2]} 1 0;background:var(--${l[3]})"></i>`).join('')}</div></div>
+        <div class="legend" style="margin-bottom:12px">${lines.filter(l => l[2]).map(l => `<span><i style="background:var(--${l[3]})"></i>${l[0]}</span>`).join('')}</div>
         <div class="tbl-wrap" style="box-shadow:none"><table class="tbl"><tbody>${lines.map(([k, n, v]) => `<tr><td><b>${k}</b><div class="xs mute">${n}</div></td><td class="r num b">${sar(v)}</td></tr>`).join('')}
         <tr><td><b>Total so far</b><div class="xs mute">Before VAT</div></td><td class="r num bb">${sar(sub)}</td></tr><tr><td class="mute">VAT 15%</td><td class="r num mute">${sar(Math.round(sub * VAT * 100) / 100)}</td></tr><tr><td><b>Total with VAT</b></td><td class="r num bb" style="font-size:14px">${sar(withVat(sub))}</td></tr></tbody></table></div>`)}
       ${sec('Invoices', 'Amounts include 15% VAT.', `<div class="tbl-wrap" style="box-shadow:none"><table class="tbl cp-inv"><thead><tr><th>Month</th><th>Invoice</th><th class="r">Amount</th><th>Status</th><th><span class="sr">Action</span></th></tr></thead><tbody>${inv.map(i => `<tr class="${flashCls(i.no)}"><td class="b">${i.m}</td><td class="mute num">${i.no}</td><td class="r num b">${sar(withVat(i.base))}</td><td>${i.paid ? chipC('Paid', 'green', true) : chipC('Not paid', 'red', true)}</td><td class="r">${i.paid ? `<button type="button" class="btn sm ghost" data-a="cp-inv-dl" data-x="${i.no}" aria-label="Download ${i.no}">${ic('download', 14)}Download</button>` : `<button type="button" class="btn sm" data-a="cp-pay" data-x="${i.no}">Pay now</button>`}</td></tr>`).join('')}</tbody></table></div>`)}`);

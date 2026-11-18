@@ -58,7 +58,8 @@ R('agent', {id:'A2', title:'Agent editor', roles:['vina'], states:[['leaving','U
   const secs = STAGES.map(([t], i) => ({n:i + 1, t, dot:secDirty(id, i + 1)}));
   const k = counts(id); const r = runOf(id);
   const sum7 = `<div class="col tight">${r ? `<div class="row tight">${chipC(k.pass + ' passed', 'green')}${k.fail ? chipC(k.fail + ' failed', 'red') : ''}${k.check ? chipC(k.check + ' to check', 'amber') : ''}<span class="xs mute">${esc(r.when)} · ${r.ver === 'draft' ? 'draft' : 'live version'}${fresh(id) ? '' : ' · before your last change'}</span></div>` : '<p class="small mute">Not run yet.</p>'}<a class="btn" href="#scenarios" data-keepdraft style="align-self:flex-start">${ic('tests', 14)}Open test scenarios</a></div>`;
-  const nd = secs.filter(x => x.dot).length;
+  const nd = secs.filter(x => x.dot).length; const on = secs[(SU.a2sec || 1) - 1] || secs[0];
+  const stepBtn = (s, t) => s ? `<button type="button" class="btn sm" data-a="ag2-jump" data-x="${s.n}">${t === 'prev' ? ic('chevL', 14) + s.t : 'Next: ' + s.t + ic('arrowR', 14)}</button>` : '';
   const stat = `${a.st === 'paused' ? pulse('amber') + 'Paused' : pulse('green') + 'Live'} · version ${SU.ver[id]} · ${n ? `<b class="amber">${n} unsaved change${n > 1 ? 's' : ''}</b>` : 'no unsaved changes'}`;
   const body = `<div class="card ag2-bar" id="ag2-bar" role="region" aria-label="${esc(c.agent.name)} status">
       <a class="ibtn sm bare ag2-back" href="#agents" aria-label="Back to agents" title="Agents">${ic('chevL', 16)}</a>${agAv(id)}
@@ -66,13 +67,15 @@ R('agent', {id:'A2', title:'Agent editor', roles:['vina'], states:[['leaving','U
       <div class="row tight ag2-btns"><button type="button" class="ibtn" data-a="ag2-hist" data-x="${id}" aria-label="Change history" title="Change history">${ic('history', 16)}</button><button type="button" class="btn ghost" data-a="ag2-discard" data-x="${id}" ${n ? '' : 'disabled'}>Discard</button><a class="btn" href="#scenarios" data-keepdraft>${ic('play', 14)}Run tests</a><button type="button" class="btn pri" data-a="ag2-save" data-x="${id}" ${!n ? 'disabled' : b ? 'aria-disabled="true" aria-describedby="ag2-why"' : ''}>Save changes</button></div>
       ${n && b ? `<div class="ag2-block" id="ag2-why" role="status">${ic('lock', 15)}<div class="grow">${b === 'fail' ? `<b>Saving is blocked.</b> ${k.fail} test scenario${k.fail > 1 ? 's' : ''} failed on these changes.` : `<b>Saving is blocked</b> until the test scenarios run on these changes.`}</div><a class="btn sm" href="#scenarios" data-keepdraft>${b === 'fail' ? 'See what failed' : 'Run the tests'}</a></div>` : ''}</div>
     <div class="ag2-ed">
-      <nav class="ag2-secnav" aria-label="Sections"><div class="eyebrow ag2-navh">Sections${nd ? ` · <span class="amber">${nd} changed</span>` : ''}</div>${secs.map(s => `<button type="button" data-a="ag2-jump" data-x="${s.n}" class="${s.dot ? 'dirty' : ''}"><span class="su-num">${s.n}</span><span class="grow">${s.t}</span>${s.dot ? '<span class="ag2-dot" title="Unsaved change"><span class="sr">Unsaved change</span></span>' : ''}</button>`).join('')}</nav>
-      <div class="col loose" style="min-width:0">${secs.map(s => `<section class="card ag2-sec ${s.dot ? 'dirty' : ''}" id="ag2-s${s.n}" aria-labelledby="ag2-h${s.n}"><div class="card-h"><span class="ag2-n">${s.n}</span><h2 id="ag2-h${s.n}">${s.t}</h2>${s.dot ? chipC('Unsaved', 'amber', true) : ''}${s.n === 5 ? `<span class="sp"></span><a class="btn sm ghost" href="#actions" data-keepdraft>Open all actions</a>` : ''}</div>${s.n === 7 ? sum7 : s.n === 5 ? BODY[5](id, true) : BODY[s.n](id)}</section>`).join('')}</div>
+      <nav class="ag2-secnav" aria-label="Sections"><div class="eyebrow ag2-navh">Sections${nd ? ` · <span class="amber">${nd} changed</span>` : ''}</div>${secs.map(s => `<button type="button" id="ag2-nb${s.n}" data-a="ag2-jump" data-x="${s.n}" class="${s.dot ? 'dirty' : ''}" aria-controls="ag2-panel" ${s === on ? 'aria-current="true"' : ''}><span class="su-num">${s.n}</span><span class="grow">${s.t}</span>${s.dot ? '<span class="ag2-dot" title="Unsaved change"><span class="sr">Unsaved change</span></span>' : ''}</button>`).join('')}</nav>
+      <div class="col loose" style="min-width:0">${[on].map(s => `<section class="card ag2-sec ${s.dot ? 'dirty' : ''}" id="ag2-panel" aria-labelledby="ag2-h${s.n}"><div class="card-h"><span class="ag2-n">${s.n}</span><h2 id="ag2-h${s.n}" tabindex="-1">${s.t}</h2>${s.dot ? chipC('Unsaved', 'amber', true) : ''}${s.n === 5 ? `<span class="sp"></span><a class="btn sm ghost" href="#actions" data-keepdraft>Open all actions</a>` : ''}</div>${s.n === 7 ? sum7 : s.n === 5 ? BODY[5](id, true) : BODY[s.n](id)}
+        <div class="row ag2-pn">${stepBtn(secs[s.n - 2], 'prev')}<span class="sp"></span>${stepBtn(secs[s.n], 'next')}</div></section>`).join('')}</div>
       <div class="ag2-chatcol">${chatBox('a2-' + id, id, {sub:'Uses your unsaved changes', seed: id === 'sara' ? SARA_SEED : null})}</div>
     </div>`;
   return shell({nav:'agents', title:'Agent editor', cp:true, viewOnly:false, crumb:null, body});
-}, after() { const bar = document.getElementById('ag2-bar'), ed = document.querySelector('.ag2-ed'); if (bar && ed) ed.style.setProperty('--stk', (getComputedStyle(bar).position === 'sticky' ? 77 + bar.offsetHeight + 14 : 88) + 'px'); if (SU.a2jump) { const e = document.getElementById('ag2-s' + SU.a2jump); SU.a2jump = 0; if (e) e.scrollIntoView({block:'start'}); } }});
-A['ag2-jump'] = (el) => { const e = document.getElementById('ag2-s' + el.dataset.x); if (e) { e.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'}); const h = e.querySelector('h2'); if (h) { h.tabIndex = -1; h.focus({preventScroll:true}); } } return false; };
+}, after() { const bar = document.getElementById('ag2-bar'), ed = document.querySelector('.ag2-ed'); if (bar && ed) ed.style.setProperty('--stk', (getComputedStyle(bar).position === 'sticky' ? 77 + bar.offsetHeight + 14 : 88) + 'px'); if (SU.a2jump) { const fx = SU.a2jump === 'focus'; SU.a2jump = 0; const e = document.getElementById('ag2-panel'); if (e && e.getBoundingClientRect().top < 0) e.scrollIntoView({block:'start'}); const h = e && e.querySelector('h2'); if (h && fx) h.focus({preventScroll:true}); } }});
+// the clicked switcher keeps focus (render restores it by id); the bottom Previous/Next buttons hand focus to the new heading
+A['ag2-jump'] = (el) => { SU.a2sec = Number(el.dataset.x); SU.a2jump = el.closest('.ag2-secnav') ? 1 : 'focus'; };
 A['ag2-discard'] = (el) => { const id = el.dataset.x; const prev = clone(SU.drafts[id]); SU.drafts[id] = clone(SU.live[id]); toast('Changes discarded', () => { SU.drafts[id] = prev; render(); }); };
 A['ag2-save'] = (el) => {
   const id = el.dataset.x; if (!unsaved(id) || blocked(id)) return;
@@ -120,6 +123,13 @@ R('actions', {id:'A3', title:'Actions', roles:['vina'], states:[['needs','Needs 
       <div style="min-width:0"><span class="sr">Step ${i + 1}: </span>${ed ? `<div class="col tight"><label class="sr" for="b-${(base + '.steps.' + i + '.t').replace(/\./g, '-')}">Step name</label><input class="inp" ${bind(base + '.steps.' + i + '.t')}><label class="sr" for="b-${(base + '.steps.' + i + '.d').replace(/\./g, '-')}">What happens</label><input class="inp" ${bind(base + '.steps.' + i + '.d')} placeholder="What happens in this step"><div class="row tight"><label class="sr" for="b-${(base + '.steps.' + i + '.k').replace(/\./g, '-')}">Step type</label>${bindSel(base + '.steps.' + i + '.k', Object.keys(STEP_T).map(x => [x, STEP_T[x][0]]))}<button type="button" class="btn sm pri" data-a="ag2-step-done">Done</button><button type="button" class="btn sm danger-o" data-a="ag2-step-del" data-x="${i}">Remove</button></div></div>`
         : `<div class="row tight"><span class="chip c-${t[1]} ag2-tt">${ic(TI[s.k] || 'bolt', 12)}${t[0]}</span><b class="small">${esc(s.t)}</b></div><div class="xs mute" style="margin-top:4px">${esc(s.d) || 'No details yet'}</div>`}</div>
       ${ed ? '<span></span>' : `<div class="row tight nowrap"><button type="button" class="ibtn sm bare" data-a="ag2-step-mv" data-x="${i}|-1" aria-label="Move step ${i + 1} up" ${i === 0 ? 'disabled' : ''}>${ic('chevU', 15)}</button><button type="button" class="ibtn sm bare" data-a="ag2-step-mv" data-x="${i}|1" aria-label="Move step ${i + 1} down" ${i === w.steps.length - 1 ? 'disabled' : ''}>${ic('chevD', 15)}</button><button type="button" class="btn sm ghost" data-a="ag2-step-ed" data-x="${k + i}">Edit</button></div>`}</li>`; }).join('');
+  const A3O = SU.a3open || (SU.a3open = {fields:false, msg:false, fails:false});
+  // collapsible section: <details> with the summary line shown while closed
+  const csec = (key, n, title, line, inner) => `<details class="card ag2-cs" ${A3O[key] ? 'open' : ''}><summary data-a="ag2-cs" data-x="${key}"><span class="ag2-n">${n}</span><span class="grow" style="min-width:0"><span class="h2">${title}</span>${A3O[key] ? '' : `<span class="xs mute ag2-csl" dir="auto">${line}</span>`}</span>${ic('chevD', 16)}</summary><div class="col ag2-csb">${inner}</div></details>`;
+  const req = w.fields.filter(f => f.req).map(f => f.t), opt = w.fields.length - req.length;
+  const fieldsLine = w.fields.length ? (req.length ? req.join(', ') + ' required' : 'Nothing required') + (opt ? ' · ' + opt + ' optional' : '') : 'No details needed';
+  const msgLine = (w.msg[T] || w.msg.ar || w.msg.en || 'No message for this action').replace(/\s+/g, ' ');
+  const failsLine = w.fails.length ? w.fails.length + (w.fails.length === 1 ? ' case: ' : ' cases: ') + w.fails.map(f => f.k || 'New case').join(' · ') : 'No cases yet';
   const sec = (n, title, sub) => `<div class="row tight nowrap"><span class="ag2-n">${n}</span><h2 class="h2">${title}</h2></div>${sub ? `<p class="small mute">${sub}</p>` : ''}`;
   const finP = w.uses ? Math.round(w.fin / w.uses * 100) : 0;
   const right = `<div class="col loose ag2-right ${off ? 'ag2-off' : ''}">
@@ -134,21 +144,20 @@ R('actions', {id:'A3', title:'Actions', roles:['vina'], states:[['needs','Needs 
       <label class="sr" for="b-${(base + '.when').replace(/\./g, '-')}">When should VINA do this?</label><textarea class="inp" rows="2" ${bindTa(base + '.when')[0]}>${bindTa(base + '.when')[1]}</textarea>
       <div class="row tight"><span class="xs mute">Customers say:</span>${w.says.map((x, i) => `<span class="tokens" style="min-height:32px;padding:2px"><span class="tok">${txt(x)}<button type="button" data-a="su-del" data-x="${base}.says#${i}" aria-label="Remove example">${ic('x', 12)}</button></span></span>`).join('')}</div>
       <form class="row tight nowrap" data-a="ag2-say" data-x="${aid}"><label class="sr" for="b-f-agSay">Add an example of what customers say</label><input class="inp grow" ${bind('f.agSay')} dir="auto" placeholder="Add an example in Arabic or English"><button type="submit" class="btn">Add</button></form></section>
-    <section class="card col">${sec(2, 'What VINA must know first', 'VINA asks for anything missing, one question at a time.')}
+    ${csec('fields', 2, 'What VINA must know first', esc(fieldsLine), `<p class="small mute">VINA asks for anything missing, one question at a time.</p>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Detail</th><th>Required</th><th>How VINA gets it</th><th><span class="sr">Remove</span></th></tr></thead><tbody>${w.fields.map((f, i) => `<tr><td><label class="sr" for="b-${(base + '.fields.' + i + '.t').replace(/\./g, '-')}">Detail</label><input class="inp" style="min-width:120px" ${bind(base + '.fields.' + i + '.t')}></td><td>${sw(f.req, 'su-tog', base + '.fields.' + i + '.req', f.t + ' required')}</td><td><label class="sr" for="b-${(base + '.fields.' + i + '.how').replace(/\./g, '-')}">How VINA gets it</label>${bindSel(base + '.fields.' + i + '.how', [...new Set([f.how, 'Asks', 'Takes it from WhatsApp', 'Already known'])])}</td><td class="r"><button type="button" class="ibtn sm bare" data-a="su-del" data-x="${base}.fields#${i}" aria-label="Remove ${esc(f.t)}">${ic('trash', 15)}</button></td></tr>`).join('') || `<tr><td colspan="4" class="mute">No details needed.</td></tr>`}</tbody></table></div>
-      <button type="button" class="btn sm" data-a="ag2-field-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a detail</button></section>
+      <button type="button" class="btn sm" data-a="ag2-field-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a detail</button>`)}
     <section class="card col">${sec(3, 'What happens', 'The steps run in this order, top to bottom. Drag to reorder, or use the arrows.')}
       ${steps ? `<ol class="ag2-flow">${steps}</ol>` : '<p class="small mute">No steps yet. Add the first one below.</p>'}
       <div class="row tight"><span class="xs mute">Add a step:</span>${Object.keys(STEP_T).map(x => `<button type="button" class="fchip" data-a="ag2-step-add" data-x="${x}">${ic('plus', 12)}${STEP_T[x][0]}</button>`).join('')}</div></section>
-    <div class="su-g2">
-      <section class="card col">${sec(4, 'Message VINA sends')}
+    ${csec('msg', 4, 'Message VINA sends', esc(msgLine), `
         <div class="seg" role="tablist" aria-label="Message language" style="align-self:flex-start">${[['ar','Arabic'],['en','English']].map(([kk, t]) => `<button type="button" role="tab" aria-selected="${T === kk}" data-a="su-set" data-x="su.a3tab" data-v="${kk}">${t}</button>`).join('')}</div>
         <label class="sr" for="b-${(base + '.msg.' + T).replace(/\./g, '-')}">Message in ${T === 'ar' ? 'Arabic' : 'English'}</label><textarea class="inp" rows="3" ${T === 'ar' ? 'dir="rtl"' : ''} ${bindTa(base + '.msg.' + T, true)[0]}>${bindTa(base + '.msg.' + T)[1]}</textarea>
         <div class="msg vina ag2-msgprev" ${T === 'ar' ? 'dir="rtl"' : ''}><div class="bub ${T === 'ar' ? 'ar' : ''}">${w.msg[T] ? blanks(w.msg[T]) : '<span class="mute">No message for this action.</span>'}</div></div>
-        <div class="xs mute">Blue words are filled in by VINA, for example <span class="blank">{name}</span> <span class="blank">{day}</span> <span class="blank">{time}</span>.</div></section>
-      <section class="card col">${sec(5, 'If something goes wrong')}
-        ${w.fails.map((f, i) => `<div class="col tight ag2-fail"><label class="sr" for="b-${(base + '.fails.' + i + '.k').replace(/\./g, '-')}">What goes wrong</label><input class="inp b" ${bind(base + '.fails.' + i + '.k')}><label class="sr" for="b-${(base + '.fails.' + i + '.v').replace(/\./g, '-')}">What VINA does</label><div class="row tight nowrap"><span class="mute" aria-hidden="true">${ic('arrowR', 14)}</span><input class="inp grow" ${bind(base + '.fails.' + i + '.v')}><button type="button" class="ibtn sm bare" data-a="su-del" data-x="${base}.fails#${i}" aria-label="Remove">${ic('trash', 15)}</button></div></div>`).join('')}
-        <button type="button" class="btn sm" data-a="ag2-fail-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a case</button></section></div>
+        <div class="xs mute">Blue words are filled in by VINA, for example <span class="blank">{name}</span> <span class="blank">{day}</span> <span class="blank">{time}</span>.</div>`)}
+    ${csec('fails', 5, 'If something goes wrong', esc(failsLine), `
+        ${w.fails.map((f, i) => `<div class="col tight ag2-fail"><label class="sr" for="b-${(base + '.fails.' + i + '.k').replace(/\./g, '-')}">What goes wrong</label><input class="inp b" ${bind(base + '.fails.' + i + '.k')}><label class="sr" for="b-${(base + '.fails.' + i + '.v').replace(/\./g, '-')}">What VINA does</label><div class="row tight nowrap"><span class="mute" aria-hidden="true">${ic('arrowR', 14)}</span><textarea class="inp grow ag2-failv" rows="2" ${bindTa(base + '.fails.' + i + '.v')[0]}>${bindTa(base + '.fails.' + i + '.v')[1]}</textarea><button type="button" class="ibtn sm bare" data-a="su-del" data-x="${base}.fails#${i}" aria-label="Remove">${ic('trash', 15)}</button></div></div>`).join('')}
+        <button type="button" class="btn sm" data-a="ag2-fail-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a case</button>`)}
     <section class="card">${`<div class="sw-row">${sw(w.ask, 'su-tog', base + '.ask', 'Ask the customer before acting')}<span class="grow"><b class="small">Ask the customer before acting</b><span class="xs mute" style="display:block">VINA repeats what it will do and waits for "yes".</span></span></div>`}</section>
   </div>`;
   return shell({nav:'actions', title:'Actions', cp:true, viewOnly:false, tools:pick('Agent:'), search:false, body:`${pickM()}<div class="ag2-a3"><aside class="card ag2-alist" aria-label="Actions"><div class="row nowrap">${agAv(id, 'sm')}<b class="grow">${esc(agentName(id))} can</b><button type="button" class="btn sm" data-a="ag2-new-act">${ic('plus', 14)}New action</button></div>${list}</aside>${right}</div>`});
@@ -159,6 +168,7 @@ A['ag2-a-reset'] = (el) => { delete SU.a3[wkey(cur(), el.dataset.x)]; if (S.st =
 A['ag2-say'] = (fm) => { const v = (S.f.agSay || '').trim(); if (!v) return false; work(cur(), fm.dataset.x).says.push(v); S.f.agSay = ''; };
 A['ag2-field-add'] = (el) => { work(cur(), el.dataset.x).fields.push({t:'New detail', req:false, how:'Asks'}); };
 A['ag2-fail-add'] = (el) => { work(cur(), el.dataset.x).fails.push({k:'', v:''}); };
+A['ag2-cs'] = (el, ev) => { if (ev) ev.preventDefault(); const o = SU.a3open; o[el.dataset.x] = !o[el.dataset.x]; };
 const curW = () => work(cur(), SU.a3sel);
 A['ag2-step-add'] = (el) => { const w = curW(); w.steps.push({t:'New step', k:el.dataset.x, d:''}); SU.a3step = wkey(cur(), SU.a3sel) + (w.steps.length - 1); };
 A['ag2-step-ed'] = (el) => { SU.a3step = el.dataset.x; };
@@ -218,7 +228,7 @@ A['ag2-sc-sel'] = (el) => { if (SU.a4.sel !== el.dataset.x) SU._a4seq = Date.now
 A['ag2-sc-run'] = () => { runAll(cur()); return false; };
 A['ag2-sc-one'] = (el) => { runAll(cur(), [el.dataset.x]); return false; };
 A['ag2-sc-mark'] = (el) => { const [sid, m] = el.dataset.x.split('|'); const s = SU.scen.find(x => x.id === sid); s.mark = m; const id = cur(); const r = runOf(id); if (r) { const e = evalScen(s, id); r.res[sid] = e.res; r.det[sid] = e; } toast(m === 'right' ? 'Marked as right. The agent will answer like this again.' : 'Marked as wrong. Fix the knowledge or rules, then run again.'); };
-A['ag2-fix'] = (el) => { const [id, kind] = el.dataset.x.split('|'); const sec = {file:4, rules:3, agent:2, actions:5}[kind] || 4; if (kind === 'actions') { go('actions'); return; } if (SU.live[id]) { SU.a2jump = sec; go('agent-' + id); } else { SU.wiz = id; go('setup-' + sec); } };
+A['ag2-fix'] = (el) => { const [id, kind] = el.dataset.x.split('|'); const sec = {file:4, rules:3, agent:2, actions:5}[kind] || 4; if (kind === 'actions') { go('actions'); return; } if (SU.live[id]) { SU.a2sec = sec; SU.a2jump = 'focus'; go('agent-' + id); } else { SU.wiz = id; go('setup-' + sec); } };
 A['ag2-sc-new'] = () => { Object.assign(S.f, {nsEdit:'', nsName:'', nsLang:'Arabic · Hijazi', nsMsgs:'', nsDo:'', nsNot:'', nsHand:false}); openModal('ag2-sc'); };
 A['ag2-sc-edit'] = (el) => { const s = SU.scen.find(x => x.id === el.dataset.x); Object.assign(S.f, {nsEdit:s.id, nsName:s.name, nsLang:s.lang, nsMsgs:(s.msgs || [s.first]).join('\n'), nsDo:s.mustDo || s.act || '', nsNot:s.mustNot || '', nsHand:!!s.mustHand}); openModal('ag2-sc'); };
 MODALS['ag2-sc'] = () => { const c = cfgOf(cur()); const ta = bindTa('f.nsMsgs');
@@ -261,6 +271,8 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-secnav button{display:flex;align-items:center;gap:10px;min-height:42px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--text);font-size:13px;font-weight:500;text-align:start;cursor:pointer;transition:background var(--d1)}
 .ag2-secnav button:hover{background:var(--sub)}
 .ag2-secnav button.dirty{font-weight:600}
+.ag2-secnav button[aria-current="true"]{background:var(--sel);font-weight:600;box-shadow:inset 3px 0 0 var(--pri)}
+.ag2-pn{padding-top:16px;margin-top:4px;border-top:1px solid var(--line)}
 .ag2-sec.dirty{box-shadow:var(--e1),inset 3px 0 0 var(--amber)}
 .ag2-sec .card-h h2{flex:0 1 auto}
 .ag2-chatcol{position:sticky;top:var(--stk)}
@@ -278,8 +290,8 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-needs{display:flex;gap:14px;align-items:flex-start;background:var(--amber-b);box-shadow:none;border-color:transparent}
 .ag2-needs .h2{color:var(--amber-f)}
 .ag2-needs .kv{grid-template-columns:minmax(90px,130px) 1fr}
-.ag2-off>section:not(.ag2-ahead):not(.ag2-needs),.ag2-off>.su-g2{opacity:.6;filter:saturate(.25);transition:opacity var(--d2)}
-.ag2-off>section:not(.ag2-ahead):not(.ag2-needs):focus-within,.ag2-off>.su-g2:focus-within{opacity:1;filter:none}
+.ag2-off>section:not(.ag2-ahead):not(.ag2-needs),.ag2-off>details{opacity:.6;filter:saturate(.25);transition:opacity var(--d2)}
+.ag2-off>section:not(.ag2-ahead):not(.ag2-needs):focus-within,.ag2-off>details:focus-within{opacity:1;filter:none}
 .ag2-sticky{position:sticky;top:77px;z-index:5;box-shadow:var(--e2)}
 .ag2-flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .ag2-step{position:relative;display:grid;grid-template-columns:18px 30px minmax(0,1fr) auto;align-items:start;gap:10px;padding:12px 12px 12px 10px;border-radius:12px;background:var(--sub);transition:background var(--d1),box-shadow var(--d2)}
@@ -292,6 +304,17 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-msgprev{max-width:100%;align-self:stretch;align-items:flex-start}
 .ag2-msgprev .bub{width:100%}
 .ag2-fail{padding:10px;border-radius:10px;background:var(--sub)}
+.ag2-failv{min-height:0;resize:vertical;line-height:1.45}
+.ag2-cs{padding:0}
+.ag2-cs>summary{display:flex;align-items:center;gap:12px;padding:22px 28px;cursor:pointer;list-style:none;border-radius:inherit}
+.ag2-cs>summary::-webkit-details-marker{display:none}
+.ag2-cs>summary:hover{background:var(--sub)}
+.ag2-cs>summary>.ic:last-child{flex:0 0 auto;color:var(--mute);transition:transform var(--d2) var(--ease)}
+.ag2-cs[open]>summary>.ic:last-child{transform:rotate(180deg)}
+.ag2-cs .h2{display:block}
+.ag2-csl{display:block;margin-top:2px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag2-csb{padding:0 28px 28px}
+@media (max-width:760px){.ag2-cs>summary{padding:18px 20px}.ag2-csb{padding:0 20px 20px}}
 /* A4 */
 .ag2-run{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
 .ag2-big{font-family:var(--f-display);font-size:28px;line-height:30px;font-weight:700}

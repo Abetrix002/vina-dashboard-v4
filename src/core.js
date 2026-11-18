@@ -484,7 +484,7 @@ const NAV = {
   sales:[['', [['inbox','Inbox','inbox'],['leads','My leads','leads'],['calendar','Test drives','cal']]]],
   vina:[['Reports', [['overview','Overview','overview'],['channels','Channels','channels'],['conversations','Conversations','conv'],['leads','Leads','leads'],['team','Call centre and sales','team'],['ratings','Customer ratings','star']]],
         ['Agent', [['agents','Agents','bot'],['actions','Actions','bolt'],['scenarios','Test scenarios','tests']]],
-        ['Leads routing', [['rules','Assignment rules','route']]],
+        ['Routing', [['rules','Lead routing','route']]],
         ['Workspace', [['connections','Connections','plug'],['users','Users','user'],['client-settings','Settings','sliders']]]],
 };
 const NAV_ALIAS = {pipeline:'leads', lead:'leads', unassigned: 'leads', qualify:'rules', rule:'rules', agent:'agents', 'conn-website':'connections', 'conn-whatsapp':'connections', 'conn-phone':'connections', 'conn-meta':'connections', plan:'client-settings', statuses:'leads'};
@@ -564,7 +564,7 @@ function cmdItems(q) {
   q = (q || '').trim().toLowerCase(); const digits = q.replace(/\D/g, '');
   const out = [];
   const pages = (NAV[S.role] || []).flatMap(([g, items]) => items.map(([k, l, i]) => ({g:'Pages', t:l, s:g || 'Menu', i, go:k})));
-  if (isVina()) pages.push({g:'Pages', t:'Choose a client', s:'Switch client', i:'updown', go:'clients'}, {g:'Pages', t:'Unassigned leads', s:'Leads routing', i:'route', go:'unassigned'}, {g:'Pages', t:'Plan and usage', s:'Workspace', i:'card', go:'plan'});
+  if (isVina()) pages.push({g:'Pages', t:'Choose a client', s:'Switch client', i:'updown', go:'clients'}, {g:'Pages', t:'Unassigned leads', s:'Lead routing', i:'route', go:'unassigned'}, {g:'Pages', t:'Qualifying', s:'Lead routing', i:'check', go:'qualify'}, {g:'Pages', t:'Plan and usage', s:'Workspace', i:'card', go:'plan'});
   if (isMgr()) pages.push({g:'Pages', t:'Unassigned leads', s:'Leads', i:'route', go:'unassigned'});
   pages.push({g:'Pages', t:'All 49 screens', s:'Prototype', i:'overview', go:'screens'});
   const pool = isAgent() ? mine() : LEADS;
@@ -602,7 +602,7 @@ const SCREENS = [
   ['M1','Overview','Manager dashboard','P1','overview','manager'],['M2','Channels','Manager dashboard','P1','channels','manager'],['M3','Conversations','Manager dashboard','P1','conversations','manager'],['M4','Call centre and sales','Manager dashboard','P1','team','manager'],['M5','Customer ratings','Manager dashboard','P1','ratings','manager'],
   ['AG1','Inbox','Agent dashboard','P1','inbox','cc'],['AG2','Callbacks','Agent dashboard','P1','callbacks','cc'],['AG3','Send to sales · Close lead','Agent dashboard','P1','inbox','cc','send-sales'],['AG4','Alerts and status','Agent dashboard','P2','alerts','sales'],
   ['LD1','Leads list (default view)','Leads','P1','leads','manager'],['LD2','Pipeline board','Leads','P2','pipeline','sales'],['LD3','Calendar','Leads','P3','calendar','sales'],['LD4','Lead page','Leads','P1','lead-l01','sales'],['LD5','Lead statuses','Leads','P1','statuses','manager'],['LD6','Lost reasons','Leads','P2','lead-l01','sales','close-lead'],
-  ['AS1','When is a lead qualified','Lead assignment','P1','qualify','vina'],['AS2','Assignment rules','Lead assignment','P1','rules','vina'],['AS3','Rule editor','Lead assignment','P1','rule-r2','vina'],['AS4','Unassigned leads','Lead assignment','P2','unassigned','vina'],['AS5','Assign or reassign','Lead assignment','P2','unassigned','vina','assign'],
+  ['AS1','Qualifying (when a lead is qualified)','Lead routing','P1','qualify','vina'],['AS2','Rules','Lead routing','P1','rules','vina'],['AS3','Rule editor','Lead routing','P1','rule-r2','vina'],['AS4','Unassigned leads','Lead routing','P2','unassigned','vina'],['AS5','Assign or reassign','Lead routing','P2','unassigned','vina','assign'],
   ['S1','Stage 1 · Your business','Control panel','P2','setup-1','vina'],['S2','Stage 2 · Who is the agent','Control panel','P2','setup-2','vina'],['S3','Stage 3 · Rules','Control panel','P2','setup-3','vina'],['S4','Stage 4 · What it knows','Control panel','P2','setup-4','vina'],['S5','Stage 5 · What it can do','Control panel','P1','setup-5','vina'],['S6','Stage 6 · Where it lives','Control panel','P2','setup-6','vina'],['S7','Stage 7 · Test and go live','Control panel','P1','setup-7','vina'],
   ['A1','Agents list','Control panel','P2','agents','vina'],['A2','Agent editor','Control panel','P2','agent-sara','vina'],['A3','Actions (action builder)','Control panel','P1','actions','vina'],['A4','Test scenarios','Control panel','P1','scenarios','vina'],
   ['C1','Connections','Control panel','P2','connections','vina'],['C2','Website · Get the plugin','Control panel','P2','conn-website','vina'],['C3','WhatsApp','Control panel','P2','conn-whatsapp','vina'],['C4','Phone line','Control panel','P3','conn-phone','vina'],['C5','Facebook Messenger','Control panel','P3','conn-meta','vina'],['C6','Connection problems','Control panel','P2','connections','vina','c6'],

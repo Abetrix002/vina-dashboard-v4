@@ -70,7 +70,7 @@
 .ag-cnt{min-width:22px;height:22px;padding:0 7px;border-radius:999px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .ag-cbrow{display:grid;grid-template-columns:120px minmax(220px,1.2fr) minmax(200px,2fr) auto;grid-template-areas:"tm who why act";gap:8px 18px;align-items:center;padding:14px 20px;border-top:1px solid var(--line)}
 .ag-cbrow.over{box-shadow:inset 3px 0 0 var(--red)}
-.ag-cbrow .ag-tm{grid-area:tm} .ag-cbrow .ag-who{grid-area:who} .ag-cbrow .ag-why{grid-area:why;min-width:0} .ag-cbrow .ag-act{grid-area:act;justify-content:flex-end}
+.ag-cbrow .ag-tm{grid-area:tm} .ag-cbrow .ag-who{grid-area:who} .ag-cbrow .ag-why{grid-area:why;min-width:0;color:var(--text)} .ag-cbrow .ag-act{grid-area:act;justify-content:flex-end}
 .ag-cbrow .tm{font-family:var(--f-display);font-size:20px;line-height:26px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .ag-cbrow .tm.red{color:var(--red-f)}
 /* AG2 call dialog */

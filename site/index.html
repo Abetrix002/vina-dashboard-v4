@@ -1326,7 +1326,7 @@ const NAV = {
   sales:[['', [['inbox','Inbox','inbox'],['leads','My leads','leads'],['calendar','Test drives','cal']]]],
   vina:[['Reports', [['overview','Overview','overview'],['channels','Channels','channels'],['conversations','Conversations','conv'],['leads','Leads','leads'],['team','Call centre and sales','team'],['ratings','Customer ratings','star']]],
         ['Agent', [['agents','Agents','bot'],['actions','Actions','bolt'],['scenarios','Test scenarios','tests']]],
-        ['Leads routing', [['rules','Assignment rules','route']]],
+        ['Routing', [['rules','Lead routing','route']]],
         ['Workspace', [['connections','Connections','plug'],['users','Users','user'],['client-settings','Settings','sliders']]]],
 };
 const NAV_ALIAS = {pipeline:'leads', lead:'leads', unassigned: 'leads', qualify:'rules', rule:'rules', agent:'agents', 'conn-website':'connections', 'conn-whatsapp':'connections', 'conn-phone':'connections', 'conn-meta':'connections', plan:'client-settings', statuses:'leads'};
@@ -1406,7 +1406,7 @@ function cmdItems(q) {
   q = (q || '').trim().toLowerCase(); const digits = q.replace(/\D/g, '');
   const out = [];
   const pages = (NAV[S.role] || []).flatMap(([g, items]) => items.map(([k, l, i]) => ({g:'Pages', t:l, s:g || 'Menu', i, go:k})));
-  if (isVina()) pages.push({g:'Pages', t:'Choose a client', s:'Switch client', i:'updown', go:'clients'}, {g:'Pages', t:'Unassigned leads', s:'Leads routing', i:'route', go:'unassigned'}, {g:'Pages', t:'Plan and usage', s:'Workspace', i:'card', go:'plan'});
+  if (isVina()) pages.push({g:'Pages', t:'Choose a client', s:'Switch client', i:'updown', go:'clients'}, {g:'Pages', t:'Unassigned leads', s:'Lead routing', i:'route', go:'unassigned'}, {g:'Pages', t:'Qualifying', s:'Lead routing', i:'check', go:'qualify'}, {g:'Pages', t:'Plan and usage', s:'Workspace', i:'card', go:'plan'});
   if (isMgr()) pages.push({g:'Pages', t:'Unassigned leads', s:'Leads', i:'route', go:'unassigned'});
   pages.push({g:'Pages', t:'All 49 screens', s:'Prototype', i:'overview', go:'screens'});
   const pool = isAgent() ? mine() : LEADS;
@@ -1444,7 +1444,7 @@ const SCREENS = [
   ['M1','Overview','Manager dashboard','P1','overview','manager'],['M2','Channels','Manager dashboard','P1','channels','manager'],['M3','Conversations','Manager dashboard','P1','conversations','manager'],['M4','Call centre and sales','Manager dashboard','P1','team','manager'],['M5','Customer ratings','Manager dashboard','P1','ratings','manager'],
   ['AG1','Inbox','Agent dashboard','P1','inbox','cc'],['AG2','Callbacks','Agent dashboard','P1','callbacks','cc'],['AG3','Send to sales · Close lead','Agent dashboard','P1','inbox','cc','send-sales'],['AG4','Alerts and status','Agent dashboard','P2','alerts','sales'],
   ['LD1','Leads list (default view)','Leads','P1','leads','manager'],['LD2','Pipeline board','Leads','P2','pipeline','sales'],['LD3','Calendar','Leads','P3','calendar','sales'],['LD4','Lead page','Leads','P1','lead-l01','sales'],['LD5','Lead statuses','Leads','P1','statuses','manager'],['LD6','Lost reasons','Leads','P2','lead-l01','sales','close-lead'],
-  ['AS1','When is a lead qualified','Lead assignment','P1','qualify','vina'],['AS2','Assignment rules','Lead assignment','P1','rules','vina'],['AS3','Rule editor','Lead assignment','P1','rule-r2','vina'],['AS4','Unassigned leads','Lead assignment','P2','unassigned','vina'],['AS5','Assign or reassign','Lead assignment','P2','unassigned','vina','assign'],
+  ['AS1','Qualifying (when a lead is qualified)','Lead routing','P1','qualify','vina'],['AS2','Rules','Lead routing','P1','rules','vina'],['AS3','Rule editor','Lead routing','P1','rule-r2','vina'],['AS4','Unassigned leads','Lead routing','P2','unassigned','vina'],['AS5','Assign or reassign','Lead routing','P2','unassigned','vina','assign'],
   ['S1','Stage 1 · Your business','Control panel','P2','setup-1','vina'],['S2','Stage 2 · Who is the agent','Control panel','P2','setup-2','vina'],['S3','Stage 3 · Rules','Control panel','P2','setup-3','vina'],['S4','Stage 4 · What it knows','Control panel','P2','setup-4','vina'],['S5','Stage 5 · What it can do','Control panel','P1','setup-5','vina'],['S6','Stage 6 · Where it lives','Control panel','P2','setup-6','vina'],['S7','Stage 7 · Test and go live','Control panel','P1','setup-7','vina'],
   ['A1','Agents list','Control panel','P2','agents','vina'],['A2','Agent editor','Control panel','P2','agent-sara','vina'],['A3','Actions (action builder)','Control panel','P1','actions','vina'],['A4','Test scenarios','Control panel','P1','scenarios','vina'],
   ['C1','Connections','Control panel','P2','connections','vina'],['C2','Website · Get the plugin','Control panel','P2','conn-website','vina'],['C3','WhatsApp','Control panel','P2','conn-whatsapp','vina'],['C4','Phone line','Control panel','P3','conn-phone','vina'],['C5','Facebook Messenger','Control panel','P3','conn-meta','vina'],['C6','Connection problems','Control panel','P2','connections','vina','c6'],
@@ -2746,7 +2746,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 .ag-cnt{min-width:22px;height:22px;padding:0 7px;border-radius:999px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .ag-cbrow{display:grid;grid-template-columns:120px minmax(220px,1.2fr) minmax(200px,2fr) auto;grid-template-areas:"tm who why act";gap:8px 18px;align-items:center;padding:14px 20px;border-top:1px solid var(--line)}
 .ag-cbrow.over{box-shadow:inset 3px 0 0 var(--red)}
-.ag-cbrow .ag-tm{grid-area:tm} .ag-cbrow .ag-who{grid-area:who} .ag-cbrow .ag-why{grid-area:why;min-width:0} .ag-cbrow .ag-act{grid-area:act;justify-content:flex-end}
+.ag-cbrow .ag-tm{grid-area:tm} .ag-cbrow .ag-who{grid-area:who} .ag-cbrow .ag-why{grid-area:why;min-width:0;color:var(--text)} .ag-cbrow .ag-act{grid-area:act;justify-content:flex-end}
 .ag-cbrow .tm{font-family:var(--f-display);font-size:20px;line-height:26px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .ag-cbrow .tm.red{color:var(--red-f)}
 /* AG2 call dialog */
@@ -3686,7 +3686,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 })();
 
 ;
-/* AS1–AS5 · When a lead is qualified, assignment rules, rule editor, unassigned leads, assign or reassign. */
+/* AS1–AS5 · Lead routing: Qualifying, Rules, rule editor, Unassigned, assign or reassign. */
 (function () {
   document.head.insertAdjacentHTML('beforeend', `<style>
   .as-2{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:20px;align-items:start}
@@ -3699,13 +3699,12 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .as-hero .meta span{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:color-mix(in srgb,var(--card) 70%,transparent);font-size:12px;font-weight:600;color:var(--mute)}
   .as-hero .meta b{color:var(--text);font-family:var(--f-display)}
   /* sticky Save / Cancel bar (leaves room for the prototype pill on the right) */
-  .as-foot{position:sticky;bottom:16px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-inline-end:236px;padding:10px 12px 10px 18px;border-radius:var(--r-l);background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);box-shadow:var(--e3);border:1px solid var(--line)}
+  .as-foot{position:sticky;bottom:16px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-inline-end:calc(max(280px,(100% - 20px) / 2.7) + 20px);padding:10px 12px 10px 18px;border-radius:var(--r-l);background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);box-shadow:var(--e3);border:1px solid var(--line)}
   .as-foot .st{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);min-width:0}
   .as-hero .verdict{font-size:20px;line-height:30px}
   .rc .as-rule{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:14px 20px 14px 14px}
   .rc .as-rule:hover{box-shadow:none;background:var(--sub)}
   .rc .as-fixed{background:transparent;border-top:1px dashed var(--line2)}
-  .as-wide{padding:0 20px}
   /* AS2 rule cards */
   .as-rule{position:relative;display:grid;grid-template-columns:18px 34px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 14px 16px 12px;background:var(--card);border:1px solid var(--card-bd);border-radius:var(--r-l);box-shadow:var(--e1);transition:box-shadow var(--d2) var(--ease),opacity var(--d2)}
   .as-rule:hover{box-shadow:var(--e2)}
@@ -3752,8 +3751,13 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .as-num{width:84px!important;text-align:center}
   .as-addc .inp{width:auto;flex:1 1 150px}
   /* AS4 */
-  .as-wide{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));column-gap:28px}
-  .as-wide>.li,.as-wide>.li:last-child{border-bottom:0;border-top:1px solid var(--line)}
+  .as-av .li .grow{min-width:0}
+  .as-av .li b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .as-ul .rc-h{flex-wrap:wrap;row-gap:8px}
+  .as-ul .rc-h .grow{flex:1 1 220px}
+  .as-avl{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--mute);text-decoration:none;white-space:nowrap}
+  .as-avl b{color:var(--text);font-weight:600}
+  .as-avl:hover{color:var(--link)}
   .as-late{display:inline-flex;align-items:center;gap:8px;color:var(--red-f);font-weight:700}
   /* AS5 dialog */
   .as5-lead{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-radius:var(--r-m);background:linear-gradient(135deg,var(--teal-b),color-mix(in srgb,var(--teal-b) 30%,var(--card)))}
@@ -3771,7 +3775,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .as-q{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--inp);color:var(--mute)}
   .as-q:focus-within{border-color:var(--horizon);box-shadow:0 0 0 4px var(--ring)}
   .as-q input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:14px;color:var(--text)}
-  @media (max-width:1000px){.as-2{grid-template-columns:minmax(0,1fr)}}
+  @media (max-width:1000px){.as-2{grid-template-columns:minmax(0,1fr)}.as-foot{margin-inline-end:64px}}
   @media (max-width:760px){
     .as-foot{margin-inline-end:124px;padding:8px 8px 8px 14px}
     .as-foot .st{display:none}
@@ -3809,12 +3813,13 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     {id:'r5', name:'Phone line leads', when:'qualified', only:[['Channel','Phone line']], to:'sales', by:'turns', avail:true, max:15, mins:15, on:false, week:0},
   ];
   // One row: the three views on the left, the page action (if any) on the right
-  const tabs = (cur, act) => isVina() ? `<div class="rx-tbar"><nav class="tabs" aria-label="Lead assignment">${[['qualify','When a lead is qualified'],['rules','Assignment rules'],['unassigned','Unassigned leads']].map(([k, t]) => `<a class="tab" href="#${k}" ${cur === k ? 'aria-selected="true" aria-current="page"' : ''}>${t}${k === 'unassigned' ? `<span class="n">${unassigned().length}</span>` : ''}</a>`).join('')}</nav><span class="sp"></span>${act ? `<span class="act">${act}</span>` : ''}</div>` : '';
+  const tabs = (cur, act) => isVina() ? `<div class="rx-tbar"><nav class="tabs" aria-label="Lead routing">${[['qualify','Qualifying'],['rules','Rules'],['unassigned','Unassigned']].map(([k, t]) => `<a class="tab" href="#${k}" ${cur === k ? 'aria-selected="true" aria-current="page"' : ''}>${t}${k === 'unassigned' ? `<span class="n">${unassigned().length}</span>` : ''}</a>`).join('')}</nav><span class="sp"></span>${act ? `<span class="act">${act}</span>` : ''}</div>` : '';
   const agents = () => Object.keys(U).filter(k => ['cc','sales'].includes(U[k].role));
   const PRES_C = {available:['Available','green'], busy:['Busy','amber'], away:['Away','grey']};
   const presChip = k => { const s = U[k].status || 'available'; const m = PRES_C[s]; return `<span class="chip c-${m[1]}"><span class="pres ${s}" style="width:7px;height:7px;border-radius:50%;display:inline-block"></span>${m[0]}</span>`; };
-  const availCard = wide => reportCard({title:'Who is available now', sub:'Only available agents get new leads.', cls:'rx-tbl', body:`<div class="list ${wide ? 'as-wide' : ''}">${agents().map(k => `<div class="li"><span class="avw">${av(U[k].name)}<span class="pres ${U[k].status || 'available'}" aria-hidden="true"></span></span><span class="grow"><b class="small">${esc(U[k].name)}</b><div class="xs mute">${U[k].team}${U[k].showroom ? ' · ' + U[k].showroom : ''}</div></span><span class="xs mute num">${mineCount(k)} open</span>${presChip(k)}</div>`).join('')}</div>`});
-  const foot = (status, btns) => `<div class="as-foot" role="region" aria-label="Save changes"><span class="st grow">${status}</span><span class="sp"></span>${btns}</div>`;
+  const availCard = () => reportCard({title:'Who is available now', sub:'Only available agents get new leads.', cls:'rx-tbl as-av', id:'as-avail', body:`<div class="list">${agents().map(k => `<div class="li"><span class="avw">${av(U[k].name)}<span class="pres ${U[k].status || 'available'}" aria-hidden="true"></span></span><span class="grow"><b class="small" title="${esc(U[k].name)}">${esc(U[k].name)}</b><div class="xs mute">${U[k].team}${U[k].showroom ? ' · ' + U[k].showroom : ''}</div></span><span class="xs mute num">${mineCount(k)} open</span>${presChip(k)}</div>`).join('')}</div>`});
+  const availLine = () => { const n = {available:0, busy:0, away:0}; agents().forEach(k => n[U[k].status || 'available']++); return `<a class="as-avl" href="#rules" title="See who is available on Rules"><span class="pres available" aria-hidden="true" style="width:7px;height:7px;border-radius:50%;display:inline-block"></span><b>${n.available} available</b> · ${n.busy} busy · ${n.away} away${ic('arrowR', 14)}</a>`; };
+  const foot = (status, btns) => `<div class="as-foot" role="region" aria-label="Save changes"><span class="st grow">${status}</span>${btns}</div>`;
 
   /* ---- AS1 ---- */
   const Q = () => S.f.as1 || (S.f.as1 = {
@@ -3830,7 +3835,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     if (!req.length) return 'Tick at least one detail VINA must have before a lead can be qualified.';
     return `A lead is qualified when we have <em>${esc(andList(req, 'and'))}</em>${sig.length ? `, and the customer <em>${esc(andList(sig, 'or'))}</em>` : `, but <strong>no buying signal is ticked, so VINA will never qualify a lead</strong>`}.`;
   };
-  R('qualify', {id:'AS1', title:'When is a lead qualified', roles:['vina'], render() {
+  R('qualify', {id:'AS1', title:'Qualifying', roles:['vina'], render() {
     const q = Q(); const reqN = Object.values(q.req).filter(Boolean).length; const sigN = Object.values(q.sig).filter(Boolean).length;
     const body = `${tabs('qualify')}
       <section class="as-hero" aria-label="When a lead is qualified, in one line"><p class="verdict ${flashCls('as1-line')}" aria-live="polite" style="margin-top:0">${qLine(q)}</p></section>
@@ -3844,7 +3849,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
           <div class="list">${[['Asked for price or financing',268],['Wanted a test drive',151],['Asked to be called',119],['Asked for a person',74]].map(([k, v]) => `<div class="li small"><span class="grow">${k}</span><b class="num">${v}</b></div>`).join('')}</div>`})}
       </div></div>
       ${foot(q.dirty ? `${pulse()}<span>Unsaved changes</span>` : `<span class="ell">Last changed by ${esc(q.saved)}</span>`, `<button type="button" class="btn" data-a="as1-reset" ${q.dirty ? '' : 'disabled title="Nothing to undo"'}>Cancel</button><button type="button" class="btn pri" data-a="as1-save" ${q.dirty && reqN ? '' : `disabled title="${reqN ? 'No changes to save' : 'Tick at least one detail first'}"`}>Save</button>`)}`;
-    return shell({nav:'qualify', title:'Lead assignment', cp:true, viewOnly:false, body});
+    return shell({nav:'qualify', title:'Lead routing', cp:true, viewOnly:false, body});
   }});
   A['as1-req'] = el => { Q().req[el.dataset.x] = el.checked; Q().dirty = true; flash('as1-line'); };
   A['as1-sig'] = el => { Q().sig[el.dataset.x] = el.checked; Q().dirty = true; flash('as1-line'); };
@@ -3860,9 +3865,9 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       <span class="grip" title="Drag to change the order" aria-hidden="true">${ic('grip', 16)}</span>
       <span class="n num" aria-hidden="true">${i + 1}</span>
       <div class="main" style="min-width:0"><div class="row tight"><a class="as-nm" href="#rule-${r.id}">${esc(r.name)}</a>${r.on ? '' : chipC('Off', 'grey', true)}</div>
-        <dl class="as-flow"><dt>When</dt><dd>${WHEN[r.when]}</dd><dt>${ic('arrowR', 11)}Send to</dt><dd><b>${esc(toLabel(r))}</b><span class="m"> · choose agent by </span><b>${BY[r.by][0]}</b></dd><dt>Only if</dt><dd class="ell mute" title="${esc(onlyLabel(r))}">${esc(onlyLabel(r))}</dd></dl></div>
+        <dl class="as-flow"><dt>When</dt><dd>${WHEN[r.when]}</dd><dt>${ic('arrowR', 11)}Send to</dt><dd>${esc(toLabel(r))}<span class="m"> · choose agent by </span>${BY[r.by][0]}</dd><dt>Only if</dt><dd class="ell mute" title="${esc(onlyLabel(r))}">${esc(onlyLabel(r))}</dd></dl></div>
       <div class="act">
-        <div class="as-wk">${r.week ? mic('leads', 12) : ''}<b class="num">${r.week ? num(r.week) : '—'}</b><span>${r.week ? 'leads this week' : 'Not used yet'}</span></div>
+        <div class="as-wk"><b class="num">${r.week ? num(r.week) : '—'}</b><span>${r.week ? 'leads this week' : 'Not used yet'}</span></div>
         ${sw(r.on, 'as-on', r.id, (r.on ? 'Turn off ' : 'Turn on ') + r.name)}
         <span class="as-mw"><button type="button" class="ibtn sm bare" id="asm-${r.id}" data-a="as-menu" data-x="${r.id}" aria-haspopup="menu" aria-expanded="${open}" aria-label="More for ${esc(r.name)}" title="Edit, move or delete">${ic('more', 18)}</button>
         ${open ? `<div class="menu as-menu ${G.popNew ? '' : 'again'}" role="menu" aria-label="${esc(r.name)}">
@@ -3874,7 +3879,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       </div>
     </article>`;
   }
-  R('rules', {id:'AS2', title:'Assignment rules', roles:['vina'], render() {
+  R('rules', {id:'AS2', title:'Rules', roles:['vina'], render() {
     const un = unassigned().length;
     const body = `${tabs('rules', `<a class="btn pri" href="#rule-new">${ic('plus', 15)}New rule</a>`)}
       <div class="as-2"><section class="card rc rx-tbl" aria-label="Rules in order"><header class="rc-h"><div class="grow"><h2>Rules in order</h2><div class="sub">The top rule is checked first. Drag to change the order.</div></div></header><div class="rc-b">${RULES.map(ruleRow).join('')}
@@ -3884,7 +3889,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       </div></section><div class="col loose">${availCard()}
         ${reportCard({title:'For every rule', body:`<div class="col tight small"><div class="sw-row">${ic('check', 16, 'green')}<span>Only give leads to agents who are <b>Available</b></span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Not opened within <b>15 minutes</b>: give it to the next agent and alert the manager</span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Outside working hours: keep until 9 AM, then assign</span></div></div>`})}
       </div></div>`;
-    return shell({nav:'rules', title:'Lead assignment', cp:true, viewOnly:false, body});
+    return shell({nav:'rules', title:'Lead routing', cp:true, viewOnly:false, body});
   }, after: afterUi});
   A['as-menu'] = el => { toggleMenu('as:' + el.dataset.x, el); };
   A['as-on'] = el => { const r = RULES.find(x => x.id === el.dataset.x); r.on = !r.on; toast(`"${r.name}" is ${r.on ? 'on' : 'off'}`); };
@@ -3904,7 +3909,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   const grp = (n, t, sub, inner) => reportCard({title:t, sub, body:`<div class="col loose">${inner}</div>`});
   R('rule', {id:'AS3', title:'Rule editor', roles:['vina'], render(param) {
     const e = E(param);
-    if (!e) return shell({nav:'rules', title:'Rule', crumb:['Assignment rules','rules'], cp:true, viewOnly:false, body:`<div class="card">${empty('route', 'We could not find this rule', 'It may have been deleted.', `<a class="btn pri" href="#rules">Back to rules</a>`)}</div>`});
+    if (!e) return shell({nav:'rules', title:'Rule', crumb:['Lead routing','rules'], cp:true, viewOnly:false, body:`<div class="card">${empty('route', 'We could not find this rule', 'It may have been deleted.', `<a class="btn pri" href="#rules">Back to rules</a>`)}</div>`});
     const d = e.d; const team = agents().filter(k => d.to === 'one' ? k === d.agent : U[k].role === d.to);
     const pool = team.filter(k => !d.avail || U[k].status !== 'away'); const wts = pool.map((k, i) => d.by === 'least' ? 1 / (1 + mineCount(k)) : 1 + (i === 0 ? .2 : 0)); const tot = wts.reduce((a, b) => a + b, 0) || 1;
     const sim = team.map(k => { const i = pool.indexOf(k); const share = i < 0 ? 0 : wts[i] / tot; return [k, Math.round(share * (d.week || 318)), Math.round(share * 100)]; });
@@ -3931,7 +3936,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
         ${reportCard({title:'History', body:`<p class="small mute">${param === 'new' ? 'New rule. Saved with your name and the time.' : 'Changed by Lina Haddad on Mon 2 Nov: most open leads from 20 to 15.'}</p>${param !== 'new' ? `<div class="hr" style="margin:14px 0"></div><button type="button" class="btn sm danger-o" data-a="as3-del">${ic('trash', 14)}Delete rule</button>` : ''}`})}
       </div></div>
       ${foot(dirty ? `${pulse()}<span>Unsaved changes</span>` : `<span>${param === 'new' ? 'New rule' : 'No changes yet'}</span>`, `<button type="button" class="btn" data-a="as3-cancel">Cancel</button><button type="button" class="btn pri" data-a="as3-save">${ic('check', 15)}Save rule</button>`)}`;
-    return shell({nav:'rules', title: param === 'new' ? 'New rule' : 'Edit rule', crumb:['Assignment rules','rules'], cp:true, viewOnly:false, body});
+    return shell({nav:'rules', title: param === 'new' ? 'New rule' : 'Edit rule', crumb:['Lead routing','rules'], cp:true, viewOnly:false, body});
   }});
   A['as3-more'] = (el, ev) => { if (ev) ev.preventDefault(); S.f.as3open = !S.f.as3open; };
   A['as3-set'] = el => { const [g, k] = el.dataset.x.split(':'); S.f.as3.d[g] = k; };
@@ -3964,10 +3969,10 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       : `<div class="tbl-wrap"><table class="tbl"><caption class="sr">Unassigned leads, longest wait first</caption><thead><tr><th>Customer</th><th>Car model</th><th>${ic('spark', 12, 'teal')} VINA summary</th><th>Why it is here</th><th>Waiting</th>${isVina() ? '<th><span class="sr">Assign</span></th>' : ''}</tr></thead><tbody>${rs.map(l => `<tr class="${flashCls(l.id)}">
         <td><a href="#lead-${l.id}" class="who" style="text-decoration:none;color:inherit">${av(l.name, 'sm')}<span style="min-width:0"><span class="nm ell" style="display:block">${esc(l.name)}</span><span class="xs mute num" style="display:block">${esc(mob(l))}</span></span></a></td>
         <td><div class="row tight nowrap" style="white-space:nowrap">${chIc(l.ch)}<b>${esc(l.model)}</b></div></td><td><div class="small ell2" style="min-width:220px;max-width:380px" title="${esc(l.summary)}">${esc(l.summary)}</div></td><td class="small mute" style="min-width:180px;max-width:280px">${esc(l.unWhy || 'No rule matched')}</td>
-        <td class="num" style="white-space:nowrap">${l.late ? `<span class="as-late">${pulse('red')}${mins(l.wait)}</span><div class="xs red">Overdue</div>` : `<span class="mute">${mins(l.wait)}</span>`}</td>${isVina() ? `<td class="r"><button type="button" class="btn sm pri" data-a="as-assign" data-x="${l.id}" aria-label="Assign ${esc(l.name)}">${ic('user', 14)}Assign</button></td>` : ''}</tr>`).join('')}</tbody></table></div>`;
+        <td class="num" style="white-space:nowrap">${l.late ? `<span class="as-late">${pulse('red')}${mins(l.wait)}</span><div class="xs red">Overdue</div>` : `<span class="mute">${mins(l.wait)}</span>`}</td>${isVina() ? `<td class="r"><button type="button" class="btn sm" data-a="as-assign" data-x="${l.id}" aria-label="Assign ${esc(l.name)}">${ic('user', 14)}Assign</button></td>` : ''}</tr>`).join('')}</tbody></table></div>`;
     const body = `${tabs('unassigned')}${reportCard({title:'Waiting for an agent', body:`<div class="g4 as-k">${stats.join('')}</div>`})}
-      ${reportCard({title:'Unassigned leads', sub: isMgr() ? 'The VINA team has been told and gives these leads to an agent by hand.' : 'Longest wait first.', cls:'rx-tbl', body: table})}${isVina() ? availCard(true) : ''}`;
-    return shell({nav:'unassigned', title: isVina() ? 'Lead assignment' : 'Unassigned leads', crumb: isMgr() ? ['Leads','leads'] : null, cp:true, viewOnly: isMgr(), body});
+      ${reportCard({title:'Unassigned leads', sub: isMgr() ? 'The VINA team has been told and gives these leads to an agent by hand.' : 'Longest wait first.', cls:'rx-tbl as-ul', right: isVina() && rs.length ? availLine() : '', body: table})}`;
+    return shell({nav:'unassigned', title: isVina() ? 'Lead routing' : 'Unassigned leads', crumb: isMgr() ? ['Leads','leads'] : null, cp:true, viewOnly: isMgr(), body});
   }});
   A['as-assign'] = el => { openAssign(el.dataset.x); };
 
@@ -4038,12 +4043,12 @@ const ACTIONS0 = [
    steps:[ST('Check what is already known','check','Name and mobile from WhatsApp, car model from the chat'),ST('Ask for what is missing','ask','One question at a time'),ST('Save the details','update','On the lead, with the time')], msg:{ar:'شكراً {name}، سجلت طلبك على {car}.', en:'Thanks {name}, I saved your request for the {car}.'}, fails:[{k:'Customer will not give a mobile',v:'Continue the chat. Ask again before booking.'}], ask:false},
   {id:'qualify', g:'Leads', icon:'check', name:'Mark the lead as qualified', line:'Uses your lead rules', when:'When the details are there and the customer shows a buying signal.', uses:612, fin:612,
    says:['أبغى أشتري هالشهر','Can I visit the showroom?','كم القسط الشهري؟'], fields:[F('Name',true,'Collected first'),F('Mobile',true,'Collected first'),F('Car model',true,'Collected first')],
-   steps:[ST('Check the lead rules','check','The rules in Lead assignment, "When is a lead qualified"'),ST('Mark as qualified','update','Status changes to Qualified'),ST('Give it to the team','assign','By the assignment rules')], msg:{ar:'تمام {name}، فريقنا بيتواصل معك قريب.', en:'Great {name}, our team will contact you soon.'}, fails:[{k:'Outside our area',v:'Never qualify. Tell the customer politely.'}], ask:false},
+   steps:[ST('Check the lead rules','check','The rules in Lead routing, "Qualifying"'),ST('Mark as qualified','update','Status changes to Qualified'),ST('Give it to the team','assign','By the assignment rules')], msg:{ar:'تمام {name}، فريقنا بيتواصل معك قريب.', en:'Great {name}, our team will contact you soon.'}, fails:[{k:'Outside our area',v:'Never qualify. Tell the customer politely.'}], ask:false},
   {id:'status', g:'Leads', icon:'flag', name:'Update the lead status', line:'New, Qualified, Callback…', when:'Every time something changes in the chat.', uses:1430, fin:1430,
    says:['خلاص اشتريت من مكان ثاني','Call me tomorrow'], fields:[F('Lead',true,'Already known')], steps:[ST('Change the status','update','Uses the lead statuses in Settings')], msg:{ar:'',en:''}, fails:[], ask:false},
   {id:'handover', g:'Leads', icon:'give', name:'Hand over to the team', line:'With a short summary', when:'When the customer asks for a person, complains, or the agent fails to answer twice.', uses:536, fin:530,
    says:['أبغى أكلم موظف','Can I talk to a person?','صار لي شهر أنتظر!'], fields:[F('Name',true,'Asks if missing'),F('Mobile',true,'Taken from WhatsApp, asks on website')],
-   steps:[ST('Write a summary for the team','update','What they want, budget, trade-in, timing'),ST('Give it to the team','assign','Call centre or sales, by the rules in Rules'),ST('Tell the customer','send','Who will reply and when'),ST('Pause in this chat','wait','Until the agent hands it back, or 24 hours')], msg:{ar:'أرسلت طلبك لزميلي في {team}، وبيتواصل معك خلال دقائق.', en:'I sent your request to my colleague in {team}. They will contact you in a few minutes.'}, fails:[{k:'Nobody is available',v:'Keep in Unassigned and alert the manager. Tell the customer when to expect a reply.'}], ask:false},
+   steps:[ST('Write a summary for the team','update','What they want, budget, trade-in, timing'),ST('Give it to the team','assign','Call centre or sales, by the rules in Lead routing'),ST('Tell the customer','send','Who will reply and when'),ST('Pause in this chat','wait','Until the agent hands it back, or 24 hours')], msg:{ar:'أرسلت طلبك لزميلي في {team}، وبيتواصل معك خلال دقائق.', en:'I sent your request to my colleague in {team}. They will contact you in a few minutes.'}, fails:[{k:'Nobody is available',v:'Keep in Unassigned and alert the manager. Tell the customer when to expect a reply.'}], ask:false},
   {id:'testdrive', g:'Bookings', icon:'cal', name:'Book a test drive', line:'Finds a free time and books it', when:'When the customer wants to try a car, asks to drive it, or asks when they can come for a test drive.', uses:48, fin:46,
    says:['أبغى أجرب السيارة','Can I test drive the V27?','متى أقدر أجيكم أجربها؟','ممكن تجربة قيادة السبت؟'],
    fields:[F('Name',true,'Asks: "باسم مين أسجل الموعد؟" Skips if known'),F('Mobile',true,'Taken from WhatsApp, asks on website'),F('Car model',true,'From the chat, or asks which car'),F('Day and time',true,'Offers free times, the customer picks'),F('Showroom',true,'Asks only if more than one is open'),F('Driving licence',false,'Not asked')],
@@ -4301,8 +4306,7 @@ function body1(id) {
   return `<div class="col loose"><section class="rx-sec"><h3>Name and type</h3>
     <div class="su-g2"><div class="field"><label for="b-${P(id, 'biz.name').replace(/\./g, '-')}">Business name</label><input class="inp" ${bind(P(id, 'biz.name'), true)}>${!b.name.trim() ? `<span class="err">${ic('alert', 14)}Write the business name. Customers see it in the chat.</span>` : ''}</div>
       <div class="field"><span class="lbl">Logo</span><div class="row tight nowrap">${b.logo ? `<img src="${b.logo}" alt="Business logo" style="width:42px;height:42px;border-radius:10px;object-fit:cover;border:1px solid var(--line)">` : `<span class="av lg c-navy" style="border-radius:10px" aria-hidden="true">${esc(initials(b.name))}</span>`}<label class="btn sm" style="min-height:40px">${ic('upload', 14)}${b.logo ? 'Change' : 'Upload logo'}<input type="file" accept="image/*" class="sr" data-ch="su-logo" data-x="${id}"></label>${b.logo ? `<button type="button" class="btn sm ghost" data-a="su-set" data-x="${P(id, 'biz.logo')}" data-v="">Remove</button>` : ''}</div></div></div>
-    <div class="field"><span class="lbl" id="su-bt">What kind of business?</span><div class="su-types" role="radiogroup" aria-labelledby="su-bt">${BTYPES.map(([k, l, i, col]) => `<button type="button" class="radio-card su-type" role="radio" aria-checked="${b.type === k}" data-a="su-type" data-x="${id}" data-v="${k}"><span class="chi lg c-${col}">${ic(i, 20)}</span><b>${l}</b></button>`).join('')}</div>
-      <div class="note vina">${ic('spark')}<div>We filled in a suggested tone, rules and actions for ${esc(pr.label)}, and ${pr.n} ready-made test scenarios. You can change all of it.</div></div></div></section>
+    <div class="field"><span class="lbl" id="su-bt">What kind of business?</span><div class="su-types" role="radiogroup" aria-labelledby="su-bt">${BTYPES.map(([k, l, i, col]) => `<button type="button" class="radio-card su-type" role="radio" aria-checked="${b.type === k}" data-a="su-type" data-x="${id}" data-v="${k}"><span class="chi lg c-${col}">${ic(i, 20)}</span><b>${l}</b></button>`).join('')}</div></div></section>
     <section class="rx-sec"><h3>Where and when</h3>
     <div class="su-g2"><div class="field"><label for="b-${P(id, 'biz.city').replace(/\./g, '-')}">City</label><input class="inp" ${bind(P(id, 'biz.city'))}></div>
       <div class="field"><label for="b-${P(id, 'biz.lang').replace(/\./g, '-')}">Main language of your team</label>${bindSel(P(id, 'biz.lang'), ['Arabic','English','Arabic and English'])}</div></div>
@@ -4378,7 +4382,7 @@ function body5(id, ed) {
       return `<div class="su-act ${a.on && !a.needs ? 'on' : 'off'} ${chg ? 'chg' : ''}"><div class="row nowrap su-at">${a.needs ? chipC('Needs setup', 'amber') : sw(a.on, 'su-tog', p + '.on', a.name)}<div class="grow"><div class="row tight"><b class="su-act-t">${esc(a.name)}</b>${chg ? chipC('Changed', 'amber') : ''}</div><div class="xs mute">${esc(a.line)}</div></div>${ed ? `<span class="xs mute num" style="white-space:nowrap">${a.needs ? 'Needs setup' : num(a.uses) + ' this week'}</span>` : ''}<a class="btn sm ghost" href="#actions-${aid}" data-keepdraft>${ed ? 'Edit' : 'Steps'}</a></div>
         ${ed ? `<div class="small" style="padding-inline-start:54px"><b>When:</b> ${esc(a.when)}</div>` : `<div class="field" style="padding-inline-start:54px"><label class="xs mute" for="b-${(p + '.when').replace(/\./g, '-')}">When should it do this?</label><textarea class="inp" rows="2" style="min-height:58px" ${bindTa(p + '.when')[0]}>${bindTa(p + '.when')[1]}</textarea>
           ${aid === 'collect' ? `<div class="row tight"><span class="xs mute">Required:</span>${a.fields.map((f, j) => `<label class="chk small" style="min-height:24px"><input ${bindChk(p + '.fields.' + j + '.req')}><span>${esc(f.t)}</span></label>`).join('')}</div>` : ''}
-          ${aid === 'qualify' ? `<a class="xs" href="#qualify" data-keepdraft>Lead rules: when is a lead qualified</a>` : ''}</div>`}
+          ${aid === 'qualify' ? `<a class="xs" href="#qualify" data-keepdraft>Lead routing: Qualifying</a>` : ''}</div>`}
       </div>`; }).join('')}
     ${ed ? '' : `<a class="btn" href="#actions-new" style="align-self:flex-start">${ic('plus', 14)}Build an action this business needs, e.g. Check stock</a>`}
   </div>`;
@@ -4386,9 +4390,9 @@ function body5(id, ed) {
 function body6(id) {
   return `<div class="col loose"><div class="su-g2">${CHANS.map(([k, l, i, col, d, route]) => { const v = chOf(id, k); const on = ON_CH(v);
     const owner = !on && SU.agents.find(a => a.id !== id && SU.live[a.id] && ON_CH(SU.live[a.id].ch[k]));
-    return `<div class="card flat su-chcard ${on ? 'on' : ''}"><div class="row nowrap"><span class="chi lg c-${col}">${ic(i, 20)}</span><div class="grow"><b>${l}</b><div class="xs mute">${d}</div></div>${chipC(v === 'Checking' ? 'Checking…' : v, on ? 'green' : v === 'Waiting for Meta' || v === 'Checking' ? 'amber' : v === 'Needs attention' ? 'red' : 'grey', true)}</div>
+    return `<div class="card flat su-chcard ${on ? 'on' : ''}"><div class="row nowrap"><span class="chi lg c-${col}">${ic(i, 20)}</span><div class="grow" style="min-width:0"><b>${l}</b><div class="xs mute">${d}</div><div style="margin-top:8px">${chipC(v === 'Checking' ? 'Checking…' : v, on ? 'green' : v === 'Waiting for Meta' || v === 'Checking' ? 'amber' : v === 'Needs attention' ? 'red' : 'grey', true)}</div></div></div>
       ${owner ? `<div class="xs mute">${esc(agentName(owner.id))} answers ${l} now. Connecting it here moves it to ${esc(agentName(id) || 'this agent')}.</div>` : ''}
-      <div class="row tight"><a class="btn sm ${on ? '' : 'pri'}" href="#${route}" data-keepdraft>${on ? 'Manage' : v === 'Waiting for Meta' ? 'See progress' : 'Connect'}</a>${k === 'web' && !on ? `<button type="button" class="btn sm" data-a="su-web-check" data-x="${id}" ${v === 'Checking' ? 'disabled' : ''}>${v === 'Checking' ? '<span class="spin" aria-hidden="true"></span>Checking' : 'Plugin already installed? Check now'}</button>` : ''}</div></div>`; }).join('')}</div></div>`;
+      <div class="row tight"><a class="btn sm" href="#${route}" data-keepdraft>${on ? 'Manage' : v === 'Waiting for Meta' ? 'See progress' : 'Connect'}</a>${k === 'web' && !on ? `<button type="button" class="btn sm" data-a="su-web-check" data-x="${id}" ${v === 'Checking' ? 'disabled' : ''}>${v === 'Checking' ? '<span class="spin" aria-hidden="true"></span>Checking' : 'Plugin already installed? Check now'}</button>` : ''}</div></div>`; }).join('')}</div></div>`;
 }
 const BODY = {1:body1, 2:body2, 3:body3, 4:body4, 5:body5, 6:body6};
 
@@ -4767,7 +4771,8 @@ R('agent', {id:'A2', title:'Agent editor', roles:['vina'], states:[['leaving','U
   const secs = STAGES.map(([t], i) => ({n:i + 1, t, dot:secDirty(id, i + 1)}));
   const k = counts(id); const r = runOf(id);
   const sum7 = `<div class="col tight">${r ? `<div class="row tight">${chipC(k.pass + ' passed', 'green')}${k.fail ? chipC(k.fail + ' failed', 'red') : ''}${k.check ? chipC(k.check + ' to check', 'amber') : ''}<span class="xs mute">${esc(r.when)} · ${r.ver === 'draft' ? 'draft' : 'live version'}${fresh(id) ? '' : ' · before your last change'}</span></div>` : '<p class="small mute">Not run yet.</p>'}<a class="btn" href="#scenarios" data-keepdraft style="align-self:flex-start">${ic('tests', 14)}Open test scenarios</a></div>`;
-  const nd = secs.filter(x => x.dot).length;
+  const nd = secs.filter(x => x.dot).length; const on = secs[(SU.a2sec || 1) - 1] || secs[0];
+  const stepBtn = (s, t) => s ? `<button type="button" class="btn sm" data-a="ag2-jump" data-x="${s.n}">${t === 'prev' ? ic('chevL', 14) + s.t : 'Next: ' + s.t + ic('arrowR', 14)}</button>` : '';
   const stat = `${a.st === 'paused' ? pulse('amber') + 'Paused' : pulse('green') + 'Live'} · version ${SU.ver[id]} · ${n ? `<b class="amber">${n} unsaved change${n > 1 ? 's' : ''}</b>` : 'no unsaved changes'}`;
   const body = `<div class="card ag2-bar" id="ag2-bar" role="region" aria-label="${esc(c.agent.name)} status">
       <a class="ibtn sm bare ag2-back" href="#agents" aria-label="Back to agents" title="Agents">${ic('chevL', 16)}</a>${agAv(id)}
@@ -4775,13 +4780,15 @@ R('agent', {id:'A2', title:'Agent editor', roles:['vina'], states:[['leaving','U
       <div class="row tight ag2-btns"><button type="button" class="ibtn" data-a="ag2-hist" data-x="${id}" aria-label="Change history" title="Change history">${ic('history', 16)}</button><button type="button" class="btn ghost" data-a="ag2-discard" data-x="${id}" ${n ? '' : 'disabled'}>Discard</button><a class="btn" href="#scenarios" data-keepdraft>${ic('play', 14)}Run tests</a><button type="button" class="btn pri" data-a="ag2-save" data-x="${id}" ${!n ? 'disabled' : b ? 'aria-disabled="true" aria-describedby="ag2-why"' : ''}>Save changes</button></div>
       ${n && b ? `<div class="ag2-block" id="ag2-why" role="status">${ic('lock', 15)}<div class="grow">${b === 'fail' ? `<b>Saving is blocked.</b> ${k.fail} test scenario${k.fail > 1 ? 's' : ''} failed on these changes.` : `<b>Saving is blocked</b> until the test scenarios run on these changes.`}</div><a class="btn sm" href="#scenarios" data-keepdraft>${b === 'fail' ? 'See what failed' : 'Run the tests'}</a></div>` : ''}</div>
     <div class="ag2-ed">
-      <nav class="ag2-secnav" aria-label="Sections"><div class="eyebrow ag2-navh">Sections${nd ? ` · <span class="amber">${nd} changed</span>` : ''}</div>${secs.map(s => `<button type="button" data-a="ag2-jump" data-x="${s.n}" class="${s.dot ? 'dirty' : ''}"><span class="su-num">${s.n}</span><span class="grow">${s.t}</span>${s.dot ? '<span class="ag2-dot" title="Unsaved change"><span class="sr">Unsaved change</span></span>' : ''}</button>`).join('')}</nav>
-      <div class="col loose" style="min-width:0">${secs.map(s => `<section class="card ag2-sec ${s.dot ? 'dirty' : ''}" id="ag2-s${s.n}" aria-labelledby="ag2-h${s.n}"><div class="card-h"><span class="ag2-n">${s.n}</span><h2 id="ag2-h${s.n}">${s.t}</h2>${s.dot ? chipC('Unsaved', 'amber', true) : ''}${s.n === 5 ? `<span class="sp"></span><a class="btn sm ghost" href="#actions" data-keepdraft>Open all actions</a>` : ''}</div>${s.n === 7 ? sum7 : s.n === 5 ? BODY[5](id, true) : BODY[s.n](id)}</section>`).join('')}</div>
+      <nav class="ag2-secnav" aria-label="Sections"><div class="eyebrow ag2-navh">Sections${nd ? ` · <span class="amber">${nd} changed</span>` : ''}</div>${secs.map(s => `<button type="button" id="ag2-nb${s.n}" data-a="ag2-jump" data-x="${s.n}" class="${s.dot ? 'dirty' : ''}" aria-controls="ag2-panel" ${s === on ? 'aria-current="true"' : ''}><span class="su-num">${s.n}</span><span class="grow">${s.t}</span>${s.dot ? '<span class="ag2-dot" title="Unsaved change"><span class="sr">Unsaved change</span></span>' : ''}</button>`).join('')}</nav>
+      <div class="col loose" style="min-width:0">${[on].map(s => `<section class="card ag2-sec ${s.dot ? 'dirty' : ''}" id="ag2-panel" aria-labelledby="ag2-h${s.n}"><div class="card-h"><span class="ag2-n">${s.n}</span><h2 id="ag2-h${s.n}" tabindex="-1">${s.t}</h2>${s.dot ? chipC('Unsaved', 'amber', true) : ''}${s.n === 5 ? `<span class="sp"></span><a class="btn sm ghost" href="#actions" data-keepdraft>Open all actions</a>` : ''}</div>${s.n === 7 ? sum7 : s.n === 5 ? BODY[5](id, true) : BODY[s.n](id)}
+        <div class="row ag2-pn">${stepBtn(secs[s.n - 2], 'prev')}<span class="sp"></span>${stepBtn(secs[s.n], 'next')}</div></section>`).join('')}</div>
       <div class="ag2-chatcol">${chatBox('a2-' + id, id, {sub:'Uses your unsaved changes', seed: id === 'sara' ? SARA_SEED : null})}</div>
     </div>`;
   return shell({nav:'agents', title:'Agent editor', cp:true, viewOnly:false, crumb:null, body});
-}, after() { const bar = document.getElementById('ag2-bar'), ed = document.querySelector('.ag2-ed'); if (bar && ed) ed.style.setProperty('--stk', (getComputedStyle(bar).position === 'sticky' ? 77 + bar.offsetHeight + 14 : 88) + 'px'); if (SU.a2jump) { const e = document.getElementById('ag2-s' + SU.a2jump); SU.a2jump = 0; if (e) e.scrollIntoView({block:'start'}); } }});
-A['ag2-jump'] = (el) => { const e = document.getElementById('ag2-s' + el.dataset.x); if (e) { e.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'}); const h = e.querySelector('h2'); if (h) { h.tabIndex = -1; h.focus({preventScroll:true}); } } return false; };
+}, after() { const bar = document.getElementById('ag2-bar'), ed = document.querySelector('.ag2-ed'); if (bar && ed) ed.style.setProperty('--stk', (getComputedStyle(bar).position === 'sticky' ? 77 + bar.offsetHeight + 14 : 88) + 'px'); if (SU.a2jump) { const fx = SU.a2jump === 'focus'; SU.a2jump = 0; const e = document.getElementById('ag2-panel'); if (e && e.getBoundingClientRect().top < 0) e.scrollIntoView({block:'start'}); const h = e && e.querySelector('h2'); if (h && fx) h.focus({preventScroll:true}); } }});
+// the clicked switcher keeps focus (render restores it by id); the bottom Previous/Next buttons hand focus to the new heading
+A['ag2-jump'] = (el) => { SU.a2sec = Number(el.dataset.x); SU.a2jump = el.closest('.ag2-secnav') ? 1 : 'focus'; };
 A['ag2-discard'] = (el) => { const id = el.dataset.x; const prev = clone(SU.drafts[id]); SU.drafts[id] = clone(SU.live[id]); toast('Changes discarded', () => { SU.drafts[id] = prev; render(); }); };
 A['ag2-save'] = (el) => {
   const id = el.dataset.x; if (!unsaved(id) || blocked(id)) return;
@@ -4829,6 +4836,13 @@ R('actions', {id:'A3', title:'Actions', roles:['vina'], states:[['needs','Needs 
       <div style="min-width:0"><span class="sr">Step ${i + 1}: </span>${ed ? `<div class="col tight"><label class="sr" for="b-${(base + '.steps.' + i + '.t').replace(/\./g, '-')}">Step name</label><input class="inp" ${bind(base + '.steps.' + i + '.t')}><label class="sr" for="b-${(base + '.steps.' + i + '.d').replace(/\./g, '-')}">What happens</label><input class="inp" ${bind(base + '.steps.' + i + '.d')} placeholder="What happens in this step"><div class="row tight"><label class="sr" for="b-${(base + '.steps.' + i + '.k').replace(/\./g, '-')}">Step type</label>${bindSel(base + '.steps.' + i + '.k', Object.keys(STEP_T).map(x => [x, STEP_T[x][0]]))}<button type="button" class="btn sm pri" data-a="ag2-step-done">Done</button><button type="button" class="btn sm danger-o" data-a="ag2-step-del" data-x="${i}">Remove</button></div></div>`
         : `<div class="row tight"><span class="chip c-${t[1]} ag2-tt">${ic(TI[s.k] || 'bolt', 12)}${t[0]}</span><b class="small">${esc(s.t)}</b></div><div class="xs mute" style="margin-top:4px">${esc(s.d) || 'No details yet'}</div>`}</div>
       ${ed ? '<span></span>' : `<div class="row tight nowrap"><button type="button" class="ibtn sm bare" data-a="ag2-step-mv" data-x="${i}|-1" aria-label="Move step ${i + 1} up" ${i === 0 ? 'disabled' : ''}>${ic('chevU', 15)}</button><button type="button" class="ibtn sm bare" data-a="ag2-step-mv" data-x="${i}|1" aria-label="Move step ${i + 1} down" ${i === w.steps.length - 1 ? 'disabled' : ''}>${ic('chevD', 15)}</button><button type="button" class="btn sm ghost" data-a="ag2-step-ed" data-x="${k + i}">Edit</button></div>`}</li>`; }).join('');
+  const A3O = SU.a3open || (SU.a3open = {fields:false, msg:false, fails:false});
+  // collapsible section: <details> with the summary line shown while closed
+  const csec = (key, n, title, line, inner) => `<details class="card ag2-cs" ${A3O[key] ? 'open' : ''}><summary data-a="ag2-cs" data-x="${key}"><span class="ag2-n">${n}</span><span class="grow" style="min-width:0"><span class="h2">${title}</span>${A3O[key] ? '' : `<span class="xs mute ag2-csl" dir="auto">${line}</span>`}</span>${ic('chevD', 16)}</summary><div class="col ag2-csb">${inner}</div></details>`;
+  const req = w.fields.filter(f => f.req).map(f => f.t), opt = w.fields.length - req.length;
+  const fieldsLine = w.fields.length ? (req.length ? req.join(', ') + ' required' : 'Nothing required') + (opt ? ' · ' + opt + ' optional' : '') : 'No details needed';
+  const msgLine = (w.msg[T] || w.msg.ar || w.msg.en || 'No message for this action').replace(/\s+/g, ' ');
+  const failsLine = w.fails.length ? w.fails.length + (w.fails.length === 1 ? ' case: ' : ' cases: ') + w.fails.map(f => f.k || 'New case').join(' · ') : 'No cases yet';
   const sec = (n, title, sub) => `<div class="row tight nowrap"><span class="ag2-n">${n}</span><h2 class="h2">${title}</h2></div>${sub ? `<p class="small mute">${sub}</p>` : ''}`;
   const finP = w.uses ? Math.round(w.fin / w.uses * 100) : 0;
   const right = `<div class="col loose ag2-right ${off ? 'ag2-off' : ''}">
@@ -4843,21 +4857,20 @@ R('actions', {id:'A3', title:'Actions', roles:['vina'], states:[['needs','Needs 
       <label class="sr" for="b-${(base + '.when').replace(/\./g, '-')}">When should VINA do this?</label><textarea class="inp" rows="2" ${bindTa(base + '.when')[0]}>${bindTa(base + '.when')[1]}</textarea>
       <div class="row tight"><span class="xs mute">Customers say:</span>${w.says.map((x, i) => `<span class="tokens" style="min-height:32px;padding:2px"><span class="tok">${txt(x)}<button type="button" data-a="su-del" data-x="${base}.says#${i}" aria-label="Remove example">${ic('x', 12)}</button></span></span>`).join('')}</div>
       <form class="row tight nowrap" data-a="ag2-say" data-x="${aid}"><label class="sr" for="b-f-agSay">Add an example of what customers say</label><input class="inp grow" ${bind('f.agSay')} dir="auto" placeholder="Add an example in Arabic or English"><button type="submit" class="btn">Add</button></form></section>
-    <section class="card col">${sec(2, 'What VINA must know first', 'VINA asks for anything missing, one question at a time.')}
+    ${csec('fields', 2, 'What VINA must know first', esc(fieldsLine), `<p class="small mute">VINA asks for anything missing, one question at a time.</p>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Detail</th><th>Required</th><th>How VINA gets it</th><th><span class="sr">Remove</span></th></tr></thead><tbody>${w.fields.map((f, i) => `<tr><td><label class="sr" for="b-${(base + '.fields.' + i + '.t').replace(/\./g, '-')}">Detail</label><input class="inp" style="min-width:120px" ${bind(base + '.fields.' + i + '.t')}></td><td>${sw(f.req, 'su-tog', base + '.fields.' + i + '.req', f.t + ' required')}</td><td><label class="sr" for="b-${(base + '.fields.' + i + '.how').replace(/\./g, '-')}">How VINA gets it</label>${bindSel(base + '.fields.' + i + '.how', [...new Set([f.how, 'Asks', 'Takes it from WhatsApp', 'Already known'])])}</td><td class="r"><button type="button" class="ibtn sm bare" data-a="su-del" data-x="${base}.fields#${i}" aria-label="Remove ${esc(f.t)}">${ic('trash', 15)}</button></td></tr>`).join('') || `<tr><td colspan="4" class="mute">No details needed.</td></tr>`}</tbody></table></div>
-      <button type="button" class="btn sm" data-a="ag2-field-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a detail</button></section>
+      <button type="button" class="btn sm" data-a="ag2-field-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a detail</button>`)}
     <section class="card col">${sec(3, 'What happens', 'The steps run in this order, top to bottom. Drag to reorder, or use the arrows.')}
       ${steps ? `<ol class="ag2-flow">${steps}</ol>` : '<p class="small mute">No steps yet. Add the first one below.</p>'}
       <div class="row tight"><span class="xs mute">Add a step:</span>${Object.keys(STEP_T).map(x => `<button type="button" class="fchip" data-a="ag2-step-add" data-x="${x}">${ic('plus', 12)}${STEP_T[x][0]}</button>`).join('')}</div></section>
-    <div class="su-g2">
-      <section class="card col">${sec(4, 'Message VINA sends')}
+    ${csec('msg', 4, 'Message VINA sends', esc(msgLine), `
         <div class="seg" role="tablist" aria-label="Message language" style="align-self:flex-start">${[['ar','Arabic'],['en','English']].map(([kk, t]) => `<button type="button" role="tab" aria-selected="${T === kk}" data-a="su-set" data-x="su.a3tab" data-v="${kk}">${t}</button>`).join('')}</div>
         <label class="sr" for="b-${(base + '.msg.' + T).replace(/\./g, '-')}">Message in ${T === 'ar' ? 'Arabic' : 'English'}</label><textarea class="inp" rows="3" ${T === 'ar' ? 'dir="rtl"' : ''} ${bindTa(base + '.msg.' + T, true)[0]}>${bindTa(base + '.msg.' + T)[1]}</textarea>
         <div class="msg vina ag2-msgprev" ${T === 'ar' ? 'dir="rtl"' : ''}><div class="bub ${T === 'ar' ? 'ar' : ''}">${w.msg[T] ? blanks(w.msg[T]) : '<span class="mute">No message for this action.</span>'}</div></div>
-        <div class="xs mute">Blue words are filled in by VINA, for example <span class="blank">{name}</span> <span class="blank">{day}</span> <span class="blank">{time}</span>.</div></section>
-      <section class="card col">${sec(5, 'If something goes wrong')}
-        ${w.fails.map((f, i) => `<div class="col tight ag2-fail"><label class="sr" for="b-${(base + '.fails.' + i + '.k').replace(/\./g, '-')}">What goes wrong</label><input class="inp b" ${bind(base + '.fails.' + i + '.k')}><label class="sr" for="b-${(base + '.fails.' + i + '.v').replace(/\./g, '-')}">What VINA does</label><div class="row tight nowrap"><span class="mute" aria-hidden="true">${ic('arrowR', 14)}</span><input class="inp grow" ${bind(base + '.fails.' + i + '.v')}><button type="button" class="ibtn sm bare" data-a="su-del" data-x="${base}.fails#${i}" aria-label="Remove">${ic('trash', 15)}</button></div></div>`).join('')}
-        <button type="button" class="btn sm" data-a="ag2-fail-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a case</button></section></div>
+        <div class="xs mute">Blue words are filled in by VINA, for example <span class="blank">{name}</span> <span class="blank">{day}</span> <span class="blank">{time}</span>.</div>`)}
+    ${csec('fails', 5, 'If something goes wrong', esc(failsLine), `
+        ${w.fails.map((f, i) => `<div class="col tight ag2-fail"><label class="sr" for="b-${(base + '.fails.' + i + '.k').replace(/\./g, '-')}">What goes wrong</label><input class="inp b" ${bind(base + '.fails.' + i + '.k')}><label class="sr" for="b-${(base + '.fails.' + i + '.v').replace(/\./g, '-')}">What VINA does</label><div class="row tight nowrap"><span class="mute" aria-hidden="true">${ic('arrowR', 14)}</span><textarea class="inp grow ag2-failv" rows="2" ${bindTa(base + '.fails.' + i + '.v')[0]}>${bindTa(base + '.fails.' + i + '.v')[1]}</textarea><button type="button" class="ibtn sm bare" data-a="su-del" data-x="${base}.fails#${i}" aria-label="Remove">${ic('trash', 15)}</button></div></div>`).join('')}
+        <button type="button" class="btn sm" data-a="ag2-fail-add" data-x="${aid}" style="align-self:flex-start">${ic('plus', 14)}Add a case</button>`)}
     <section class="card">${`<div class="sw-row">${sw(w.ask, 'su-tog', base + '.ask', 'Ask the customer before acting')}<span class="grow"><b class="small">Ask the customer before acting</b><span class="xs mute" style="display:block">VINA repeats what it will do and waits for "yes".</span></span></div>`}</section>
   </div>`;
   return shell({nav:'actions', title:'Actions', cp:true, viewOnly:false, tools:pick('Agent:'), search:false, body:`${pickM()}<div class="ag2-a3"><aside class="card ag2-alist" aria-label="Actions"><div class="row nowrap">${agAv(id, 'sm')}<b class="grow">${esc(agentName(id))} can</b><button type="button" class="btn sm" data-a="ag2-new-act">${ic('plus', 14)}New action</button></div>${list}</aside>${right}</div>`});
@@ -4868,6 +4881,7 @@ A['ag2-a-reset'] = (el) => { delete SU.a3[wkey(cur(), el.dataset.x)]; if (S.st =
 A['ag2-say'] = (fm) => { const v = (S.f.agSay || '').trim(); if (!v) return false; work(cur(), fm.dataset.x).says.push(v); S.f.agSay = ''; };
 A['ag2-field-add'] = (el) => { work(cur(), el.dataset.x).fields.push({t:'New detail', req:false, how:'Asks'}); };
 A['ag2-fail-add'] = (el) => { work(cur(), el.dataset.x).fails.push({k:'', v:''}); };
+A['ag2-cs'] = (el, ev) => { if (ev) ev.preventDefault(); const o = SU.a3open; o[el.dataset.x] = !o[el.dataset.x]; };
 const curW = () => work(cur(), SU.a3sel);
 A['ag2-step-add'] = (el) => { const w = curW(); w.steps.push({t:'New step', k:el.dataset.x, d:''}); SU.a3step = wkey(cur(), SU.a3sel) + (w.steps.length - 1); };
 A['ag2-step-ed'] = (el) => { SU.a3step = el.dataset.x; };
@@ -4927,7 +4941,7 @@ A['ag2-sc-sel'] = (el) => { if (SU.a4.sel !== el.dataset.x) SU._a4seq = Date.now
 A['ag2-sc-run'] = () => { runAll(cur()); return false; };
 A['ag2-sc-one'] = (el) => { runAll(cur(), [el.dataset.x]); return false; };
 A['ag2-sc-mark'] = (el) => { const [sid, m] = el.dataset.x.split('|'); const s = SU.scen.find(x => x.id === sid); s.mark = m; const id = cur(); const r = runOf(id); if (r) { const e = evalScen(s, id); r.res[sid] = e.res; r.det[sid] = e; } toast(m === 'right' ? 'Marked as right. The agent will answer like this again.' : 'Marked as wrong. Fix the knowledge or rules, then run again.'); };
-A['ag2-fix'] = (el) => { const [id, kind] = el.dataset.x.split('|'); const sec = {file:4, rules:3, agent:2, actions:5}[kind] || 4; if (kind === 'actions') { go('actions'); return; } if (SU.live[id]) { SU.a2jump = sec; go('agent-' + id); } else { SU.wiz = id; go('setup-' + sec); } };
+A['ag2-fix'] = (el) => { const [id, kind] = el.dataset.x.split('|'); const sec = {file:4, rules:3, agent:2, actions:5}[kind] || 4; if (kind === 'actions') { go('actions'); return; } if (SU.live[id]) { SU.a2sec = sec; SU.a2jump = 'focus'; go('agent-' + id); } else { SU.wiz = id; go('setup-' + sec); } };
 A['ag2-sc-new'] = () => { Object.assign(S.f, {nsEdit:'', nsName:'', nsLang:'Arabic · Hijazi', nsMsgs:'', nsDo:'', nsNot:'', nsHand:false}); openModal('ag2-sc'); };
 A['ag2-sc-edit'] = (el) => { const s = SU.scen.find(x => x.id === el.dataset.x); Object.assign(S.f, {nsEdit:s.id, nsName:s.name, nsLang:s.lang, nsMsgs:(s.msgs || [s.first]).join('\n'), nsDo:s.mustDo || s.act || '', nsNot:s.mustNot || '', nsHand:!!s.mustHand}); openModal('ag2-sc'); };
 MODALS['ag2-sc'] = () => { const c = cfgOf(cur()); const ta = bindTa('f.nsMsgs');
@@ -4970,6 +4984,8 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-secnav button{display:flex;align-items:center;gap:10px;min-height:42px;padding:0 10px;border:0;border-radius:10px;background:transparent;color:var(--text);font-size:13px;font-weight:500;text-align:start;cursor:pointer;transition:background var(--d1)}
 .ag2-secnav button:hover{background:var(--sub)}
 .ag2-secnav button.dirty{font-weight:600}
+.ag2-secnav button[aria-current="true"]{background:var(--sel);font-weight:600;box-shadow:inset 3px 0 0 var(--pri)}
+.ag2-pn{padding-top:16px;margin-top:4px;border-top:1px solid var(--line)}
 .ag2-sec.dirty{box-shadow:var(--e1),inset 3px 0 0 var(--amber)}
 .ag2-sec .card-h h2{flex:0 1 auto}
 .ag2-chatcol{position:sticky;top:var(--stk)}
@@ -4987,8 +5003,8 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-needs{display:flex;gap:14px;align-items:flex-start;background:var(--amber-b);box-shadow:none;border-color:transparent}
 .ag2-needs .h2{color:var(--amber-f)}
 .ag2-needs .kv{grid-template-columns:minmax(90px,130px) 1fr}
-.ag2-off>section:not(.ag2-ahead):not(.ag2-needs),.ag2-off>.su-g2{opacity:.6;filter:saturate(.25);transition:opacity var(--d2)}
-.ag2-off>section:not(.ag2-ahead):not(.ag2-needs):focus-within,.ag2-off>.su-g2:focus-within{opacity:1;filter:none}
+.ag2-off>section:not(.ag2-ahead):not(.ag2-needs),.ag2-off>details{opacity:.6;filter:saturate(.25);transition:opacity var(--d2)}
+.ag2-off>section:not(.ag2-ahead):not(.ag2-needs):focus-within,.ag2-off>details:focus-within{opacity:1;filter:none}
 .ag2-sticky{position:sticky;top:77px;z-index:5;box-shadow:var(--e2)}
 .ag2-flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .ag2-step{position:relative;display:grid;grid-template-columns:18px 30px minmax(0,1fr) auto;align-items:start;gap:10px;padding:12px 12px 12px 10px;border-radius:12px;background:var(--sub);transition:background var(--d1),box-shadow var(--d2)}
@@ -5001,6 +5017,17 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-msgprev{max-width:100%;align-self:stretch;align-items:flex-start}
 .ag2-msgprev .bub{width:100%}
 .ag2-fail{padding:10px;border-radius:10px;background:var(--sub)}
+.ag2-failv{min-height:0;resize:vertical;line-height:1.45}
+.ag2-cs{padding:0}
+.ag2-cs>summary{display:flex;align-items:center;gap:12px;padding:22px 28px;cursor:pointer;list-style:none;border-radius:inherit}
+.ag2-cs>summary::-webkit-details-marker{display:none}
+.ag2-cs>summary:hover{background:var(--sub)}
+.ag2-cs>summary>.ic:last-child{flex:0 0 auto;color:var(--mute);transition:transform var(--d2) var(--ease)}
+.ag2-cs[open]>summary>.ic:last-child{transform:rotate(180deg)}
+.ag2-cs .h2{display:block}
+.ag2-csl{display:block;margin-top:2px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag2-csb{padding:0 28px 28px}
+@media (max-width:760px){.ag2-cs>summary{padding:18px 20px}.ag2-csb{padding:0 20px 20px}}
 /* A4 */
 .ag2-run{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
 .ag2-big{font-family:var(--f-display);font-size:28px;line-height:30px;font-weight:700}
@@ -5451,6 +5478,8 @@ document.head.insertAdjacentHTML('beforeend', `<style>
   const used = () => S.st === 'limit' ? LIMIT : PEOPLE.filter(p => p.status !== 'Off').length;
   const teamOf = p => RK[p.role] === 'sales' ? p.showroom : RK[p.role] === 'cc' ? 'Call centre' : 'Management';
   const PST = {'Active':'green','Invite waiting':'amber','Off':'grey'};
+  const lastAdmin = p => p.role === 'Account admin' && p.status === 'Active' && PEOPLE.filter(x => x.role === 'Account admin' && x.status === 'Active').length === 1;
+  const LAST_WHY = ' is the only account admin. Make someone else an account admin first.';
   const seatBar = (u, extra) => { const pct = Math.min(100, u / LIMIT * 100), tone = u > LIMIT ? 'red' : u >= LIMIT ? 'red' : u >= LIMIT - 2 ? 'amber' : 'green'; return `<div class="cp-seat"><div class="row tight small" style="justify-content:space-between"><span><b class="num">${u}</b> <span class="mute">of ${LIMIT} users on the plan</span></span>${extra || ''}</div><div class="bar-h" role="progressbar" aria-label="Users on the plan" aria-valuenow="${u}" aria-valuemin="0" aria-valuemax="${LIMIT}"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div></div>`; };
   if (!S.f.cpu) S.f.cpu = {q:'', role:''};
   R('users', {id:'U1', title:'Users', roles:['vina'], states:[['loading','Loading'],['error','Could not load'],['limit','User limit reached']], render() {
@@ -5460,9 +5489,9 @@ document.head.insertAdjacentHTML('beforeend', `<style>
     const can = (k) => ({'Open the Manager dashboard':['Yes','—','—'],'See all conversations and leads':['View only','—','—'],'Work their own chats and leads':['—','Yes','Yes'],'Send a lead to sales':['—','Yes','—'],'Book test drives':['—','—','Yes'],'Download CSV':['Yes','—','—'],'Use the control panel':['Later','—','—']})[k];
     const table = rows.length ? `<div class="tbl-wrap"><table class="tbl cp-utbl"><thead><tr><th>Name</th><th>Role</th><th>Team or showroom</th><th>Status</th><th>Last active</th><th><span class="sr">Actions</span></th></tr></thead><tbody>
       ${rows.map(p => `<tr class="${flashCls(p.id)}"><td><div class="who">${av(p.name)}<div style="min-width:0"><div class="nm">${esc(p.name)}</div><div class="xs mute">${esc(p.email)}</div></div></div></td>
-        <td><label class="sr" for="cp-r-${p.id}">Role for ${esc(p.name)}</label><select class="inp cp-rsel" id="cp-r-${p.id}" data-ch="cp-role" data-x="${p.id}">${ROLES.map(r => `<option ${r === p.role ? 'selected' : ''}>${r}</option>`).join('')}</select></td>
+        <td><label class="sr" for="cp-r-${p.id}">Role for ${esc(p.name)}</label><select class="inp cp-rsel" id="cp-r-${p.id}" data-ch="cp-role" data-x="${p.id}" ${lastAdmin(p) ? `aria-describedby="cp-la-${p.id}"` : ''}>${ROLES.map(r => `<option ${r === p.role ? 'selected' : lastAdmin(p) ? 'disabled' : ''}>${r}</option>`).join('')}</select>${lastAdmin(p) ? `<div class="xs mute" id="cp-la-${p.id}" style="margin-top:4px">The only account admin</div>` : ''}</td>
         <td class="mute">${esc(teamOf(p))}</td><td>${chipC(p.status, PST[p.status], true)}</td><td class="mute num">${esc(p.last)}</td>
-        <td class="r">${p.status === 'Invite waiting' ? `<button type="button" class="btn sm" data-a="cp-resend" data-x="${p.id}" aria-label="Resend invite to ${esc(p.name)}">${ic('send', 14)}Resend</button>` : p.status === 'Active' ? `<button type="button" class="btn sm ghost" data-a="cp-off" data-x="${p.id}" aria-label="Turn off ${esc(p.name)}">Turn off</button>` : `<button type="button" class="btn sm" data-a="cp-on" data-x="${p.id}" ${full ? 'disabled title="All users on the plan are used"' : ''} aria-label="Turn on ${esc(p.name)}">Turn on</button>`}</td></tr>`).join('')}
+        <td class="r">${p.status === 'Invite waiting' ? `<button type="button" class="btn sm" data-a="cp-resend" data-x="${p.id}" aria-label="Resend invite to ${esc(p.name)}">${ic('send', 14)}Resend</button>` : p.status === 'Active' ? `<button type="button" class="btn sm ghost" data-a="cp-off" data-x="${p.id}" aria-label="Turn off ${esc(p.name)}" ${lastAdmin(p) ? `aria-disabled="true" title="${esc(p.name + LAST_WHY)}"` : ''}>Turn off</button>` : `<button type="button" class="btn sm" data-a="cp-on" data-x="${p.id}" ${full ? 'disabled title="All users on the plan are used"' : ''} aria-label="Turn on ${esc(p.name)}">Turn on</button>`}</td></tr>`).join('')}
     </tbody></table></div>` : `<div class="card">${empty('search', 'No one matches', 'Nobody on the team has that name or role. Clear the search or add people.', `<button type="button" class="btn" data-a="cp-u-clear">Clear search</button>`)}</div>`;
     const waiting = PEOPLE.filter(p => p.status === 'Invite waiting').length;
     const body = stateWrap(`
@@ -5476,13 +5505,15 @@ document.head.insertAdjacentHTML('beforeend', `<style>
   A['cp-u-role'] = el => { S.f.cpu.role = el.dataset.x; };
   A['cp-u-clear'] = () => { S.f.cpu.q = ''; S.f.cpu.role = ''; };
   A['cp-role'] = el => {
-    const p = PEOPLE.find(x => x.id === el.dataset.x); const was = p.role; p.role = el.value;
+    const p = PEOPLE.find(x => x.id === el.dataset.x); const was = p.role;
+    if (el.value !== was && lastAdmin(p)) { el.value = was; toast(p.name + LAST_WHY); return; }
+    p.role = el.value;
     if (U[p.id]) { U[p.id].label = p.role; U[p.id].role = RK[p.role]; U[p.id].team = teamOf(p); }
     flash(p.id);
-    toast(p.name + ' is now ' + (p.role === 'Account admin' ? 'an ' : 'a ') + p.role + '. It applies next time they log in.', () => { p.role = was; if (U[p.id]) { U[p.id].label = was; U[p.id].role = RK[was]; } flash(p.id); render(); });
+    toast(p.name + ' is now ' + (p.role === 'Account admin' ? 'an ' : 'a ') + p.role + '. It applies next time they log in.', () => { if (lastAdmin(p)) { toast(p.name + LAST_WHY); render(); return; } p.role = was; if (U[p.id]) { U[p.id].label = was; U[p.id].role = RK[was]; } flash(p.id); render(); });
   };
   A['cp-resend'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); p.last = 'Invited ' + nowStr().replace('Today ', 'today '); flash(p.id); toast('Invite sent again to ' + p.email + '.'); };
-  A['cp-off'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); p.status = 'Off'; flash(p.id); toast(p.name + ' can no longer log in. Their leads stay with them until reassigned.', () => { p.status = 'Active'; flash(p.id); render(); }); };
+  A['cp-off'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); if (lastAdmin(p)) { toast(p.name + LAST_WHY); return; } p.status = 'Off'; flash(p.id); toast(p.name + ' can no longer log in. Their leads stay with them until reassigned.', () => { p.status = 'Active'; flash(p.id); render(); }); };
   A['cp-on'] = el => { const p = PEOPLE.find(x => x.id === el.dataset.x); p.status = 'Active'; flash(p.id); toast(p.name + ' can log in again.'); };
 
   /* ---------- U2 Add people ---------- */
@@ -5578,7 +5609,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
   R('plan', {id:'B1', title:'Plan and usage', roles:['vina'], states:[['loading','Loading'],['error','Could not load'],['paid','All paid']], render() {
     const inv = INV.map(i => Object.assign({}, i, {paid: i.paid || S.st === 'paid'}));
     const conv = 2436, convMax = 10000, u = used();
-    const lines = [['Pro plan','November 2026',750,'navy'],['Meta WhatsApp charges','Passed through at cost · 1,742 conversations',418,'green'],['AI usage','Passed through at cost',236,'teal'],['Phone minutes', CS.ph.st === 'ok' ? 'Passed through at cost · 0 minutes' : 'Not used',0,'grey']];
+    const lines = [['Pro plan','November 2026',750,'ch-c'],['Meta WhatsApp charges','Passed through at cost · 1,742 conversations',418,'ch-b'],['AI usage','Passed through at cost',236,'ch-f'],['Phone minutes', CS.ph.st === 'ok' ? 'Passed through at cost · 0 minutes' : 'Not used',0,'ch-d']];
     const sub = lines.reduce((a, l) => a + l[2], 0);
     const meter = (k, v, of, pct, tone, n) => `<div class="card cp-meter col tight"><span class="cp-kt">${mic(k, 13)}${k}</span><div class="row tight" style="align-items:baseline"><span class="cp-big" ${countAttr(v)}>${v}</span><span class="mute">of ${of}</span></div><div class="bar-h" role="progressbar" aria-label="${k}" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div><span class="xs mute">${n}</span></div>`;
     const unpaid = inv.filter(i => !i.paid);
@@ -5589,8 +5620,8 @@ document.head.insertAdjacentHTML('beforeend', `<style>
         ${meter('Conversations this month', num(conv), num(convMax), conv / convMax * 100, 'horizon', '1 to 7 November · resets 1 December')}
         ${meter('Users', String(u), LIMIT, u / LIMIT * 100, u >= LIMIT ? 'red' : u >= LIMIT - 2 ? 'amber' : 'green', 'Agents: 3 of 3 · <a href="#users">Users and roles</a>')}
       </div>
-      ${sec('This month so far', '1 to 7 November 2026 · Meta and AI charges are passed through at cost, with nothing added.', `<div class="grow-x" style="margin-bottom:12px"><div class="cp-stack" role="img" aria-label="Charges so far: ${lines.filter(l => l[2]).map(l => l[0] + ' ' + sar(l[2])).join(', ')}">${lines.filter(l => l[2]).map(l => `<i style="flex:${l[2]} 1 0;background:var(--${l[3]}-f)"></i>`).join('')}</div></div>
-        <div class="legend" style="margin-bottom:12px">${lines.filter(l => l[2]).map(l => `<span><i style="background:var(--${l[3]}-f)"></i>${l[0]}</span>`).join('')}</div>
+      ${sec('This month so far', '1 to 7 November 2026 · Meta and AI charges are passed through at cost, with nothing added.', `<div class="grow-x" style="margin-bottom:12px"><div class="cp-stack" role="img" aria-label="Charges so far: ${lines.filter(l => l[2]).map(l => l[0] + ' ' + sar(l[2])).join(', ')}">${lines.filter(l => l[2]).map(l => `<i style="flex:${l[2]} 1 0;background:var(--${l[3]})"></i>`).join('')}</div></div>
+        <div class="legend" style="margin-bottom:12px">${lines.filter(l => l[2]).map(l => `<span><i style="background:var(--${l[3]})"></i>${l[0]}</span>`).join('')}</div>
         <div class="tbl-wrap" style="box-shadow:none"><table class="tbl"><tbody>${lines.map(([k, n, v]) => `<tr><td><b>${k}</b><div class="xs mute">${n}</div></td><td class="r num b">${sar(v)}</td></tr>`).join('')}
         <tr><td><b>Total so far</b><div class="xs mute">Before VAT</div></td><td class="r num bb">${sar(sub)}</td></tr><tr><td class="mute">VAT 15%</td><td class="r num mute">${sar(Math.round(sub * VAT * 100) / 100)}</td></tr><tr><td><b>Total with VAT</b></td><td class="r num bb" style="font-size:14px">${sar(withVat(sub))}</td></tr></tbody></table></div>`)}
       ${sec('Invoices', 'Amounts include 15% VAT.', `<div class="tbl-wrap" style="box-shadow:none"><table class="tbl cp-inv"><thead><tr><th>Month</th><th>Invoice</th><th class="r">Amount</th><th>Status</th><th><span class="sr">Action</span></th></tr></thead><tbody>${inv.map(i => `<tr class="${flashCls(i.no)}"><td class="b">${i.m}</td><td class="mute num">${i.no}</td><td class="r num b">${sar(withVat(i.base))}</td><td>${i.paid ? chipC('Paid', 'green', true) : chipC('Not paid', 'red', true)}</td><td class="r">${i.paid ? `<button type="button" class="btn sm ghost" data-a="cp-inv-dl" data-x="${i.no}" aria-label="Download ${i.no}">${ic('download', 14)}Download</button>` : `<button type="button" class="btn sm" data-a="cp-pay" data-x="${i.no}">Pay now</button>`}</td></tr>`).join('')}</tbody></table></div>`)}`);
