@@ -278,7 +278,7 @@
     const l = G.sel && lead(G.sel);
     const folders = `<div class="tabs ag-ftabs" role="tablist" aria-label="Folders">${FOLDERS[S.role].map(([k, t]) => `<button type="button" role="tab" class="tab ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-selected="${fk === k}">${t}${k === 'closed' ? '' : `<span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span>`}</button>`).join('')}</div>`;
     const items = S.st === 'loading' ? `<div style="padding:8px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x, fk); const m = lastLine(x);
-        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:rowStatus(x, fk) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
+        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:rowStatus(x, fk) || `<span class="cx-st">${esc(x.model)}</span>`}); }).join('')
       : q ? empty('search', 'No chats match', 'Nothing in this folder has “' + esc(S.f.agQ.trim()) + '” in the name or mobile number.')
       : empty('inbox', fk === 'closed' ? 'Nothing closed today yet' : 'No chats here', fk === 'closed' ? 'Leads you close today show here.' : 'When VINA hands a chat to you, it shows here and you get an alert. You can keep working your leads in My leads.', `<a class="btn" href="#leads">Open my leads</a>`);
     let chat;

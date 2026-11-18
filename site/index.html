@@ -842,6 +842,20 @@ html,body{overflow-anchor:none}
 /* Scrolling lists contain their own screen-reader labels (.sr is absolute); otherwise those labels escape the list and stretch the page */
 .cx-list,[data-keep],.cx-row{position:relative}
 
+/* Chat rows, two lines: name + time, then the preview with one quiet tag at its end.
+   Avatars are neutral so colour only means status or lateness. */
+.cx-row{align-items:center;padding:9px 10px}
+.cx-row>.cx-av{align-self:center;margin-top:0}
+.cx-row .av,.cx-head .av{background:var(--sub2);color:var(--mute)}
+.cx-row.unread .av{color:var(--text)}
+.cx-rb{gap:2px}
+.cx-rn{font-weight:600}
+.cx-r2{display:flex;align-items:center;gap:10px;min-width:0}
+.cx-r2 .cx-rp{flex:1 1 auto;min-width:0}
+.cx-r2 .cx-rm{flex:0 0 auto;margin-top:0;max-width:46%;gap:6px}
+.cx-r2 .cx-st{overflow:hidden;text-overflow:ellipsis}
+.cx-r2 .cx-st:only-child::before{content:none}
+
 </style>
 </head>
 <body>
@@ -1248,7 +1262,7 @@ const avCh = (name, ch, size) => { const c = CH[ch] || CH.wa; return `<span clas
 // quiet status for list rows: a coloured dot and the word, no filled chip
 const stDot = (label, c) => `<span class="cx-st"><i style="background:var(--${c}-f)" aria-hidden="true"></i>${esc(label)}</span>`;
 // o: {l, a (action), cur, time, late, unread, preview (html), meta (html), cls}
-const cxRow = o => `<button type="button" class="cx-row ${o.unread ? 'unread' : ''} ${o.cls || ''}" data-a="${o.a}" data-x="${o.l.id}" aria-current="${!!o.cur}">${avCh(o.l.name, o.l.ch)}<span class="cx-rb"><span class="cx-r1"><span class="cx-rn ell">${esc(o.l.name)}</span>${o.unread ? '<span class="unread-dot" aria-hidden="true"></span><span class="sr">, unread</span>' : ''}<span class="cx-rt ${o.late ? 'late' : ''}">${esc(o.time)}</span></span><span class="cx-rp ell">${o.preview}</span><span class="cx-rm">${o.meta}</span></span></button>`;
+const cxRow = o => `<button type="button" class="cx-row ${o.unread ? 'unread' : ''} ${o.cls || ''}" data-a="${o.a}" data-x="${o.l.id}" aria-current="${!!o.cur}">${avCh(o.l.name, o.l.ch)}<span class="cx-rb"><span class="cx-r1"><span class="cx-rn ell">${esc(o.l.name)}</span>${o.unread ? '<span class="unread-dot" aria-hidden="true"></span><span class="sr">, unread</span>' : ''}<span class="cx-rt ${o.late ? 'late' : ''}">${esc(o.time)}</span></span><span class="cx-r2"><span class="cx-rp ell">${o.preview}</span>${o.meta ? `<span class="cx-rm">${o.meta}</span>` : ''}</span></span></button>`;
 const cxSearch = (path, label) => `<label class="cx-search">${ic('search', 15)}<span class="sr">${label}</span><input type="search" placeholder="Name or mobile" ${bind(path, true)}></label>`;
 // o: {back (action), line (html), acts (html), more (html)}
 const cxHead = (l, o) => `<div class="cx-head">${o.back ? `<button type="button" class="ibtn sm bare cx-back" data-a="${o.back}" aria-label="Back to chats">${ic('chevL')}</button>` : ''}${avCh(l.name, l.ch)}<div class="cx-hn"><div class="b ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="xs mute ell">${o.line}</div></div><span class="cx-hchip">${chip(l.status)}</span>${o.acts || ''}<button type="button" class="ibtn sm cx-dpb" data-a="dp" aria-pressed="${dpOpen()}" aria-controls="cx-dp" aria-label="Customer details" title="Customer details (])">${ic('cols', 16)}</button>${o.more || ''}</div>`;
@@ -2604,7 +2618,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 
   const M3 = () => S.f.m3 || (S.f.m3 = {folder:'open', ch:'all', st:'all', hb:'all', date:'all', rated:false, low:false, q:''});
   // [key, tab label, full name, test]
-  const FOLDERS = [['open','Open','All open conversations', l => !['sold','lost'].includes(l.status)], ['waiting','Waiting','Waiting for a person', l => !['sold','lost'].includes(l.status) && l.owner !== 'vina' && (!l.owner || l.asked || l.unread)], ['closed','Closed','Closed', l => ['sold','lost'].includes(l.status)], ['low','Low rating','Low rating, 1 or 2 stars', l => l.rating && l.rating <= 2]];
+  const FOLDERS = [['open','Open','All open conversations', l => !['sold','lost'].includes(l.status)], ['waiting','Waiting','Waiting for a person', l => !['sold','lost'].includes(l.status) && l.owner !== 'vina' && (!l.owner || l.asked || l.unread)], ['closed','Closed','Closed', l => ['sold','lost'].includes(l.status)], ['low','Rated low','Low rating, 1 or 2 stars', l => l.rating && l.rating <= 2]];
   const FL = {ch: v => CH[v].label, st: v => STATUS[v].label, hb: v => 'Handled by ' + (v === 'VINA alone' ? 'VINA alone' : v.toLowerCase()), date: v => v === 'today' ? 'Today' : 'Last 7 days'};
   const activeF = s => ['ch','st','hb','date'].filter(k => s[k] !== 'all').map(k => [k, FL[k](s[k])]).concat(s.rated ? [['rated','Has a rating']] : [], s.low ? [['low','Low rating']] : []);
   const lastLine = l => [...l.m].reverse().find(x => ['in','vina','agent','file','tpl'].includes(x.k)) || {text:'', at:''};
@@ -2636,7 +2650,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
         <button type="button" class="btn mg-fbtn" data-a="m3-filt" aria-haspopup="dialog" aria-expanded="${popOpen}">${ic('filter', 15)}Filters${act.length ? `<span class="mg-fn">${act.length}</span>` : ''}</button></div>
       ${act.length ? `<div class="fchips mg-act">${act.map(([k, t]) => `<button type="button" class="fchip" data-a="m3-unf" data-x="${k}" aria-label="Remove filter: ${esc(t)}">${esc(t)}<span class="x">${ic('x', 13)}</span></button>`).join('')}<button type="button" class="clr" data-a="m3-clear">Clear all</button></div>` : ''}${pop}</div>`;
     const rows = list.length ? list.map(l => { const ll = lastLine(l); return cxRow({l, a:'m3-sel', cur:sel === l, time:rowTime(ll.at), unread:l.unread, preview:txt(ll.text),
-        meta:stDot((STATUS[l.status] || {label:l.status}).label, (STATUS[l.status] || {c:'grey'}).c) + `<span class="ell">${esc(l.handled)}</span>` + (l.rating ? stars(l.rating, 11) : '')}); }).join('')
+        meta: s.folder === 'low' && l.rating ? stars(l.rating, 11) : stDot((STATUS[l.status] || {label:l.status}).label, (STATUS[l.status] || {c:'grey'}).c)}); }).join('')
       : empty('search', 'No conversations match', 'Try another folder or clear the filters.', act.length || s.q ? `<button type="button" class="btn sm" data-a="m3-clear">Clear filters</button>` : '');
     const listPane = `<section class="mg-list" aria-label="Conversation list">${head}${tabs}<div class="cx-list" id="m3-list" data-keep aria-keyshortcuts="J K">${rows}</div></section>`;
     const line = [CH[sel ? sel.ch : 'wa'].label, sel && sel.model, sel && (sel.owner ? 'given to ' + uname(sel.owner) : 'not given to anyone yet')].map(esc).join(' · ');
@@ -3001,7 +3015,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const l = G.sel && lead(G.sel);
     const folders = `<div class="tabs ag-ftabs" role="tablist" aria-label="Folders">${FOLDERS[S.role].map(([k, t]) => `<button type="button" role="tab" class="tab ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-selected="${fk === k}">${t}${k === 'closed' ? '' : `<span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span>`}</button>`).join('')}</div>`;
     const items = S.st === 'loading' ? `<div style="padding:8px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x, fk); const m = lastLine(x);
-        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:rowStatus(x, fk) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
+        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:rowStatus(x, fk) || `<span class="cx-st">${esc(x.model)}</span>`}); }).join('')
       : q ? empty('search', 'No chats match', 'Nothing in this folder has “' + esc(S.f.agQ.trim()) + '” in the name or mobile number.')
       : empty('inbox', fk === 'closed' ? 'Nothing closed today yet' : 'No chats here', fk === 'closed' ? 'Leads you close today show here.' : 'When VINA hands a chat to you, it shows here and you get an alert. You can keep working your leads in My leads.', `<a class="btn" href="#leads">Open my leads</a>`);
     let chat;

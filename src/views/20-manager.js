@@ -446,7 +446,7 @@
 
   const M3 = () => S.f.m3 || (S.f.m3 = {folder:'open', ch:'all', st:'all', hb:'all', date:'all', rated:false, low:false, q:''});
   // [key, tab label, full name, test]
-  const FOLDERS = [['open','Open','All open conversations', l => !['sold','lost'].includes(l.status)], ['waiting','Waiting','Waiting for a person', l => !['sold','lost'].includes(l.status) && l.owner !== 'vina' && (!l.owner || l.asked || l.unread)], ['closed','Closed','Closed', l => ['sold','lost'].includes(l.status)], ['low','Low rating','Low rating, 1 or 2 stars', l => l.rating && l.rating <= 2]];
+  const FOLDERS = [['open','Open','All open conversations', l => !['sold','lost'].includes(l.status)], ['waiting','Waiting','Waiting for a person', l => !['sold','lost'].includes(l.status) && l.owner !== 'vina' && (!l.owner || l.asked || l.unread)], ['closed','Closed','Closed', l => ['sold','lost'].includes(l.status)], ['low','Rated low','Low rating, 1 or 2 stars', l => l.rating && l.rating <= 2]];
   const FL = {ch: v => CH[v].label, st: v => STATUS[v].label, hb: v => 'Handled by ' + (v === 'VINA alone' ? 'VINA alone' : v.toLowerCase()), date: v => v === 'today' ? 'Today' : 'Last 7 days'};
   const activeF = s => ['ch','st','hb','date'].filter(k => s[k] !== 'all').map(k => [k, FL[k](s[k])]).concat(s.rated ? [['rated','Has a rating']] : [], s.low ? [['low','Low rating']] : []);
   const lastLine = l => [...l.m].reverse().find(x => ['in','vina','agent','file','tpl'].includes(x.k)) || {text:'', at:''};
@@ -478,7 +478,7 @@
         <button type="button" class="btn mg-fbtn" data-a="m3-filt" aria-haspopup="dialog" aria-expanded="${popOpen}">${ic('filter', 15)}Filters${act.length ? `<span class="mg-fn">${act.length}</span>` : ''}</button></div>
       ${act.length ? `<div class="fchips mg-act">${act.map(([k, t]) => `<button type="button" class="fchip" data-a="m3-unf" data-x="${k}" aria-label="Remove filter: ${esc(t)}">${esc(t)}<span class="x">${ic('x', 13)}</span></button>`).join('')}<button type="button" class="clr" data-a="m3-clear">Clear all</button></div>` : ''}${pop}</div>`;
     const rows = list.length ? list.map(l => { const ll = lastLine(l); return cxRow({l, a:'m3-sel', cur:sel === l, time:rowTime(ll.at), unread:l.unread, preview:txt(ll.text),
-        meta:stDot((STATUS[l.status] || {label:l.status}).label, (STATUS[l.status] || {c:'grey'}).c) + `<span class="ell">${esc(l.handled)}</span>` + (l.rating ? stars(l.rating, 11) : '')}); }).join('')
+        meta: s.folder === 'low' && l.rating ? stars(l.rating, 11) : stDot((STATUS[l.status] || {label:l.status}).label, (STATUS[l.status] || {c:'grey'}).c)}); }).join('')
       : empty('search', 'No conversations match', 'Try another folder or clear the filters.', act.length || s.q ? `<button type="button" class="btn sm" data-a="m3-clear">Clear filters</button>` : '');
     const listPane = `<section class="mg-list" aria-label="Conversation list">${head}${tabs}<div class="cx-list" id="m3-list" data-keep aria-keyshortcuts="J K">${rows}</div></section>`;
     const line = [CH[sel ? sel.ch : 'wa'].label, sel && sel.model, sel && (sel.owner ? 'given to ' + uname(sel.owner) : 'not given to anyone yet')].map(esc).join(' · ');

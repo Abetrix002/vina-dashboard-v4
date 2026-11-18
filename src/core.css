@@ -828,3 +828,17 @@ html,body{overflow-anchor:none}
 
 /* Scrolling lists contain their own screen-reader labels (.sr is absolute); otherwise those labels escape the list and stretch the page */
 .cx-list,[data-keep],.cx-row{position:relative}
+
+/* Chat rows, two lines: name + time, then the preview with one quiet tag at its end.
+   Avatars are neutral so colour only means status or lateness. */
+.cx-row{align-items:center;padding:9px 10px}
+.cx-row>.cx-av{align-self:center;margin-top:0}
+.cx-row .av,.cx-head .av{background:var(--sub2);color:var(--mute)}
+.cx-row.unread .av{color:var(--text)}
+.cx-rb{gap:2px}
+.cx-rn{font-weight:600}
+.cx-r2{display:flex;align-items:center;gap:10px;min-width:0}
+.cx-r2 .cx-rp{flex:1 1 auto;min-width:0}
+.cx-r2 .cx-rm{flex:0 0 auto;margin-top:0;max-width:46%;gap:6px}
+.cx-r2 .cx-st{overflow:hidden;text-overflow:ellipsis}
+.cx-r2 .cx-st:only-child::before{content:none}
