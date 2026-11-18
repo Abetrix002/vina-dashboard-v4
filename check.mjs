@@ -20,6 +20,7 @@ const ev = async e => { const r = await send('Runtime.evaluate', { expression: e
 const ok = (name, c, got) => { console.log(`${c ? 'PASS' : 'FAIL'}  ${name}${c ? '' : `  -> ${JSON.stringify(got).slice(0, 1500)}`}`); if (!c) failed++; };
 
 await send('Runtime.enable'); await send('Page.enable');
+if (!process.env.MOTION) await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] }); // flows assume synchronous renders; MOTION=1 runs with transitions on
 await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
 await send('Page.navigate', { url: 'file://' + path.join(ROOT, 'dist/index.html') }); await sleep(1500);
 ok('boots without errors', !errors.length, errors);

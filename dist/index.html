@@ -791,6 +791,37 @@ header.top .crumb{font-size:13px}
 .addf:hover{border-style:solid;color:var(--text);background:var(--sub)}
 @media (max-width:760px){.rc-h{padding:14px 16px 4px}.rc-b{padding:8px 16px 14px}}
 
+/* ================= Motion pass ================= */
+/* View transitions: the frame (menu, top bar) stays put; content crossfades; exits are faster than entries */
+.nav{view-transition-name:vt-nav} header.top{view-transition-name:vt-top}
+::view-transition-group(*){animation-duration:260ms;animation-timing-function:var(--ease)}
+::view-transition-old(root){animation:vtOut 120ms var(--ease-in) both}
+::view-transition-new(root){animation:vtIn 240ms var(--ease) both}
+:root[data-vt="state"]::view-transition-old(root),:root[data-vt="move"]::view-transition-old(root){animation-duration:90ms}
+:root[data-vt="state"]::view-transition-new(root),:root[data-vt="move"]::view-transition-new(root){animation-duration:180ms}
+:root[data-vt]::view-transition-old(vt-nav),:root[data-vt]::view-transition-new(vt-nav),:root[data-vt]::view-transition-old(vt-top),:root[data-vt]::view-transition-new(vt-top){animation:none}
+@keyframes vtOut{to{opacity:0}} @keyframes vtIn{from{opacity:0}}
+/* moved items glide with a slight spring */
+::view-transition-group(*):not(::view-transition-group(root)){animation-timing-function:var(--spring)}
+
+/* Disclosures open and close smoothly (where the browser supports animating to auto) */
+:root{interpolate-size:allow-keywords}
+details::details-content{block-size:0;overflow-y:clip;transition:block-size 280ms var(--ease),content-visibility 280ms allow-discrete}
+details[open]::details-content{block-size:auto}
+details>summary{cursor:pointer}
+details>summary .ic{transition:transform 220ms var(--ease)}
+details[open]>summary .ic:last-child{transform:rotate(180deg)}
+
+/* Pressed feedback is instant; release eases back */
+.btn,.ibtn,.fchip,.tab,.seg>*,.cx-row,.radio-card{transition-property:background,border-color,color,box-shadow,transform,opacity}
+.cx-row:active,.tab:active,.seg>*:active{transform:scale(.985)}
+/* Rows show a quiet "open" arrow on hover */
+.tbl tbody tr.click td:last-child{position:relative}
+.tbl tbody tr.click td:last-child::after{content:"›";position:absolute;inset-inline-end:10px;top:50%;transform:translate(-4px,-50%);opacity:0;color:var(--mute);font-size:18px;transition:opacity var(--d1),transform var(--d2) var(--ease)}
+.tbl tbody tr.click:hover td:last-child::after{opacity:1;transform:translate(0,-50%)}
+
+@media (prefers-reduced-motion:reduce){.nav,header.top{view-transition-name:none} details::details-content{transition:none}}
+
 </style>
 <div id="app"></div>
 <div id="layers"></div>
@@ -1353,7 +1384,7 @@ const curTheme = () => S.theme === 'system' ? (matchMedia('(prefers-color-scheme
 A.theme = () => { setTheme(curTheme() === 'dark' ? 'light' : 'dark'); };
 function setTheme(t) {
   const apply = () => setTheme0(t);
-  if (document.startViewTransition && S.role !== undefined && document.documentElement.dataset.ready && !matchMedia('(prefers-reduced-motion: reduce)').matches) { try { document.startViewTransition(apply); return; } catch (e) {} }
+  if (document.startViewTransition && S.role !== undefined && document.documentElement.dataset.ready && !matchMedia('(prefers-reduced-motion: reduce)').matches) { try { const t = document.startViewTransition(apply); t.ready.catch(() => {}); t.finished.catch(() => {}); return; } catch (e) {} }
   apply();
 }
 function setTheme0(t) { S.theme = t; if (t === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('vina-theme', t); } catch (e) {} }
@@ -1578,6 +1609,7 @@ function render() {
   S._lastMenu = S.menu;
   if (enter) countUp(app());
   replayUI(snap, enter, r.name);
+  nameMovers(); originFromTrigger();
   if (S.cmd) { const q = document.getElementById('cmd-q'); if (q) { if (S._cmdNew || document.activeElement !== q) q.focus(); const opt = document.getElementById('co-' + S.cmd.i); if (opt) opt.scrollIntoView({block:'nearest'}); } S._cmdNew = false; }
   else if (S._focusModal) { S._focusModal = false; const m = $('#layers .modal:not(.ghost .modal), #layers .drawer:not(.ghost)'); const t = m && (m.querySelector('[autofocus]') || m.querySelector('input,select,textarea,button:not([data-a="close-modal"]):not([data-a="close-drawer"])')); if (t) t.focus(); }
   else if (fid) { const e = document.getElementById(fid); if (e) { e.focus(); try { if (ss != null) e.setSelectionRange(ss, se); } catch (er) {} } }
@@ -1586,6 +1618,34 @@ function render() {
 const stickBottom = () => { S._stick = true; };
 
 /* ---------- Events ---------- */
+/* ---------- Motion: view transitions (continuity between screens and states, moved items glide) ---------- */
+// One snapshot crossfade per change, so nothing snaps; items with a stable name (chat rows, pipeline cards, rules) move to their new place.
+const canVT = () => !!document.startViewTransition && motionOK() && document.documentElement.dataset.ready;
+let VT_KIND = '';
+function vtRender(kind, after) {
+  const run = () => { render(); if (after) after(); };
+  if (!canVT()) { run(); return; }
+  VT_KIND = kind; document.documentElement.dataset.vt = kind;
+  try { const t = document.startViewTransition(run); t.ready.catch(() => {}); t.finished.catch(() => {}).then(() => { if (VT_KIND === kind) delete document.documentElement.dataset.vt; }); } // a newer change skips the older one; that is expected
+  catch (e) { run(); }
+}
+// clicks that change what a region shows (tabs, segments, chips, disclosures, list rows, move/sort) crossfade; menus keep their own motion
+const vtFor = el => !!el && !el.closest('.menu, .modal, .drawer, .cmd') && el.getAttribute('aria-haspopup') == null && (
+  el.matches('[role="tab"], .tab, .seg > *, .fchip, .cx-row, [data-vt], [aria-expanded]') || /(^|-)(move|mv|sort|page|folder|view|cal|tab|sel|drop|up|down)(-|$)/.test(el.dataset.a || ''));
+// give items that can move a stable view-transition name so the browser animates them to their new place
+function nameMovers() {
+  if (!document.startViewTransition) return;
+  const seen = new Set();
+  $$('#app .cx-row[data-x], #app [data-drag][data-x]').forEach(e => { const n = 'vt-' + (e.dataset.drag || 'row') + '-' + String(e.dataset.x).replace(/[^a-zA-Z0-9_-]/g, ''); if (seen.has(n)) return; seen.add(n); e.style.viewTransitionName = n; });
+}
+// dialogs grow from the control that opened them
+let PTR = null;
+document.addEventListener('pointerdown', ev => { PTR = {x:ev.clientX, y:ev.clientY, t:Date.now()}; }, true);
+function originFromTrigger() {
+  if (!PTR || Date.now() - PTR.t > 900) return;
+  $$('#layers .scrim.anim-in .modal, #layers .cmd-scrim.anim-in .cmd').forEach(m => { const r = m.getBoundingClientRect(); m.style.transformOrigin = Math.round(PTR.x - r.left) + 'px ' + Math.round(PTR.y - r.top) + 'px'; });
+}
+
 document.addEventListener('click', (ev) => {
   const g = ev.target.closest('[data-go]');
   if (g && !g.closest('[data-a]:not([data-go])')) { ev.preventDefault(); S.menu = null; S.navOpen = false; go(g.dataset.go); return; }
@@ -1596,7 +1656,7 @@ document.addEventListener('click', (ev) => {
   if (el.getAttribute('aria-disabled') === 'true' || el.disabled) return;
   const fn = A[el.dataset.a]; if (!fn) { console.warn('No action', el.dataset.a); return; }
   if (el.tagName === 'A' && el.getAttribute('href') === '#') ev.preventDefault();
-  const r = fn(el, ev); if (r !== false) render();
+  const r = fn(el, ev); if (r !== false) { if (vtFor(el)) vtRender('state'); else render(); }
 });
 document.addEventListener('input', (ev) => {
   const el = ev.target;
@@ -1627,10 +1687,10 @@ let DRAG = null;
 document.addEventListener('dragstart', (ev) => { const d = ev.target.closest && ev.target.closest('[data-drag]'); if (!d) return; DRAG = {kind:d.dataset.drag, id:d.dataset.x}; d.classList.add('dragging'); try { ev.dataTransfer.setData('text/plain', d.dataset.x); ev.dataTransfer.effectAllowed = 'move'; } catch (e) {} });
 document.addEventListener('dragend', (ev) => { $$('.dragging,.drop-on').forEach(e => e.classList.remove('dragging', 'drop-on')); DRAG = null; });
 document.addEventListener('dragover', (ev) => { const t = ev.target.closest && ev.target.closest('[data-drop]'); if (!t || !DRAG) return; ev.preventDefault(); $$('.drop-on').forEach(e => e !== t && e.classList.remove('drop-on')); t.classList.add('drop-on'); });
-document.addEventListener('drop', (ev) => { const t = ev.target.closest && ev.target.closest('[data-drop]'); if (!t || !DRAG) return; ev.preventDefault(); const d = DRAG; DRAG = null; t.classList.remove('drop-on'); const fn = A[t.dataset.drop]; if (fn && fn(t, d) !== false) render(); });
+document.addEventListener('drop', (ev) => { const t = ev.target.closest && ev.target.closest('[data-drop]'); if (!t || !DRAG) return; ev.preventDefault(); const d = DRAG; DRAG = null; t.classList.remove('drop-on'); const fn = A[t.dataset.drop]; if (fn && fn(t, d) !== false) vtRender('move'); });
 // One ticker for live timers: <span data-since="epochMs"> shows m:ss
 setInterval(() => { $$('[data-since]').forEach(e => { const s = Math.max(0, Math.floor((Date.now() - Number(e.dataset.since)) / 1000)); e.textContent = Math.floor(s / 60) + ':' + pad(s % 60); }); $$('[data-until]').forEach(e => { const s = Math.max(0, Math.ceil((Number(e.dataset.until) - Date.now()) / 1000)); e.textContent = s ? '0:' + pad(s) : ''; if (!s && e.dataset.done && A[e.dataset.done]) { delete e.dataset.until; if (A[e.dataset.done](e) !== false) render(); } }); }, 1000);
-window.addEventListener('hashchange', () => { S._enter = true; S.cmd = null; S.modal = null; S.drawer = null; S.menu = null; S.navOpen = false; S.st = ''; render(); window.scrollTo(0, 0); const m = document.getElementById('main'); if (m) m.focus({preventScroll:true}); });
+window.addEventListener('hashchange', () => { S._enter = true; S.cmd = null; S.modal = null; S.drawer = null; S.menu = null; S.navOpen = false; S.st = ''; vtRender('route', () => { window.scrollTo(0, 0); const m = document.getElementById('main'); if (m) m.focus({preventScroll:true}); }); });
 
 window.addEventListener('online', () => { S.offline = false; render(); toast('Back online. Your changes were sent.'); });
 window.addEventListener('offline', () => { S.offline = true; render(); });
@@ -2147,6 +2207,13 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .mg-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px var(--card);transform:translate(-50%,50%)}
   .mg-hit{position:absolute;top:0;bottom:0;transform:translateX(-50%)}
   .mg-hit:hover::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--line2)}
+  /* GA-style hover guide: the guide line plus a dot on every line at that point */
+  .mg-hit::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--line2);opacity:0;transition:opacity var(--d1)}
+  .mg-hit:hover::after{opacity:1}
+  .mg-hit>i{position:absolute;left:50%;width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px var(--card);transform:translate(-50%,50%) scale(0);transition:transform var(--d2) var(--spring);z-index:1;pointer-events:none}
+  .mg-hit>i.o{background:var(--card);box-shadow:inset 0 0 0 2px var(--c)}
+  .mg-hit:hover>i{transform:translate(-50%,50%) scale(1)}
+  @media (prefers-reduced-motion:reduce){.mg-hit>i,.mg-hit::after{transition:none}}
   .mg-lg .dash{display:inline-block;width:16px;height:0;border-top:2px dashed var(--faint);margin-inline-end:6px;vertical-align:3px}
   .mg-lg b{color:var(--text);font-weight:600;margin-inline-start:4px;font-variant-numeric:tabular-nums}
   /* M2 */
@@ -2340,7 +2407,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
         : `<path class="draw" data-p="${pts.map(p => p.join(',')).join(' ')}" d="${d}" fill="none" style="stroke:var(${s.c})" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>`;
     }).join('');
     const ends = series.filter(s => !s.dash).map(s => { const i = s.vals.length - 1; return `<span class="mg-dot fade-in" style="left:${xp(i).toFixed(2)}%;bottom:${pc(s.vals[i]).toFixed(1)}%;--c:var(${s.c})"></span>`; }).join('');
-    const hits = labels.map((lb, i) => `<span class="mg-hit" style="left:${xp(i).toFixed(2)}%;width:${n === 1 ? 100 : (100 / (n - 1)).toFixed(2)}%" title="${esc(lb + ' · ' + series.map(s => s.name + ': ' + fmt(s.vals[i])).join(' · '))}"></span>`).join('');
+    const hits = labels.map((lb, i) => `<span class="mg-hit" style="left:${xp(i).toFixed(2)}%;width:${n === 1 ? 100 : (100 / (n - 1)).toFixed(2)}%" title="${esc(lb + ' · ' + series.map(s => s.name + ': ' + fmt(s.vals[i])).join(' · '))}">${series.map(s => s.vals[i] == null ? '' : `<i style="bottom:${pc(s.vals[i]).toFixed(1)}%;--c:var(${s.c})"${s.dash ? ' class="o"' : ''}></i>`).join('')}</span>`).join('');
     const every = Math.ceil(n / 7);
     const xl = labels.map((lb, i) => i % every === 0 || i === n - 1 ? `<span class="${i < n - 1 && (i / every) % 2 ? 'o' : ''}" style="left:${xp(i).toFixed(2)}%;${i === 0 && n > 1 ? 'transform:none' : i === n - 1 && n > 1 ? 'transform:translateX(-100%)' : ''}">${esc(lb)}</span>` : '').join('');
     return `<figure class="mg-plot" role="img" aria-label="${esc(o.label || '')}"><div class="mg-area ln" style="--ph:${o.h || 200}px">${grid(min, max, fmt)}<svg class="mg-ln" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${ends}${hits}</div><div class="mg-xl abs">${xl}</div></figure>`;

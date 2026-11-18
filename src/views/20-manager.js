@@ -84,6 +84,13 @@
   .mg-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px var(--card);transform:translate(-50%,50%)}
   .mg-hit{position:absolute;top:0;bottom:0;transform:translateX(-50%)}
   .mg-hit:hover::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--line2)}
+  /* GA-style hover guide: the guide line plus a dot on every line at that point */
+  .mg-hit::after{content:"";position:absolute;left:50%;top:0;bottom:0;border-left:1px solid var(--line2);opacity:0;transition:opacity var(--d1)}
+  .mg-hit:hover::after{opacity:1}
+  .mg-hit>i{position:absolute;left:50%;width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 0 2px var(--card);transform:translate(-50%,50%) scale(0);transition:transform var(--d2) var(--spring);z-index:1;pointer-events:none}
+  .mg-hit>i.o{background:var(--card);box-shadow:inset 0 0 0 2px var(--c)}
+  .mg-hit:hover>i{transform:translate(-50%,50%) scale(1)}
+  @media (prefers-reduced-motion:reduce){.mg-hit>i,.mg-hit::after{transition:none}}
   .mg-lg .dash{display:inline-block;width:16px;height:0;border-top:2px dashed var(--faint);margin-inline-end:6px;vertical-align:3px}
   .mg-lg b{color:var(--text);font-weight:600;margin-inline-start:4px;font-variant-numeric:tabular-nums}
   /* M2 */
@@ -277,7 +284,7 @@
         : `<path class="draw" data-p="${pts.map(p => p.join(',')).join(' ')}" d="${d}" fill="none" style="stroke:var(${s.c})" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>`;
     }).join('');
     const ends = series.filter(s => !s.dash).map(s => { const i = s.vals.length - 1; return `<span class="mg-dot fade-in" style="left:${xp(i).toFixed(2)}%;bottom:${pc(s.vals[i]).toFixed(1)}%;--c:var(${s.c})"></span>`; }).join('');
-    const hits = labels.map((lb, i) => `<span class="mg-hit" style="left:${xp(i).toFixed(2)}%;width:${n === 1 ? 100 : (100 / (n - 1)).toFixed(2)}%" title="${esc(lb + ' · ' + series.map(s => s.name + ': ' + fmt(s.vals[i])).join(' · '))}"></span>`).join('');
+    const hits = labels.map((lb, i) => `<span class="mg-hit" style="left:${xp(i).toFixed(2)}%;width:${n === 1 ? 100 : (100 / (n - 1)).toFixed(2)}%" title="${esc(lb + ' · ' + series.map(s => s.name + ': ' + fmt(s.vals[i])).join(' · '))}">${series.map(s => s.vals[i] == null ? '' : `<i style="bottom:${pc(s.vals[i]).toFixed(1)}%;--c:var(${s.c})"${s.dash ? ' class="o"' : ''}></i>`).join('')}</span>`).join('');
     const every = Math.ceil(n / 7);
     const xl = labels.map((lb, i) => i % every === 0 || i === n - 1 ? `<span class="${i < n - 1 && (i / every) % 2 ? 'o' : ''}" style="left:${xp(i).toFixed(2)}%;${i === 0 && n > 1 ? 'transform:none' : i === n - 1 && n > 1 ? 'transform:translateX(-100%)' : ''}">${esc(lb)}</span>` : '').join('');
     return `<figure class="mg-plot" role="img" aria-label="${esc(o.label || '')}"><div class="mg-area ln" style="--ph:${o.h || 200}px">${grid(min, max, fmt)}<svg class="mg-ln" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${ends}${hits}</div><div class="mg-xl abs">${xl}</div></figure>`;

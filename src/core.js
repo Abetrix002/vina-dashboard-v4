@@ -554,7 +554,7 @@ const curTheme = () => S.theme === 'system' ? (matchMedia('(prefers-color-scheme
 A.theme = () => { setTheme(curTheme() === 'dark' ? 'light' : 'dark'); };
 function setTheme(t) {
   const apply = () => setTheme0(t);
-  if (document.startViewTransition && S.role !== undefined && document.documentElement.dataset.ready && !matchMedia('(prefers-reduced-motion: reduce)').matches) { try { document.startViewTransition(apply); return; } catch (e) {} }
+  if (document.startViewTransition && S.role !== undefined && document.documentElement.dataset.ready && !matchMedia('(prefers-reduced-motion: reduce)').matches) { try { const t = document.startViewTransition(apply); t.ready.catch(() => {}); t.finished.catch(() => {}); return; } catch (e) {} }
   apply();
 }
 function setTheme0(t) { S.theme = t; if (t === 'system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('vina-theme', t); } catch (e) {} }
@@ -779,6 +779,7 @@ function render() {
   S._lastMenu = S.menu;
   if (enter) countUp(app());
   replayUI(snap, enter, r.name);
+  nameMovers(); originFromTrigger();
   if (S.cmd) { const q = document.getElementById('cmd-q'); if (q) { if (S._cmdNew || document.activeElement !== q) q.focus(); const opt = document.getElementById('co-' + S.cmd.i); if (opt) opt.scrollIntoView({block:'nearest'}); } S._cmdNew = false; }
   else if (S._focusModal) { S._focusModal = false; const m = $('#layers .modal:not(.ghost .modal), #layers .drawer:not(.ghost)'); const t = m && (m.querySelector('[autofocus]') || m.querySelector('input,select,textarea,button:not([data-a="close-modal"]):not([data-a="close-drawer"])')); if (t) t.focus(); }
   else if (fid) { const e = document.getElementById(fid); if (e) { e.focus(); try { if (ss != null) e.setSelectionRange(ss, se); } catch (er) {} } }
@@ -787,6 +788,34 @@ function render() {
 const stickBottom = () => { S._stick = true; };
 
 /* ---------- Events ---------- */
+/* ---------- Motion: view transitions (continuity between screens and states, moved items glide) ---------- */
+// One snapshot crossfade per change, so nothing snaps; items with a stable name (chat rows, pipeline cards, rules) move to their new place.
+const canVT = () => !!document.startViewTransition && motionOK() && document.documentElement.dataset.ready;
+let VT_KIND = '';
+function vtRender(kind, after) {
+  const run = () => { render(); if (after) after(); };
+  if (!canVT()) { run(); return; }
+  VT_KIND = kind; document.documentElement.dataset.vt = kind;
+  try { const t = document.startViewTransition(run); t.ready.catch(() => {}); t.finished.catch(() => {}).then(() => { if (VT_KIND === kind) delete document.documentElement.dataset.vt; }); } // a newer change skips the older one; that is expected
+  catch (e) { run(); }
+}
+// clicks that change what a region shows (tabs, segments, chips, disclosures, list rows, move/sort) crossfade; menus keep their own motion
+const vtFor = el => !!el && !el.closest('.menu, .modal, .drawer, .cmd') && el.getAttribute('aria-haspopup') == null && (
+  el.matches('[role="tab"], .tab, .seg > *, .fchip, .cx-row, [data-vt], [aria-expanded]') || /(^|-)(move|mv|sort|page|folder|view|cal|tab|sel|drop|up|down)(-|$)/.test(el.dataset.a || ''));
+// give items that can move a stable view-transition name so the browser animates them to their new place
+function nameMovers() {
+  if (!document.startViewTransition) return;
+  const seen = new Set();
+  $$('#app .cx-row[data-x], #app [data-drag][data-x]').forEach(e => { const n = 'vt-' + (e.dataset.drag || 'row') + '-' + String(e.dataset.x).replace(/[^a-zA-Z0-9_-]/g, ''); if (seen.has(n)) return; seen.add(n); e.style.viewTransitionName = n; });
+}
+// dialogs grow from the control that opened them
+let PTR = null;
+document.addEventListener('pointerdown', ev => { PTR = {x:ev.clientX, y:ev.clientY, t:Date.now()}; }, true);
+function originFromTrigger() {
+  if (!PTR || Date.now() - PTR.t > 900) return;
+  $$('#layers .scrim.anim-in .modal, #layers .cmd-scrim.anim-in .cmd').forEach(m => { const r = m.getBoundingClientRect(); m.style.transformOrigin = Math.round(PTR.x - r.left) + 'px ' + Math.round(PTR.y - r.top) + 'px'; });
+}
+
 document.addEventListener('click', (ev) => {
   const g = ev.target.closest('[data-go]');
   if (g && !g.closest('[data-a]:not([data-go])')) { ev.preventDefault(); S.menu = null; S.navOpen = false; go(g.dataset.go); return; }
@@ -797,7 +826,7 @@ document.addEventListener('click', (ev) => {
   if (el.getAttribute('aria-disabled') === 'true' || el.disabled) return;
   const fn = A[el.dataset.a]; if (!fn) { console.warn('No action', el.dataset.a); return; }
   if (el.tagName === 'A' && el.getAttribute('href') === '#') ev.preventDefault();
-  const r = fn(el, ev); if (r !== false) render();
+  const r = fn(el, ev); if (r !== false) { if (vtFor(el)) vtRender('state'); else render(); }
 });
 document.addEventListener('input', (ev) => {
   const el = ev.target;
@@ -828,10 +857,10 @@ let DRAG = null;
 document.addEventListener('dragstart', (ev) => { const d = ev.target.closest && ev.target.closest('[data-drag]'); if (!d) return; DRAG = {kind:d.dataset.drag, id:d.dataset.x}; d.classList.add('dragging'); try { ev.dataTransfer.setData('text/plain', d.dataset.x); ev.dataTransfer.effectAllowed = 'move'; } catch (e) {} });
 document.addEventListener('dragend', (ev) => { $$('.dragging,.drop-on').forEach(e => e.classList.remove('dragging', 'drop-on')); DRAG = null; });
 document.addEventListener('dragover', (ev) => { const t = ev.target.closest && ev.target.closest('[data-drop]'); if (!t || !DRAG) return; ev.preventDefault(); $$('.drop-on').forEach(e => e !== t && e.classList.remove('drop-on')); t.classList.add('drop-on'); });
-document.addEventListener('drop', (ev) => { const t = ev.target.closest && ev.target.closest('[data-drop]'); if (!t || !DRAG) return; ev.preventDefault(); const d = DRAG; DRAG = null; t.classList.remove('drop-on'); const fn = A[t.dataset.drop]; if (fn && fn(t, d) !== false) render(); });
+document.addEventListener('drop', (ev) => { const t = ev.target.closest && ev.target.closest('[data-drop]'); if (!t || !DRAG) return; ev.preventDefault(); const d = DRAG; DRAG = null; t.classList.remove('drop-on'); const fn = A[t.dataset.drop]; if (fn && fn(t, d) !== false) vtRender('move'); });
 // One ticker for live timers: <span data-since="epochMs"> shows m:ss
 setInterval(() => { $$('[data-since]').forEach(e => { const s = Math.max(0, Math.floor((Date.now() - Number(e.dataset.since)) / 1000)); e.textContent = Math.floor(s / 60) + ':' + pad(s % 60); }); $$('[data-until]').forEach(e => { const s = Math.max(0, Math.ceil((Number(e.dataset.until) - Date.now()) / 1000)); e.textContent = s ? '0:' + pad(s) : ''; if (!s && e.dataset.done && A[e.dataset.done]) { delete e.dataset.until; if (A[e.dataset.done](e) !== false) render(); } }); }, 1000);
-window.addEventListener('hashchange', () => { S._enter = true; S.cmd = null; S.modal = null; S.drawer = null; S.menu = null; S.navOpen = false; S.st = ''; render(); window.scrollTo(0, 0); const m = document.getElementById('main'); if (m) m.focus({preventScroll:true}); });
+window.addEventListener('hashchange', () => { S._enter = true; S.cmd = null; S.modal = null; S.drawer = null; S.menu = null; S.navOpen = false; S.st = ''; vtRender('route', () => { window.scrollTo(0, 0); const m = document.getElementById('main'); if (m) m.focus({preventScroll:true}); }); });
 
 window.addEventListener('online', () => { S.offline = false; render(); toast('Back online. Your changes were sent.'); });
 window.addEventListener('offline', () => { S.offline = true; render(); });
