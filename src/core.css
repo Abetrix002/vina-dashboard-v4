@@ -664,7 +664,10 @@ header.top .crumb{font-size:13px}
 .cx-list{flex:1;overflow-y:auto;min-height:0;padding:6px 8px 24px;display:flex;flex-direction:column;gap:2px}
 .cx-row{display:flex;gap:12px;width:100%;padding:10px 10px;border:0;border-radius:10px;background:transparent;color:var(--text);text-align:start;cursor:pointer;font:inherit;transition:background var(--d1)}
 .cx-row:hover{background:var(--sub)}
-.cx-row[aria-current="true"]{background:var(--sel)}
+.cx-row[aria-current="true"]{background:var(--sub);box-shadow:inset 3px 0 0 var(--horizon)}
+.cx-st{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;color:var(--mute)}
+.cx-st i{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+.cx-rm .cx-st+.ell::before{content:"·";margin-inline-end:8px;color:var(--faint)}
 .cx-row:focus-visible{outline:2px solid var(--horizon);outline-offset:-2px}
 .cx-rb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .cx-r1{display:flex;align-items:center;gap:6px;min-width:0}

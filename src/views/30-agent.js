@@ -201,6 +201,12 @@
     cc:[['callbacks','Callbacks', l => isOpen(l) && l.cb && !l.cb.done && !l.asked], ['asked','Asked for a person', l => isOpen(l) && l.asked], ['mine','My chats', isOpen], ['closed','Closed today', l => !isOpen(l) && l.closedToday]],
     sales:[['sent','Sent to me', l => isOpen(l) && (l.status === 'qualified' || l.unread)], ['mine','My chats', isOpen], ['closed','Closed today', l => !isOpen(l) && l.closedToday]],
   };
+  // status on a list row, left out when the folder already says it (every chat in Callbacks is a callback)
+  const rowStatus = (x, fk) => {
+    if (x.asked && isOpen(x)) return fk === 'asked' ? '' : stDot('Asked for a person', 'amber');
+    if (fk === 'callbacks' && x.status === 'callback') return '';
+    const s = STATUS[x.status] || {label:x.status, c:'grey'}; return stDot(s.label, s.c);
+  };
   const folderList = k => { const f = FOLDERS[S.role].find(x => x[0] === k) || FOLDERS[S.role][0]; return mine().filter(f[2]).sort((a, b) => (b.unread - a.unread) || ((b.late ? 1 : 0) - (a.late ? 1 : 0)) || (a.lastIn - b.lastIn)); };
   const lastLine = l => { const m = [...l.m].reverse().find(x => x.k !== 'evt' && x.k !== 'act' && x.text); return m ? m : null; };
   const listTime = l => { const r = rem(l); if (isCC() && l.cb && !l.cb.done && r < 0) return [`${mins(-r)} late`, true]; const m = lastLine(l); return [m ? rowTime(m.at) : '—', l.late]; };
@@ -259,7 +265,7 @@
     const l = G.sel && lead(G.sel);
     const folders = `<div class="tabs ag-ftabs" role="tablist" aria-label="Folders">${FOLDERS[S.role].map(([k, t]) => `<button type="button" role="tab" class="tab ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-selected="${fk === k}">${t}<span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span></button>`).join('')}</div>`;
     const items = S.st === 'loading' ? `<div style="padding:8px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x); const m = lastLine(x);
-        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:(x.asked && isOpen(x) ? chipC('Asked for a person', 'amber', true) : chip(x.status)) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
+        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:rowStatus(x, fk) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
       : q ? empty('search', 'No chats match', 'Nothing in this folder has “' + esc(S.f.agQ.trim()) + '” in the name or mobile number.')
       : empty('inbox', fk === 'closed' ? 'Nothing closed today yet' : 'No chats here', fk === 'closed' ? 'Leads you close today show here.' : 'When VINA hands a chat to you, it shows here and you get an alert. You can keep working your leads in My leads.', `<a class="btn" href="#leads">Open my leads</a>`);
     let chat;

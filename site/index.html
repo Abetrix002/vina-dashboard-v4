@@ -677,7 +677,10 @@ header.top .crumb{font-size:13px}
 .cx-list{flex:1;overflow-y:auto;min-height:0;padding:6px 8px 24px;display:flex;flex-direction:column;gap:2px}
 .cx-row{display:flex;gap:12px;width:100%;padding:10px 10px;border:0;border-radius:10px;background:transparent;color:var(--text);text-align:start;cursor:pointer;font:inherit;transition:background var(--d1)}
 .cx-row:hover{background:var(--sub)}
-.cx-row[aria-current="true"]{background:var(--sel)}
+.cx-row[aria-current="true"]{background:var(--sub);box-shadow:inset 3px 0 0 var(--horizon)}
+.cx-st{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;color:var(--mute)}
+.cx-st i{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+.cx-rm .cx-st+.ell::before{content:"·";margin-inline-end:8px;color:var(--faint)}
 .cx-row:focus-visible{outline:2px solid var(--horizon);outline-offset:-2px}
 .cx-rb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .cx-r1{display:flex;align-items:center;gap:6px;min-width:0}
@@ -1194,9 +1197,12 @@ function msgWhen(at) {
 }
 const dayLabel = n => { if (!n) return 'Today'; if (n === 1) return 'Yesterday'; const d = new Date(NOW0.getTime() - n * 864e5); return WD[d.getDay()] + ' ' + d.getDate() + ' ' + MON3[d.getMonth()]; };
 const rowTime = at => { const w = msgWhen(at); return w.min == null ? w.time : !w.day ? w.time : w.day === 1 ? 'Yesterday' : WD[(NOW0.getDay() - w.day + 7) % 7]; };
-const avCh = (name, ch, size) => { const c = CH[ch] || CH.wa; return `<span class="cx-av">${av(name, size)}<span class="cx-chb c-${c.c}" title="${c.label}">${ic(c.i, 10)}</span><span class="sr">${c.label}</span></span>`; };
+// WhatsApp is the usual channel, so only other channels get a badge on the avatar (screen readers always hear the channel)
+const avCh = (name, ch, size) => { const c = CH[ch] || CH.wa; return `<span class="cx-av">${av(name, size)}${ch && ch !== 'wa' ? `<span class="cx-chb c-${c.c}" title="${c.label}">${ic(c.i, 10)}</span>` : ''}<span class="sr">${c.label}</span></span>`; };
+// quiet status for list rows: a coloured dot and the word, no filled chip
+const stDot = (label, c) => `<span class="cx-st"><i style="background:var(--${c}-f)" aria-hidden="true"></i>${esc(label)}</span>`;
 // o: {l, a (action), cur, time, late, unread, preview (html), meta (html), cls}
-const cxRow = o => `<button type="button" class="cx-row ${o.unread ? 'unread' : ''} ${o.cls || ''}" data-a="${o.a}" data-x="${o.l.id}" aria-current="${!!o.cur}">${avCh(o.l.name, o.l.ch)}<span class="cx-rb"><span class="cx-r1"><span class="cx-rn ell">${esc(o.l.name)}</span>${o.unread ? '<span class="unread-dot" aria-hidden="true"></span><span class="sr">, unread</span>' : ''}<span class="cx-rt ${o.late ? 'late' : ''}">${o.late ? pulse('red') : ''}${esc(o.time)}</span></span><span class="cx-rp ell">${o.preview}</span><span class="cx-rm">${o.meta}</span></span></button>`;
+const cxRow = o => `<button type="button" class="cx-row ${o.unread ? 'unread' : ''} ${o.cls || ''}" data-a="${o.a}" data-x="${o.l.id}" aria-current="${!!o.cur}">${avCh(o.l.name, o.l.ch)}<span class="cx-rb"><span class="cx-r1"><span class="cx-rn ell">${esc(o.l.name)}</span>${o.unread ? '<span class="unread-dot" aria-hidden="true"></span><span class="sr">, unread</span>' : ''}<span class="cx-rt ${o.late ? 'late' : ''}">${esc(o.time)}</span></span><span class="cx-rp ell">${o.preview}</span><span class="cx-rm">${o.meta}</span></span></button>`;
 const cxSearch = (path, label) => `<label class="cx-search">${ic('search', 15)}<span class="sr">${label}</span><input type="search" placeholder="Name or mobile" ${bind(path, true)}></label>`;
 // o: {back (action), line (html), acts (html), more (html)}
 const cxHead = (l, o) => `<div class="cx-head">${o.back ? `<button type="button" class="ibtn sm bare cx-back" data-a="${o.back}" aria-label="Back to chats">${ic('chevL')}</button>` : ''}${avCh(l.name, l.ch)}<div class="cx-hn"><div class="b ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="xs mute ell">${o.line}</div></div><span class="cx-hchip">${chip(l.status)}</span>${o.acts || ''}<button type="button" class="ibtn sm cx-dpb" data-a="dp" aria-pressed="${dpOpen()}" aria-controls="cx-dp" aria-label="Customer details" title="Customer details (])">${ic('cols', 16)}</button>${o.more || ''}</div>`;
@@ -2513,7 +2519,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
         <button type="button" class="btn mg-fbtn" data-a="m3-filt" aria-haspopup="dialog" aria-expanded="${popOpen}">${ic('filter', 15)}Filters${act.length ? `<span class="mg-fn">${act.length}</span>` : ''}</button></div>
       ${act.length ? `<div class="fchips mg-act">${act.map(([k, t]) => `<button type="button" class="fchip" data-a="m3-unf" data-x="${k}" aria-label="Remove filter: ${esc(t)}">${esc(t)}<span class="x">${ic('x', 13)}</span></button>`).join('')}<button type="button" class="clr" data-a="m3-clear">Clear all</button></div>` : ''}${pop}</div>`;
     const rows = list.length ? list.map(l => { const ll = lastLine(l); return cxRow({l, a:'m3-sel', cur:sel === l, time:rowTime(ll.at), unread:l.unread, preview:txt(ll.text),
-        meta:chip(l.status) + `<span class="ell">${esc(l.handled)}</span>` + (l.rating ? stars(l.rating, 11) : '')}); }).join('')
+        meta:stDot((STATUS[l.status] || {label:l.status}).label, (STATUS[l.status] || {c:'grey'}).c) + `<span class="ell">${esc(l.handled)}</span>` + (l.rating ? stars(l.rating, 11) : '')}); }).join('')
       : empty('search', 'No conversations match', 'Try another folder or clear the filters.', act.length || s.q ? `<button type="button" class="btn sm" data-a="m3-clear">Clear filters</button>` : '');
     const listPane = `<section class="mg-list" aria-label="Conversation list">${head}${tabs}<div class="cx-list" id="m3-list" data-keep aria-keyshortcuts="J K">${rows}</div></section>`;
     const line = [CH[sel ? sel.ch : 'wa'].label, sel && sel.model, sel && (sel.owner ? 'given to ' + uname(sel.owner) : 'not given to anyone yet')].map(esc).join(' · ');
@@ -2801,6 +2807,12 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     cc:[['callbacks','Callbacks', l => isOpen(l) && l.cb && !l.cb.done && !l.asked], ['asked','Asked for a person', l => isOpen(l) && l.asked], ['mine','My chats', isOpen], ['closed','Closed today', l => !isOpen(l) && l.closedToday]],
     sales:[['sent','Sent to me', l => isOpen(l) && (l.status === 'qualified' || l.unread)], ['mine','My chats', isOpen], ['closed','Closed today', l => !isOpen(l) && l.closedToday]],
   };
+  // status on a list row, left out when the folder already says it (every chat in Callbacks is a callback)
+  const rowStatus = (x, fk) => {
+    if (x.asked && isOpen(x)) return fk === 'asked' ? '' : stDot('Asked for a person', 'amber');
+    if (fk === 'callbacks' && x.status === 'callback') return '';
+    const s = STATUS[x.status] || {label:x.status, c:'grey'}; return stDot(s.label, s.c);
+  };
   const folderList = k => { const f = FOLDERS[S.role].find(x => x[0] === k) || FOLDERS[S.role][0]; return mine().filter(f[2]).sort((a, b) => (b.unread - a.unread) || ((b.late ? 1 : 0) - (a.late ? 1 : 0)) || (a.lastIn - b.lastIn)); };
   const lastLine = l => { const m = [...l.m].reverse().find(x => x.k !== 'evt' && x.k !== 'act' && x.text); return m ? m : null; };
   const listTime = l => { const r = rem(l); if (isCC() && l.cb && !l.cb.done && r < 0) return [`${mins(-r)} late`, true]; const m = lastLine(l); return [m ? rowTime(m.at) : '—', l.late]; };
@@ -2859,7 +2871,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const l = G.sel && lead(G.sel);
     const folders = `<div class="tabs ag-ftabs" role="tablist" aria-label="Folders">${FOLDERS[S.role].map(([k, t]) => `<button type="button" role="tab" class="tab ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-selected="${fk === k}">${t}<span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span></button>`).join('')}</div>`;
     const items = S.st === 'loading' ? `<div style="padding:8px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x); const m = lastLine(x);
-        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:(x.asked && isOpen(x) ? chipC('Asked for a person', 'amber', true) : chip(x.status)) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
+        return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:rowStatus(x, fk) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
       : q ? empty('search', 'No chats match', 'Nothing in this folder has “' + esc(S.f.agQ.trim()) + '” in the name or mobile number.')
       : empty('inbox', fk === 'closed' ? 'Nothing closed today yet' : 'No chats here', fk === 'closed' ? 'Leads you close today show here.' : 'When VINA hands a chat to you, it shows here and you get an alert. You can keep working your leads in My leads.', `<a class="btn" href="#leads">Open my leads</a>`);
     let chat;
