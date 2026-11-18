@@ -2223,12 +2223,12 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .mg-gl span{position:absolute;right:calc(100% + 8px);top:-8px;font-size:12px;line-height:16px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap}
   .mg-cols{position:absolute;inset:0;display:flex}
   .mg-c{position:relative;flex:1;display:flex;align-items:flex-end;justify-content:center;min-width:0}
-  .mg-pc{gap:3px}
-  .mg-pc i{display:block;width:min(30%,26px);border-radius:4px 4px 1px 1px;min-height:0}
+  .mg-pc{gap:4px}
+  .mg-pc i{display:block;box-sizing:border-box;width:min(24%,20px);border-radius:4px 4px 1px 1px;min-height:0}
   .mg-pc i.c{background:var(--ch-a)}
-  .mg-pc i.p{background:color-mix(in srgb,var(--faint) 14%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--faint) 55%,transparent)}
+  .mg-pc i.p{background:color-mix(in srgb,var(--faint) 7%,transparent);border:1px dashed color-mix(in srgb,var(--faint) 75%,transparent);border-bottom:0}
   .mg-cols:hover .mg-pc i{opacity:.6} .mg-cols .mg-pc:hover i{opacity:1}
-  .mg-sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px;background:color-mix(in srgb,var(--faint) 14%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--faint) 55%,transparent)}
+  .mg-sw{display:inline-block;box-sizing:border-box;width:10px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px;background:color-mix(in srgb,var(--faint) 7%,transparent);border:1px dashed color-mix(in srgb,var(--faint) 75%,transparent)}
   /* the strip under the chart: four across when the card is wide, otherwise two by two (never three and one) */
   .mg-sum{container-type:inline-size}
   .mg-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -2436,7 +2436,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   function pairs(labels, cur, prev, o) {
     const n = labels.length, every = Math.ceil(n / 7), hi = Math.max(1, ...cur, ...prev), small = hi < 8;
     const max = small ? hi + 1 : top4(hi), pc = v => (v / max * 100).toFixed(1);
-    const cols = labels.map((lb, i) => `<div class="mg-c mg-pc" title="${esc(lb)} · ${esc(o.name)}: ${num(cur[i])} · ${esc(o.prevName)}: ${num(prev[i])}"><i class="p grow-y" style="height:${pc(prev[i])}%"></i><i class="c grow-y" style="height:${pc(cur[i])}%"></i></div>`).join('');
+    const cols = labels.map((lb, i) => `<div class="mg-c mg-pc" title="${esc(lb)} · ${esc(o.name)}: ${num(cur[i])} · ${esc(o.prevName)}: ${num(prev[i])}"><i class="p grow-y" style="height:${pc(prev[i])}%${prev[i] ? '' : ';visibility:hidden'}"></i><i class="c grow-y" style="height:${pc(cur[i])}%${cur[i] ? '' : ';visibility:hidden'}"></i></div>`).join('');
     const xl = labels.map((lb, i) => `<span class="${(i / every) % 2 ? 'o' : ''}">${i % every === 0 ? esc(lb) : ''}</span>`).join('');
     return `<figure class="mg-plot" role="img" aria-label="${esc(o.label || '')}"><div class="mg-area" style="--ph:${o.h || 200}px">${grid(0, max, v => num(Math.round(v)), small ? max : 4)}<div class="mg-cols">${cols}</div></div><div class="mg-xl">${xl}</div></figure>`;
   }
