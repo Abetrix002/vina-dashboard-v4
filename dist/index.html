@@ -828,6 +828,10 @@ details[open]>summary .ic:last-child{transform:rotate(180deg)}
 /* The app redraws whole regions; browser scroll anchoring would nudge the page on each redraw */
 html,body{overflow-anchor:none}
 
+/* Details panel header: a quiet title, the chat header already names the customer */
+.cx-dpt{font-size:13px;font-weight:600;color:var(--mute)}
+.cx-vq{font-weight:500;color:var(--mute)}
+
 </style>
 <div id="app"></div>
 <div id="layers"></div>
@@ -868,6 +872,7 @@ const IP = {
   team:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
   star:'M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2 2 9.3l6.9-1z',
   inbox:'M22 12h-6l-2 3h-4l-2-3H2M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z',
+  kbd:'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10',
   phone:'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z',
   cal:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
   bot:'M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M9 13v2M15 13v2',
@@ -1294,12 +1299,11 @@ function cxDetails(l, o) {
   const kv = rows => `<dl class="kv">${rows.filter(r => r[1]).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
   const car = esc(l.model) + (l.trim ? ' · ' + esc(l.trim) : '') + (l.colour ? ' · ' + esc(l.colour) : '');
   return `<aside class="cx-dp ${anim ? 'anim-in' : ''}" id="cx-dp" aria-label="Customer details">
-    <div class="cx-dph">${av(l.name, 'lg')}<div class="grow"><div class="cx-dpn ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="small mute num">${esc(mob(l))}</div></div><button type="button" class="ibtn sm bare cx-dpx" data-a="dp" aria-label="Close customer details" title="Close (])">${ic('x', 16)}</button></div>
-    <div class="row tight">${chip(l.status)}${l.vq ? vtag() : ''}</div>
-    <section class="cx-sum" aria-label="VINA summary"><div class="hd">${ic('spark', 14)}VINA summary</div><p>${esc(l.summary)}.</p>${l.facts ? `<dl class="kv">${l.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}</section>
-    <section class="cx-sec" aria-label="Next step">${kv([['Next step', esc(l.next)], ['Callback time', o && o.cb], ['Car model', car], ['Given to', l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone yet</span>']])}</section>
+    <div class="cx-dph"><div class="grow cx-dpt">Customer details</div><button type="button" class="ibtn sm bare cx-dpx" data-a="dp" aria-label="Close customer details" title="Close (])">${ic('x', 16)}</button></div>
+    <section class="cx-sum" aria-label="VINA summary"><div class="hd">${ic('spark', 14)}VINA summary${l.vq ? '<span class="cx-vq"> · qualified by VINA</span>' : ''}</div><p>${esc(l.summary)}.</p>${l.facts ? `<dl class="kv">${l.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}</section>
+    <section class="cx-sec" aria-label="Next step">${kv([['Mobile', '<span class="num">' + esc(mob(l)) + '</span>'], o && o.cb ? ['Callback', o.cb] : ['Next step', esc(l.next)], ['Car model', car], o && o.mine ? ['', ''] : ['Given to', l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone yet</span>']])}</section>
     <section class="cx-sec"><button type="button" class="cx-dpmore" data-a="dp-more" aria-expanded="${DP.more}">Lead details${ic('chevD', 16)}</button>${DP.more ? `<div class="cx-dpg ${moreNew ? 'anim-in' : ''}">${kv([['Channel', CH[l.ch].label], ['Came from', esc(l.src)], ['Campaign', l.src === 'Walk-in' ? '' : esc(l.campaign)], ['Handled by', esc(l.handled)], ['City', esc(l.city)], ['Language', esc(l.lang)], ['Lead since', esc(l.created)]])}</div>` : ''}</section>
-    <section class="cx-sec"><h3>Customer rating</h3>${l.rating ? `<div>${stars(l.rating)}${l.ratingNote ? `<p class="xs mute" style="margin-top:6px">“${esc(l.ratingNote)}”</p>` : ''}</div>` : '<span class="small mute">Not rated yet</span>'}</section>
+    ${l.rating ? `<section class="cx-sec"><h3>Customer rating</h3><div>${stars(l.rating)}${l.ratingNote ? `<p class="xs mute" style="margin-top:6px">“${esc(l.ratingNote)}”</p>` : ''}</div></section>` : ''}
   </aside>`;
 }
 // Single-key shortcuts: null while typing, with a modifier, or with a dialog or the palette open.
@@ -2703,13 +2707,14 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 (function () {
   document.body.insertAdjacentHTML('beforeend', `<style>
 /* AG1 inbox: list · chat · details. The list rows, thread, header and details panel are the shared .cx-* parts in core. */
-.ag-inbox{position:relative;display:grid;grid-template-columns:320px minmax(0,1fr);height:calc(100vh - 69px);min-height:540px}
-@media (min-width:1280px){.ag-inbox.dp-on{grid-template-columns:320px minmax(0,1fr) 320px}}
+.ag-inbox{position:relative;display:grid;grid-template-columns:350px minmax(0,1fr);height:calc(100vh - 69px);min-height:540px}
+@media (min-width:1280px){.ag-inbox.dp-on{grid-template-columns:350px minmax(0,1fr) 300px}}
 .ag-col{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--card)}
 .ag-listcol{border-inline-end:1px solid var(--line)}
 .ag-lh{display:flex;flex-direction:column;gap:4px;padding:12px 12px 0;border-bottom:1px solid var(--line)}
 .ag-ftabs{border-bottom:0;margin:0 -6px}
-.ag-ftabs .tab{min-height:40px;padding:0 8px;gap:6px}
+.ag-ftabs .tab{min-height:40px;padding:0 5px;gap:4px}
+@media (min-width:1181px){.ag-ftabs{-webkit-mask-image:none;mask-image:none;padding-inline-end:0}}
 .ag-ftabs .tab .n{min-width:20px;height:18px;padding:0 5px}
 .ag-chatcol{background:var(--bg)}
 @container (max-width:480px){.ag-hl2{display:none}}
@@ -2746,7 +2751,16 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 .ag-tools{display:flex;align-items:center;gap:2px;padding:0 8px 8px 6px}
 .ag-tools .ibtn{color:var(--mute)}
 .ag-tools .ibtn:hover,.ag-tools .ibtn[aria-expanded="true"]{color:var(--text);background:var(--sub)}
-.ag-hint{margin-inline-end:10px;font-size:12px;color:var(--faint);white-space:nowrap}
+.ag-hint{margin-inline-end:6px;font-size:12px;color:var(--faint);white-space:nowrap}
+.ag-tools .ag-tlb{width:auto;padding:0 8px;gap:6px;font-size:13px;font-weight:500;white-space:nowrap}
+.ag-kbtn{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 8px;margin-inline-end:8px;border:0;border-radius:8px;background:transparent;color:var(--mute);font:inherit;font-size:12px;font-weight:500;cursor:pointer}
+.ag-kbtn:hover,.ag-kbtn[aria-expanded="true"]{background:var(--sub);color:var(--text)}
+.ag-comp .menu.ag-kmenu{left:auto;right:16px;width:300px}
+.ag-kl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;padding:4px 10px 8px;align-items:center;font-size:13px}
+.ag-kl dd{margin:0;color:var(--mute)} .ag-kl kbd{font:600 12px var(--f);padding:1px 6px;border-radius:5px;border:1px solid var(--line2);background:var(--sub);color:var(--text);white-space:nowrap}
+.ag-due{display:flex;align-items:center;gap:10px;min-height:40px;margin:0 16px 8px;padding:6px 12px;border-radius:10px;background:var(--amber-b);color:var(--amber-f);font-size:13px}
+.ag-due.late{background:var(--red-b);color:var(--red-f)}
+.ag-due .ic{flex:0 0 auto}
 .ag-file:focus-visible+label{outline:2px solid var(--horizon);outline-offset:2px}
 .ag-comp .menu{bottom:calc(100% - 8px);left:16px;width:min(420px,calc(100% - 32px))}
 .ag-comp .menu button{white-space:normal;padding:8px 10px;min-height:44px;align-items:flex-start;flex-direction:column;gap:2px}
@@ -2801,11 +2815,12 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 .ag-alhead{display:flex;align-items:center;gap:12px;min-height:40px}
 @media (max-width:1180px){
   .ag-inbox{grid-template-columns:288px minmax(0,1fr)}
-  .ag-hint{display:none}
+  .ag-hint,.ag-tl,.ag-dm{display:none}
   .ag-cbrow{grid-template-columns:104px minmax(0,1fr) auto;grid-template-areas:"tm who act" "tm why act"}
   .ag-alpage{grid-template-columns:1fr}
 }
 @media (max-width:760px){
+  .ag-kbtn{display:none}
   .ag-inbox{grid-template-columns:1fr;height:calc(100vh - 118px)}
   .ag-inbox[data-mob="list"] .ag-chatcol{display:none}
   .ag-inbox[data-mob="chat"] .ag-listcol{display:none}
@@ -2898,18 +2913,19 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 
   /* ---------- AG1 Inbox ---------- */
   const FOLDERS = {
-    cc:[['callbacks','Callbacks', l => isOpen(l) && l.cb && !l.cb.done && !l.asked], ['asked','Asked for a person', l => isOpen(l) && l.asked], ['mine','My chats', isOpen], ['closed','Closed today', l => !isOpen(l) && l.closedToday]],
-    sales:[['sent','Sent to me', l => isOpen(l) && (l.status === 'qualified' || l.unread)], ['mine','My chats', isOpen], ['closed','Closed today', l => !isOpen(l) && l.closedToday]],
+    cc:[['callbacks','To call', l => isOpen(l) && l.cb && !l.cb.done && !l.asked], ['asked','Wants a person', l => isOpen(l) && l.asked], ['mine','Mine', isOpen], ['closed','Closed', l => !isOpen(l) && l.closedToday]],
+    sales:[['sent','Sent to me', l => isOpen(l) && (l.status === 'qualified' || l.unread)], ['mine','Mine', isOpen], ['closed','Closed', l => !isOpen(l) && l.closedToday]],
   };
   // status on a list row, left out when the folder already says it (every chat in Callbacks is a callback)
   const rowStatus = (x, fk) => {
-    if (x.asked && isOpen(x)) return fk === 'asked' ? '' : stDot('Asked for a person', 'amber');
+    if (x.asked && isOpen(x)) return fk === 'asked' ? '' : stDot('Wants a person', 'amber');
     if (fk === 'callbacks' && x.status === 'callback') return '';
     const s = STATUS[x.status] || {label:x.status, c:'grey'}; return stDot(s.label, s.c);
   };
   const folderList = k => { const f = FOLDERS[S.role].find(x => x[0] === k) || FOLDERS[S.role][0]; return mine().filter(f[2]).sort((a, b) => (b.unread - a.unread) || ((b.late ? 1 : 0) - (a.late ? 1 : 0)) || (a.lastIn - b.lastIn)); };
   const lastLine = l => { const m = [...l.m].reverse().find(x => x.k !== 'evt' && x.k !== 'act' && x.text); return m ? m : null; };
-  const listTime = l => { const r = rem(l); if (isCC() && l.cb && !l.cb.done && r < 0) return [`${mins(-r)} late`, true]; const m = lastLine(l); return [m ? rowTime(m.at) : '—', l.late]; };
+  const listTime = (l, fk) => { const r = rem(l);
+    if (isCC() && fk === 'callbacks' && l.cb && !l.cb.done) return r < 0 ? [`${mins(-r)} late`, true] : ['Call ' + l.cb.at, false]; if (isCC() && l.cb && !l.cb.done && r < 0) return [`${mins(-r)} late`, true]; const m = lastLine(l); return [m ? rowTime(m.at) : '—', l.late]; };
   const SAVED = ['Hi {first}, this is {me} from iCaur Alghanim. Is now a good time to talk?', 'Our Madinah Road showroom is open 9 AM to 10 PM, Saturday to Thursday.', 'I will send you the full offer in writing in a few minutes.', 'Would you like to book a test drive? Tell me the day and time that suits you.'];
   const TPL = [['Follow up', 'Hello {first}, this is iCaur Alghanim. Are you still interested in the {model}? Reply to this message and we will help you.'], ['New offer', 'Hello {first}, there is a new offer on the {model} this month. Reply YES to hear more.'], ['Test drive reminder', 'Hello {first}, a reminder of your test drive at our Madinah Road showroom. Reply to change the time.']];
   const REPLY = {Arabic:['تمام، شكراً لك', 'طيب، أنتظر اتصالك', 'ممتاز، يناسبني'], English:['Great, thank you.', 'Okay, that works for me.', 'Perfect, talk soon.']};
@@ -2936,12 +2952,13 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       <textarea class="ag-ta" rows="1" ${ta[0]} data-in="ag-type" aria-describedby="ag-hint" placeholder="${note ? 'Write a note for the team…' : 'Reply to ' + fn + '… Type / for saved replies'}">${ta[1]}</textarea>
       <div class="ag-tools">
         ${note ? '' : `<input type="file" id="ag-file" class="sr ag-file" data-ch="ag-file"><label class="ibtn sm bare" for="ag-file" title="Attach a file" aria-label="Attach a file">${ic('clip', 17)}</label>
-        <button type="button" class="ibtn sm bare" data-a="ag-menu" data-x="ag-saved" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-saved'}" aria-label="Saved replies" title="Saved replies (/)" aria-keyshortcuts="/">${ic('book', 17)}</button>
+        <button type="button" class="ibtn sm bare ag-tlb" data-a="ag-menu" data-x="ag-saved" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-saved'}" title="Saved replies (/)" aria-keyshortcuts="/">${ic('book', 17)}<span class="ag-tl">Saved replies</span></button>
         ${l.ch === 'wa' ? `<button type="button" class="ibtn sm bare" data-a="ag-menu" data-x="ag-tpl" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-tpl'}" aria-label="WhatsApp templates" title="WhatsApp templates">${ic('tpl', 17)}</button>` : ''}`}
-        <span class="sp"></span><span class="ag-hint" id="ag-hint">Enter to send · Shift+Enter for a new line</span>
+        <span class="sp"></span><span class="sr" id="ag-hint">Enter sends, Shift+Enter adds a new line</span><button type="button" class="ag-kbtn" data-a="ag-menu" data-x="ag-keys" aria-haspopup="menu" aria-expanded="${S.menu === 'ag-keys'}" title="Keyboard shortcuts (?)" aria-keyshortcuts="?">${ic('kbd', 14)}<span class="ag-tl">Shortcuts</span></button>
         <button type="button" class="btn pri sm" data-a="ag-send" title="${note ? 'Save note' : 'Send'} (Enter)" aria-keyshortcuts="Enter Control+Enter Meta+Enter">${ic(note ? 'note' : 'send', 14)}${note ? 'Save note' : 'Send'}</button>
       </div></div>
       ${S.menu === 'ag-saved' && !note ? `<div class="menu" role="menu" aria-label="Saved replies"><div class="mh">Saved replies${G.sq ? ' · “' + esc(G.sq) + '”' : ''}</div>${matches.length ? matches.map(([i, t], n) => `<button type="button" role="menuitem" class="${n === 0 && G.sq != null ? 'hit' : ''}" data-a="ag-saved" data-x="${i}"><span class="small">${esc(t)}</span></button>`).join('') : `<p class="xs mute" style="padding:6px 10px 8px">No saved reply has “${esc(G.sq)}” in it.</p>`}${G.sq != null && matches.length ? '<div class="ag-keys"><kbd>Enter</kbd> picks the first one · <kbd>Esc</kbd> closes</div>' : ''}</div>` : ''}
+      ${S.menu === 'ag-keys' ? `<div class="menu ag-kmenu" role="menu" aria-label="Keyboard shortcuts"><div class="mh">Keyboard shortcuts</div><dl class="ag-kl">${[['J', 'Next chat'], ['K', 'Previous chat'], ['R', 'Reply'], ['N', 'Note for the team'], ['/', 'Saved replies'], [']', 'Customer details'], ['Enter', 'Send'], ['Shift + Enter', 'New line'], ['Esc', 'Close a menu']].map(([k, t]) => `<dt><kbd>${k}</kbd></dt><dd>${t}</dd>`).join('')}</dl></div>` : ''}
       ${S.menu === 'ag-tpl' && !note ? `<div class="menu" role="menu" aria-label="WhatsApp templates"><div class="mh">WhatsApp templates</div>${TPL.map(([n, s], i) => `<button type="button" role="menuitem" data-a="ag-tpl" data-x="${i}"><b class="small">${esc(n)}</b><span class="xs mute">${esc(fill(s, l))}</span></button>`).join('')}</div>` : ''}
     </div>`;
   }
@@ -2951,7 +2968,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const items = (closed ? '' : (isCC() ? `<button type="button" role="menuitem" data-a="ag-sendsales" data-x="${l.id}">${ic('send', 16)}<span class="grow">Send to sales</span></button>` : `<button type="button" role="menuitem" data-a="ag-booktd" data-x="${l.id}">${ic('cal', 16)}<span class="grow">Book test drive</span></button>`)
       + `<button type="button" role="menuitem" data-a="ag-close" data-x="${l.id}">${ic('check', 16)}<span class="grow">Close lead</span></button><div class="hr" style="margin:6px 0"></div>`)
       + `<a role="menuitem" href="#lead-${l.id}">${ic('arrowR', 16)}<span class="grow">Open lead page</span></a><button type="button" role="menuitem" data-a="ag-copy" data-x="${l.id}">${ic('copy', 16)}<span class="grow">Copy mobile</span><span class="xs mute num">${esc(l.mob.slice(-4))}</span></button>`;
-    return `<span class="ag-morew"><button type="button" class="ibtn sm" data-a="ag-menu" data-x="ag-more" aria-haspopup="menu" aria-expanded="${open}" aria-label="More actions" title="More actions">${ic('more', 18)}</button>${open ? `<div class="menu" role="menu" aria-label="More actions">${items}<div class="hr" style="margin:6px 0"></div><div class="ag-keys"><kbd>J</kbd> <kbd>K</kbd> next, previous chat · <kbd>R</kbd> reply · <kbd>N</kbd> note · <kbd>]</kbd> details · <kbd>/</kbd> saved replies</div></div>` : ''}</span>`;
+    return `<span class="ag-morew"><button type="button" class="ibtn sm" data-a="ag-menu" data-x="ag-more" aria-haspopup="menu" aria-expanded="${open}" aria-label="More actions" title="More actions">${ic('more', 18)}</button>${open ? `<div class="menu" role="menu" aria-label="More actions">${items}</div>` : ''}</span>`;
   }
 
   R('inbox', {id:'AG1', title:'Inbox', roles:['cc','sales'], states:[['empty','No chats'],['closed','Chat closed'],['loading','Loading'],['error','Could not load']], render() {
@@ -2963,8 +2980,8 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     // the open chat stays open after the agent acts on it, even if it no longer matches this folder
     if (!list.find(l => l.id === G.sel)) { const cur = G.sel && lead(G.sel); if (cur && G.keep === G.sel && cur.owner === S.me) list.unshift(cur); else G.sel = list[0] ? list[0].id : null; }
     const l = G.sel && lead(G.sel);
-    const folders = `<div class="tabs ag-ftabs" role="tablist" aria-label="Folders">${FOLDERS[S.role].map(([k, t]) => `<button type="button" role="tab" class="tab ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-selected="${fk === k}">${t}<span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span></button>`).join('')}</div>`;
-    const items = S.st === 'loading' ? `<div style="padding:8px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x); const m = lastLine(x);
+    const folders = `<div class="tabs ag-ftabs" role="tablist" aria-label="Folders">${FOLDERS[S.role].map(([k, t]) => `<button type="button" role="tab" class="tab ${flashCls('ag-f-' + k)}" data-a="ag-folder" data-x="${k}" aria-selected="${fk === k}">${t}${k === 'closed' ? '' : `<span class="n">${S.st === 'empty' ? 0 : folderList(k).length}</span>`}</button>`).join('')}</div>`;
+    const items = S.st === 'loading' ? `<div style="padding:8px">${loadingRows(6, 62)}</div>` : list.length ? list.map(x => { const [t, late] = listTime(x, fk); const m = lastLine(x);
         return cxRow({l:x, a:'ag-sel', cur:x.id === G.sel, time:t, late, unread:x.unread, cls:flashCls(x.id), preview: m ? txt(m.text) : esc(x.summary), meta:rowStatus(x, fk) + `<span class="ell">${esc(x.model)}</span>`}); }).join('')
       : q ? empty('search', 'No chats match', 'Nothing in this folder has “' + esc(S.f.agQ.trim()) + '” in the name or mobile number.')
       : empty('inbox', fk === 'closed' ? 'Nothing closed today yet' : 'No chats here', fk === 'closed' ? 'Leads you close today show here.' : 'When VINA hands a chat to you, it shows here and you get an alert. You can keep working your leads in My leads.', `<a class="btn" href="#leads">Open my leads</a>`);
@@ -2974,20 +2991,23 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     else if (!l) chat = empty('conv', 'Pick a chat', 'Choose a chat on the left to read it and reply.');
     else {
       const closed = !isOpen(l) || S.st === 'closed';
-      const line = [CH[l.ch].label, l.model, l.owner === S.me ? 'given to you' : 'given to ' + uname(l.owner)].map(esc).join(' · ');
+      const line = [CH[l.ch].label, l.model].concat(l.owner === S.me ? [] : ['given to ' + uname(l.owner)]).map(esc).join(' · '); // it is your inbox: "given to you" goes without saying
+      const r = rem(l), due = !closed && isCC() && l.cb && !l.cb.done && r <= 15;
       // one primary action for the state: Take over here, or Hand back in the paused bar above the composer
-      const acts = closed ? '' : (l.paused ? '' : `<button type="button" class="btn sm pri" data-a="ag-take" data-x="${l.id}" aria-label="Take over" title="VINA stops replying in this chat only">${ic('pause', 14)}<span class="ag-hl">Take over</span></button>`)
-        + (isCC() ? `<button type="button" class="btn sm" data-a="ag-call" data-x="${l.id}" aria-label="Call ${esc(l.name)}" title="Call ${esc(l.mob)}">${ic('phone', 14)}<span class="ag-hl ag-hl2">Call</span></button>` : '');
+      const call = isCC() ? `<button type="button" class="btn sm ${due ? 'pri' : ''}" data-a="ag-call" data-x="${l.id}" aria-label="Call ${esc(l.name)}" title="Call ${esc(l.mob)}">${ic('phone', 14)}<span class="ag-hl ag-hl2">${due ? 'Call now' : 'Call'}</span></button>` : '';
+      const acts = (due ? call : '') + (closed ? '' : (l.paused ? '' : `<button type="button" class="btn sm ${due ? '' : 'pri'}" data-a="ag-take" data-x="${l.id}" aria-label="Take over" title="VINA stops replying in this chat only">${ic('pause', 14)}<span class="ag-hl">Take over</span></button>`)) + (due ? '' : call);
       chat = cxHead(l, {back:'ag-back', line, acts, more:moreMenu(l, closed)})
         + cxThread(l, {id:'ag-chat', typing:G.typing === l.id})
         + (closed ? `<div class="ag-closedbar" role="status">${ic('lock', 16)}<span class="grow">This lead is closed · ${esc(l.status === 'sold' ? 'Sold' : l.lostReason || 'Lost')}${l.checkin ? ' · VINA checks in on 7 Dec' : ''}. You cannot reply here.</span></div>`
-          : (l.paused ? `<div class="ag-paused ${flashCls('ag-pause-' + l.id)}" role="status">${pulse()}<span class="grow" title="VINA carries on by itself after 24 hours without a reply from you"><b>VINA is paused in this chat</b><span class="ag-pl"> · back on its own after 24 h without your reply</span></span><button type="button" class="btn sm" data-a="ag-handback" data-x="${l.id}" title="VINA replies in this chat again">${ic('play', 14)}Hand back</button></div>` : '') + composerHtml(l));
+          : (l.paused ? `<div class="ag-paused ${flashCls('ag-pause-' + l.id)}" role="status">${pulse()}<span class="grow" title="VINA carries on by itself after 24 hours without a reply from you"><b>VINA is paused in this chat</b><span class="ag-pl"> · back on its own after 24 h without your reply</span></span><button type="button" class="btn sm" data-a="ag-handback" data-x="${l.id}" title="VINA replies in this chat again">${ic('play', 14)}Hand back</button></div>` : '')
+          + (due ? `<div class="ag-due ${r < 0 ? 'late' : ''}" role="status">${ic('phone', 14)}<span class="grow"><b>Callback ${r < 0 ? 'was due' : 'due'} ${esc(l.cb.at)}</b> · ${r < 0 ? mins(-r) + ' late' : 'in ' + mins(r)}<span class="ag-dm"> · ${esc(l.mob)}</span></span></div>` : '')
+          + composerHtml(l));
     }
     const dp = l && S.st !== 'loading' && S.st !== 'error' && dpOpen();
     return shell({nav:'inbox', title:'Inbox', flush:true, search:true, body:`<div class="ag-inbox ${dp ? 'dp-on' : ''}" data-mob="${G.mob}">
       <section class="ag-col ag-listcol" aria-label="Chats"><div class="ag-lh">${cxSearch('f.agQ', 'Search my chats')}${folders}</div><div class="cx-list" id="ag-list" data-keep aria-keyshortcuts="J K">${items}</div></section>
       <section class="ag-col ag-chatcol" aria-label="Chat">${chat}</section>
-      ${dp ? cxDetails(l, {cb:cbTxt(l)}) : ''}
+      ${dp ? cxDetails(l, {cb:cbTxt(l), mine:true}) : ''}
     </div>`});
   }, after() { if (!CSS.supports('field-sizing', 'content')) { const t = $('#b-f-agText'); if (t) autoGrow(t); } }});
   // ponytail: JS height only where CSS field-sizing is missing (Safari, Firefox)
@@ -3044,6 +3064,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const k = hotkey(ev); if (!k) return;
     const lk = k.toLowerCase();
     if (lk === 'r' || lk === 'n') { ev.preventDefault(); G.tab = lk === 'r' ? 'reply' : 'note'; S.menu = null; G.sq = null; render(); focusTa(); }
+    else if (k === '?') { ev.preventDefault(); S.menu = S.menu === 'ag-keys' ? null : 'ag-keys'; render(); }
     else if (k === '/' && G.tab !== 'note' && $('#b-f-agText')) { ev.preventDefault(); if (!(S.f.agText || '').trim()) { S.f.agText = '/'; G.sq = ''; } else G.sq = null; S.menu = 'ag-saved'; render(); focusTa(); }
   });
 

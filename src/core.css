@@ -821,3 +821,7 @@ details[open]>summary .ic:last-child{transform:rotate(180deg)}
 
 /* The app redraws whole regions; browser scroll anchoring would nudge the page on each redraw */
 html,body{overflow-anchor:none}
+
+/* Details panel header: a quiet title, the chat header already names the customer */
+.cx-dpt{font-size:13px;font-weight:600;color:var(--mute)}
+.cx-vq{font-weight:500;color:var(--mute)}

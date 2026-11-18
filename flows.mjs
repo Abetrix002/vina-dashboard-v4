@@ -262,4 +262,24 @@ export default [
     if (new Set(ST_ORDER.map(k => STATUS[k].c)).size !== 8) return 'two statuses share a colour';
     if (/blue/i.test(STATUS.offer.colour)) return 'Offer sent is still a blue';
     return true;`],
+  ['Inbox review: Call leads a due callback, due bar, To call shows call times, all folders fit, quieter details, shortcuts', `${G}
+    signIn('cc'); await tick(150); await go2('inbox'); await tick(200);
+    const tabs = document.querySelector('#app .ag-ftabs'); if (tabs.scrollWidth > tabs.clientWidth + 1) return 'folders cut off';
+    if (!/^To call/.test(tabs.querySelector('[role="tab"]').textContent)) return 'first folder is not To call';
+    const times = [...document.querySelectorAll('#app .cx-row .cx-rt')].map(e => e.textContent);
+    if (!times.length || times.some(x => !/^Call |late$/.test(x))) return 'To call rows show other times: ' + times.join(', ');
+    const late = LEADS.find(x => x.owner === S.me && x.cb && !x.cb.done && document.querySelector('#app .cx-row[data-x="' + x.id + '"] .cx-rt.late'));
+    if (!late) return 'no late callback to open';
+    A['ag-sel']({dataset:{x:late.id}}); render(); await tick();
+    const call = document.querySelector('#app .cx-head [data-a="ag-call"]'), take = document.querySelector('#app .cx-head [data-a="ag-take"]');
+    if (!call || !call.classList.contains('pri') || !/Call now/.test(call.textContent)) return 'Call is not the main action on a late callback';
+    if (take && take.classList.contains('pri')) return 'Take over is still a main button';
+    const bar = document.querySelector('#app .ag-due'); if (!bar || !/was due/.test(bar.textContent)) return 'no due bar';
+    const dp = document.querySelector('#app .cx-dp');
+    if (dp) { if (dp.querySelector('.cx-dpn')) return 'details repeat the name'; if (/Not rated yet/.test(dp.textContent)) return 'empty rating shown'; if (/Given to/.test(dp.textContent)) return 'details repeat the owner'; }
+    if (/given to you/.test(document.querySelector('#app .cx-head').textContent)) return 'header says given to you';
+    document.dispatchEvent(new KeyboardEvent('keydown', {key:'?', bubbles:true})); await tick();
+    if (!document.querySelector('#app .ag-kmenu')) return '? did not open shortcuts';
+    document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', bubbles:true})); await tick();
+    return true;`],
 ];

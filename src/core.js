@@ -32,6 +32,7 @@ const IP = {
   team:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
   star:'M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2 2 9.3l6.9-1z',
   inbox:'M22 12h-6l-2 3h-4l-2-3H2M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z',
+  kbd:'M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10',
   phone:'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z',
   cal:'M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',
   bot:'M12 8V4H8M6 8h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2zM2 14h2M20 14h2M9 13v2M15 13v2',
@@ -458,12 +459,11 @@ function cxDetails(l, o) {
   const kv = rows => `<dl class="kv">${rows.filter(r => r[1]).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
   const car = esc(l.model) + (l.trim ? ' · ' + esc(l.trim) : '') + (l.colour ? ' · ' + esc(l.colour) : '');
   return `<aside class="cx-dp ${anim ? 'anim-in' : ''}" id="cx-dp" aria-label="Customer details">
-    <div class="cx-dph">${av(l.name, 'lg')}<div class="grow"><div class="cx-dpn ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="small mute num">${esc(mob(l))}</div></div><button type="button" class="ibtn sm bare cx-dpx" data-a="dp" aria-label="Close customer details" title="Close (])">${ic('x', 16)}</button></div>
-    <div class="row tight">${chip(l.status)}${l.vq ? vtag() : ''}</div>
-    <section class="cx-sum" aria-label="VINA summary"><div class="hd">${ic('spark', 14)}VINA summary</div><p>${esc(l.summary)}.</p>${l.facts ? `<dl class="kv">${l.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}</section>
-    <section class="cx-sec" aria-label="Next step">${kv([['Next step', esc(l.next)], ['Callback time', o && o.cb], ['Car model', car], ['Given to', l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone yet</span>']])}</section>
+    <div class="cx-dph"><div class="grow cx-dpt">Customer details</div><button type="button" class="ibtn sm bare cx-dpx" data-a="dp" aria-label="Close customer details" title="Close (])">${ic('x', 16)}</button></div>
+    <section class="cx-sum" aria-label="VINA summary"><div class="hd">${ic('spark', 14)}VINA summary${l.vq ? '<span class="cx-vq"> · qualified by VINA</span>' : ''}</div><p>${esc(l.summary)}.</p>${l.facts ? `<dl class="kv">${l.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}</section>
+    <section class="cx-sec" aria-label="Next step">${kv([['Mobile', '<span class="num">' + esc(mob(l)) + '</span>'], o && o.cb ? ['Callback', o.cb] : ['Next step', esc(l.next)], ['Car model', car], o && o.mine ? ['', ''] : ['Given to', l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone yet</span>']])}</section>
     <section class="cx-sec"><button type="button" class="cx-dpmore" data-a="dp-more" aria-expanded="${DP.more}">Lead details${ic('chevD', 16)}</button>${DP.more ? `<div class="cx-dpg ${moreNew ? 'anim-in' : ''}">${kv([['Channel', CH[l.ch].label], ['Came from', esc(l.src)], ['Campaign', l.src === 'Walk-in' ? '' : esc(l.campaign)], ['Handled by', esc(l.handled)], ['City', esc(l.city)], ['Language', esc(l.lang)], ['Lead since', esc(l.created)]])}</div>` : ''}</section>
-    <section class="cx-sec"><h3>Customer rating</h3>${l.rating ? `<div>${stars(l.rating)}${l.ratingNote ? `<p class="xs mute" style="margin-top:6px">“${esc(l.ratingNote)}”</p>` : ''}</div>` : '<span class="small mute">Not rated yet</span>'}</section>
+    ${l.rating ? `<section class="cx-sec"><h3>Customer rating</h3><div>${stars(l.rating)}${l.ratingNote ? `<p class="xs mute" style="margin-top:6px">“${esc(l.ratingNote)}”</p>` : ''}</div></section>` : ''}
   </aside>`;
 }
 // Single-key shortcuts: null while typing, with a modifier, or with a dialog or the palette open.
