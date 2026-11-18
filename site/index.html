@@ -839,6 +839,9 @@ html,body{overflow-anchor:none}
 .cx-dpt{font-size:13px;font-weight:600;color:var(--mute)}
 .cx-vq{font-weight:500;color:var(--mute)}
 
+/* Scrolling lists contain their own screen-reader labels (.sr is absolute); otherwise those labels escape the list and stretch the page */
+.cx-list,[data-keep],.cx-row{position:relative}
+
 </style>
 </head>
 <body>
