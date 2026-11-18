@@ -38,8 +38,8 @@
   .mg-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
   .mg-si{display:flex;align-items:flex-start;gap:10px;padding:14px 20px;min-width:0}
   .mg-si+.mg-si{border-inline-start:1px solid var(--line)}
-  .mg-si .k{display:block;font-size:12.5px;line-height:17px;color:var(--mute)}
-  .mg-si .v{font-family:var(--f-display);font-size:18px;line-height:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  .mg-si .k{display:block;font-size:13px;line-height:17px;color:var(--mute)}
+  .mg-si .v{font-family:var(--f-display);font-size:16px;line-height:24px;font-weight:700;font-variant-numeric:tabular-nums}
   /* M1 waiting now: a live card */
   .mg-rtn{display:flex;align-items:center;gap:12px}
   .mg-rtn .v{font-family:var(--f-display);font-size:44px;line-height:48px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -47,14 +47,14 @@
   .mg-mini{display:flex;align-items:flex-end;gap:3px;height:34px;margin:18px 0 6px}
   .mg-mini i{flex:1;min-height:2px;border-radius:2px 2px 0 0;background:color-mix(in srgb,var(--amber) 55%,transparent)}
   .mg-mini i:last-child{background:var(--amber)}
-  .mg-cap{display:flex;justify-content:space-between;font-size:11.5px;color:var(--faint)}
+  .mg-cap{display:flex;justify-content:space-between;font-size:12px;color:var(--faint)}
   .mg-rtl{margin-top:14px;padding-top:6px;border-top:1px solid var(--line)}
   .mg-rtl .hd{display:flex;justify-content:space-between;padding:6px 0 4px;font-size:12px;color:var(--mute)}
   .mg-wl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:7px 10px;margin:0 -10px;border-radius:10px;text-decoration:none;color:var(--text);min-height:54px;transition:background var(--d1) var(--ease)}
   .mg-wl:hover{background:var(--sub)}
   .mg-wl .nm{font-weight:600;display:block;font-size:14px}
   .mg-wl .meta{display:flex;align-items:center;gap:8px;margin-top:3px;font-size:12px;color:var(--mute);min-width:0}
-  .mg-wl .meta .chip{height:20px;font-size:11.5px;padding:0 7px}
+  .mg-wl .meta .chip{height:20px;font-size:12px;padding:0 7px}
   .mg-wl .w{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-variant-numeric:tabular-nums;font-size:13px;white-space:nowrap}
   /* bars and splits */
   .mg-hrow{display:grid;grid-template-columns:minmax(100px,150px) 1fr minmax(48px,auto);gap:14px;align-items:center;font-size:14px;min-height:36px}
@@ -62,7 +62,7 @@
   .mg-split{display:flex;height:12px;border-radius:999px;overflow:hidden;gap:3px}
   .mg-split i{display:block;height:100%}
   .mg-sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:6px}
-  .mg-br{display:grid;grid-template-columns:62px minmax(0,1fr) 44px 40px;gap:12px;align-items:center;min-height:32px;font-size:13.5px}
+  .mg-br{display:grid;grid-template-columns:62px minmax(0,1fr) 44px 40px;gap:12px;align-items:center;min-height:32px;font-size:14px}
   .mg-br .bar-h{height:10px}
   /* charts: HTML bars and an SVG line layer, so labels stay readable at any width */
   .mg-plot{margin:0;display:flex;flex-direction:column;gap:8px}
@@ -99,7 +99,7 @@
   .mg-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 16px;align-items:start}
   .mg-stats>div{display:flex;flex-direction:column-reverse;justify-content:flex-end;gap:2px}
   .mg-stats .k{font-size:13px;line-height:18px;color:var(--mute)}
-  .mg-stats .v{font-family:var(--f-display);font-size:22px;line-height:28px;font-weight:700;font-variant-numeric:tabular-nums}
+  .mg-stats .v{font-family:var(--f-display);font-size:20px;line-height:28px;font-weight:700;font-variant-numeric:tabular-nums}
   .mg-live{display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
   .mg-chc .note{margin-top:16px}
   /* M3 (unchanged) */
@@ -114,7 +114,7 @@
   .mg-lh{position:relative;display:flex;flex-direction:column;gap:8px;padding:12px 12px 0}
   .mg-lh .mg-fbtn{min-height:38px}
   .mg-fbtn[aria-expanded="true"]{background:var(--sel);border-color:var(--horizon)}
-  .mg-fn{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--pri);color:var(--on-pri);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+  .mg-fn{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--pri);color:var(--on-pri);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
   .mg-act .fchip{min-height:30px;font-size:12px;padding:0 6px 0 10px;gap:2px}
   .mg-act .fchip .x{display:inline-flex}
   .mg-act .clr{border:0;background:transparent;color:var(--link);font-size:12px;font-weight:600;cursor:pointer;min-height:30px;padding:0 6px;border-radius:8px}
@@ -185,7 +185,7 @@
     .mg-tab:nth-child(odd),.mg-si:nth-child(odd){border-inline-start:0}
     .mg-tab:nth-child(n+3),.mg-si:nth-child(n+3){border-top:1px solid var(--line)}
     .mg-tab{padding:12px 14px 10px}
-    .mg-tab .v{font-size:22px;line-height:28px}
+    .mg-tab .v{font-size:20px;line-height:28px}
     .mg-si{padding:12px 14px}
     .mg-cp{padding:14px 16px 12px}
     .mg-area{height:min(var(--ph),220px)}
@@ -200,7 +200,7 @@
     .mg-fun.hd .wd{display:none} .mg-fun.hd .nr{display:inline}
     .mg-ft{height:20px}
     .mg-fun:not(.hd){padding:8px 0}
-    .mg-three .v{font-size:24px;line-height:30px}
+    .mg-three .v{font-size:28px;line-height:30px}
     .mg-three>div{padding:12px}
     .mg-person{width:70px}
     .ptb-date .r{display:none}

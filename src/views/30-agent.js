@@ -19,7 +19,7 @@
 .ag-morew{position:relative;display:inline-flex}
 .ag-morew .menu{top:calc(100% + 6px);right:0;min-width:248px}
 .ag-keys{padding:6px 10px 4px;font-size:12px;line-height:1.6;color:var(--mute);max-width:248px}
-.ag-keys kbd{font:600 11px var(--f);padding:1px 5px;border-radius:5px;border:1px solid var(--line2);background:var(--sub);color:var(--text)}
+.ag-keys kbd{font:600 12px var(--f);padding:1px 5px;border-radius:5px;border:1px solid var(--line2);background:var(--sub);color:var(--text)}
 .ag-paused{container-type:inline-size;display:flex;align-items:center;gap:10px;min-height:44px;padding:6px 10px 6px 16px;background:var(--amber-b);color:var(--amber-f);border-top:1px solid color-mix(in srgb,var(--amber-f) 22%,transparent);font-size:13px}
 .ag-paused b{font-weight:700}
 .ag-paused .btn{min-height:30px;background:var(--card)}
@@ -66,7 +66,7 @@
 .ag-dayline{display:none}
 .ag-grp{overflow:hidden}
 .ag-grp-h{display:flex;align-items:center;gap:8px;padding:16px 20px 10px}
-.ag-grp-h h2{font-family:var(--f-display);font-size:15px;font-weight:700}
+.ag-grp-h h2{font-family:var(--f-display);font-size:14px;font-weight:700}
 .ag-cnt{min-width:22px;height:22px;padding:0 7px;border-radius:999px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .ag-cbrow{display:grid;grid-template-columns:120px minmax(220px,1.2fr) minmax(200px,2fr) auto;grid-template-areas:"tm who why act";gap:8px 18px;align-items:center;padding:14px 20px;border-top:1px solid var(--line)}
 .ag-cbrow.over{box-shadow:inset 3px 0 0 var(--red)}
@@ -413,7 +413,7 @@
       ['noanswer', 'No answer, try again in 1 hour', l.cb ? 'Moves the callback to ' + later : 'Saves the try in the history', 'amber', 'clock'],
       ['wrong', 'Wrong number', 'Closes the lead as lost', 'red', 'x']];
     const why = l.cb ? l.cb.why : l.summary;
-    return modalFrame('Calling ' + l.name, `<div class="ag-callcard"><div class="row nowrap">${av(l.name, 'lg')}<div class="grow"><div class="b ell" style="font-size:17px">${esc(l.name)}</div><div class="mu num">${esc(l.mob)}</div></div><span class="pill" style="background:rgba(110,190,185,.2);color:#BFE6E3">${pulse('green')}On the call</span></div>
+    return modalFrame('Calling ' + l.name, `<div class="ag-callcard"><div class="row nowrap">${av(l.name, 'lg')}<div class="grow"><div class="b ell" style="font-size:16px">${esc(l.name)}</div><div class="mu num">${esc(l.mob)}</div></div><span class="pill" style="background:rgba(110,190,185,.2);color:#BFE6E3">${pulse('green')}On the call</span></div>
         <div class="tm" role="timer" aria-label="Call time"><span data-since="${m.t0}">0:00</span></div>
         <div class="mu">${esc(l.model)} · ${esc(why)}${l.cb ? ` · ${l.cb.tries ? l.cb.tries + (l.cb.tries === 1 ? ' try' : ' tries') + ' so far' : 'first try'}` : ''}</div></div>
       <div class="ag-sum"><div class="hd">${ic('spark', 14)}VINA summary</div><p>${esc(l.summary)}.</p></div>

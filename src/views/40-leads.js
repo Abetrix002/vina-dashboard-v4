@@ -8,7 +8,7 @@
   .ld-q:focus-within{border-color:var(--horizon);box-shadow:0 0 0 4px var(--ring)}
   .ld-q input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:13px;color:var(--text)}
   .ld-rel{position:relative}
-  .ld-bar .btn .n{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--pri);color:var(--on-pri);font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+  .ld-bar .btn .n{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--pri);color:var(--on-pri);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
   .menu.ld-pop{top:48px;left:0;width:min(560px,calc(100vw - 32px));padding:16px;gap:14px;transform-origin:top left;cursor:default}
   .menu.ld-pop.r{left:auto;right:0;width:250px;padding:8px 12px 10px;gap:0;transform-origin:top right}
   .menu.ld-pop .g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 14px}
@@ -64,31 +64,31 @@
   .ld-cal{overflow-x:auto;border-radius:var(--r-l);background:var(--card);box-shadow:var(--e1);border:1px solid var(--card-bd)}
   .ld-cal-in{display:grid;min-width:860px}
   .ld-cal-h{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:68px;border-bottom:1px solid var(--line);font-size:12px;color:var(--mute);font-weight:500}
-  .ld-cal-h b{font-family:var(--f-display);font-size:17px;color:var(--text);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .ld-cal-h b{font-family:var(--f-display);font-size:16px;color:var(--text);width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center}
   .ld-cal-h.today span{color:var(--link);font-weight:700}
   .ld-cal-h.today b{background:var(--pri);color:var(--on-pri)}
   .ld-cal-g{position:relative}
-  .ld-cal-t{font-size:11px;color:var(--faint);text-align:end;padding:0 10px;height:48px;transform:translateY(-7px)}
+  .ld-cal-t{font-size:12px;color:var(--faint);text-align:end;padding:0 10px;height:48px;transform:translateY(-7px)}
   .ld-cal-t:first-child{visibility:hidden}
   .ld-cal-d{position:relative;border-inline-start:1px solid var(--line);background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 23px,var(--sub) 23px,var(--sub) 24px,transparent 24px,transparent 47px,var(--line) 47px,var(--line) 48px)}
   .ld-cal-d.today{background-color:color-mix(in srgb,var(--sel) 45%,transparent)}
   .ld-cal-d.closed{background-image:repeating-linear-gradient(135deg,var(--sub) 0 6px,transparent 6px 14px)}
   .ld-cal-d .shut{position:sticky;top:80px;padding:12px;text-align:center;font-size:12px;color:var(--mute)}
-  .ld-ev{position:absolute;border-radius:8px;padding:4px 8px 4px 10px;font-size:11px;line-height:1.3;text-align:start;border:0;cursor:pointer;overflow:hidden;box-shadow:inset 3px 0 0 currentColor;transition:box-shadow var(--d2) var(--ease),transform var(--d2) var(--ease);z-index:1}
+  .ld-ev{position:absolute;border-radius:8px;padding:4px 8px 4px 10px;font-size:12px;line-height:1.3;text-align:start;border:0;cursor:pointer;overflow:hidden;box-shadow:inset 3px 0 0 currentColor;transition:box-shadow var(--d2) var(--ease),transform var(--d2) var(--ease);z-index:1}
   .ld-ev b{display:block;font-size:12px;color:var(--text);font-weight:600}
   .ld-ev .s{display:block;color:var(--mute)}
   .ld-ev:hover{box-shadow:inset 3px 0 0 currentColor,var(--e2);transform:translateY(-1px);z-index:3}
   .ld-ev.td{background:var(--purple-b);color:var(--purple-f)} .ld-ev.cb{background:var(--amber-b);color:var(--amber-f)}
   .ld-now{position:absolute;left:0;right:0;height:2px;background:var(--horizon);z-index:2;pointer-events:none}
   .ld-now::before{content:"";position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--horizon);box-shadow:0 0 0 3px var(--card)}
-  .ld-now-t{position:absolute;right:6px;transform:translateY(-50%);font-size:10.5px;font-weight:700;color:var(--on-pri);background:var(--horizon);padding:1px 6px;border-radius:6px;z-index:2}
+  .ld-now-t{position:absolute;right:6px;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--on-pri);background:var(--horizon);padding:1px 6px;border-radius:6px;z-index:2}
   .ld-legend{display:flex;flex-wrap:wrap;gap:8px}
   .ld-legend span{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:8px;font-size:12px;font-weight:600}
   .ld-legend i{width:8px;height:8px;border-radius:50%;background:currentColor}
   /* LD4 lead page */
   .ld-hero{padding:24px 24px 20px;background:radial-gradient(900px 220px at 0% 0%,color-mix(in srgb,var(--horizon) 12%,transparent),transparent 70%),var(--card)}
   .ld-hd{display:flex;flex-wrap:wrap;gap:16px 20px;align-items:center}
-  .ld-nm{font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.02em}
+  .ld-nm{font-size:28px;line-height:32px;font-weight:700;letter-spacing:-.02em}
   .ld-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin-top:8px;font-size:13px;color:var(--mute)}
   .ld-meta>span{display:inline-flex;align-items:center;gap:7px}
   .ld-meta b{color:var(--text);font-weight:600}
@@ -99,16 +99,16 @@
   .ld-steps .st .bar i{display:block;height:100%;border-radius:inherit;background:var(--indigo-f)}
   .ld-steps .ld-cur .bar i{background:linear-gradient(90deg,var(--indigo-f),var(--horizon))}
   .ld-steps .ld-cur .lb{font-weight:700}
-  .ld-steps .st .d{font-size:11.5px}
+  .ld-steps .st .d{font-size:12px}
   .ld-steps .ld-cur .d{color:var(--link);font-weight:600}
   .ld-2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,1fr);gap:20px;align-items:start}
   .ld-vina{border-radius:var(--r-l);padding:22px;background:linear-gradient(155deg,var(--teal-b),color-mix(in srgb,var(--teal-b) 30%,var(--card)) 75%);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--teal-f) 18%,transparent)}
   .ld-vina .vh{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-  .ld-vina .vh h2{font-size:15px;font-weight:700}
+  .ld-vina .vh h2{font-size:14px;font-weight:700}
   .ld-vina .vh .xs{color:var(--teal-f);font-weight:600}
   .ld-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;margin:0}
   .ld-facts div{padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--card) 70%,transparent)}
-  .ld-facts dt{font-size:11.5px;color:var(--teal-f);font-weight:600}
+  .ld-facts dt{font-size:12px;color:var(--teal-f);font-weight:600}
   .ld-facts dd{margin:2px 0 0;font-weight:600}
   .ld-why{margin-top:16px;padding-top:14px;border-top:1px solid color-mix(in srgb,var(--teal-f) 18%,transparent);font-size:13px}
   .ld-why .btn{padding:0 6px;margin-inline-start:-6px;margin-top:4px;color:var(--teal-f)}
@@ -128,7 +128,7 @@
   .ld5-st{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px}
   .ld5-t{position:relative;background:var(--card);border:1px solid var(--card-bd);border-radius:var(--r-l);padding:16px 16px 14px;box-shadow:var(--e1);display:flex;flex-direction:column;gap:8px;overflow:hidden}
   .ld5-t::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--c)}
-  .ld5-t .n{font-family:var(--f-display);font-size:22px;font-weight:700;line-height:1}
+  .ld5-t .n{font-family:var(--f-display);font-size:20px;font-weight:700;line-height:1}
   .ld5-sw{width:12px;height:12px;border-radius:4px;background:var(--c)}
   .ld-sw{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
   .ld-part{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
@@ -136,12 +136,12 @@
   @media (max-width:760px){
     .ld-q{width:100%}
     .menu.ld-pop .g{grid-template-columns:1fr}
-    .ld-nm{font-size:21px;line-height:27px}
+    .ld-nm{font-size:20px;line-height:27px}
     .ld-hero{padding:18px 16px 16px}
     .ld-acts{margin-inline-start:0;width:100%}
     .ld-acts .btn{flex:1 1 auto}
     .ld-steps .st .d{display:none}
-    .ld-steps .st{font-size:11px;line-height:1.3}
+    .ld-steps .st{font-size:12px;line-height:1.3}
     .ld-hd>.av.xl{width:48px;height:48px;flex-basis:48px;font-size:16px}
     .ld-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
   }

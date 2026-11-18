@@ -343,7 +343,7 @@ function body4(id) {
   if (S.st === 'reading') files = files.concat([{f:{n:'Offers Dec 2026.pdf', ext:'PDF', st:'Reading', meta:'', on:true}, i:-1}]);
   const stc = s => s === 'Ready' ? 'green' : s === 'Reading' ? 'blue' : 'red';
   const isEmpty = !files.length && (S.st === 'empty' || (!k.links.length && !k.faq.length));
-  const row = (title, ext, meta, st, why, path, on, delPath) => `<div class="su-src ${st === 'Failed' ? 'bad' : ''} ${flashCls('src-' + title)}"><span class="chi lg c-${ext === 'WEB' ? 'blue' : ext === 'XLS' ? 'green' : ext === 'PDF' ? 'red' : 'navy'}" style="font-size:10px;font-weight:700">${esc(ext.slice(0, 4))}</span><div class="grow"><div class="b ell">${esc(title)}</div>${st === 'Reading' ? `<div class="xs mute">Reading… the agent can use it in a moment</div><span class="su-read" aria-hidden="true"><i></i></span>` : `<div class="xs ${st === 'Failed' ? 'red' : 'mute'}">${esc(st === 'Failed' ? why : meta)}</div>`}</div>${st === 'Reading' ? `<span class="chip c-blue">${spin()}Reading</span>` : chipC(st, stc(st), true)}${path ? sw(on, 'su-tog', path, 'Use ' + title, st !== 'Ready') : ''}${delPath ? `<button type="button" class="ibtn sm bare" data-a="su-del" data-x="${delPath}" aria-label="Remove ${esc(title)}">${ic('trash', 15)}</button>` : ''}</div>`;
+  const row = (title, ext, meta, st, why, path, on, delPath) => `<div class="su-src ${st === 'Failed' ? 'bad' : ''} ${flashCls('src-' + title)}"><span class="chi lg c-${ext === 'WEB' ? 'blue' : ext === 'XLS' ? 'green' : ext === 'PDF' ? 'red' : 'navy'}" style="font-size:12px;font-weight:700">${esc(ext.slice(0, 4))}</span><div class="grow"><div class="b ell">${esc(title)}</div>${st === 'Reading' ? `<div class="xs mute">Reading… the agent can use it in a moment</div><span class="su-read" aria-hidden="true"><i></i></span>` : `<div class="xs ${st === 'Failed' ? 'red' : 'mute'}">${esc(st === 'Failed' ? why : meta)}</div>`}</div>${st === 'Reading' ? `<span class="chip c-blue">${spin()}Reading</span>` : chipC(st, stc(st), true)}${path ? sw(on, 'su-tog', path, 'Use ' + title, st !== 'Ready') : ''}${delPath ? `<button type="button" class="ibtn sm bare" data-a="su-del" data-x="${delPath}" aria-label="Remove ${esc(title)}">${ic('trash', 15)}</button>` : ''}</div>`;
   return `<div class="col loose">
     ${isEmpty ? empty('book', 'Nothing added yet', 'Add what your team uses to answer customers: price lists, brochures, offers, your website and common questions. The agent answers only from what you add here.', `<div class="row tight" style="justify-content:center">${['Price list.xlsx','Brochure.pdf','Offers.pdf','Your website'].map(x => chipC(x, 'grey')).join('')}</div>`) : ''}
     <div class="field"><span class="lbl">Files</span><label class="su-drop" for="su-up-${id}">${ic('upload', 22)}<span><b>Upload files</b><span class="xs mute" style="display:block">PDF, Word or Excel, up to 20 MB each. For example price lists, brochures and offers.</span></span><input id="su-up-${id}" type="file" multiple class="sr" data-ch="su-upload" data-x="${id}"></label>
@@ -567,7 +567,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .su-stage{display:flex;align-items:center;gap:12px;min-height:52px;padding:6px 10px;border-radius:12px;text-decoration:none;color:var(--text);transition:background var(--d1) var(--ease),box-shadow var(--d2)}
 .su-stage:hover{background:var(--sub)}
 .su-stage.cur{background:var(--card);box-shadow:var(--e2),0 0 0 1px var(--card-bd)}
-.su-st-t{display:block;font-size:13.5px;font-weight:600;line-height:18px}
+.su-st-t{display:block;font-size:14px;font-weight:600;line-height:18px}
 .su-stage:not(.cur):not(.ok) .su-st-t{color:var(--mute)}
 .su-stage.cur .su-st-t{font-weight:700}
 .su-num{position:relative;z-index:1;width:28px;height:28px;flex:0 0 28px;border-radius:50%;border:1.5px solid var(--line2);background:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--mute);font-variant-numeric:tabular-nums}
@@ -582,7 +582,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .su-main.enter>*:not(.su-foot){animation:rise var(--d4) var(--ease) both}
 .su-main.enter>*:nth-child(2){animation-delay:60ms} .su-main.enter>*:nth-child(3){animation-delay:120ms}
 .su-mhead{display:flex;flex-direction:column;gap:8px}
-.su-mhead h1{font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.02em}
+.su-mhead h1{font-size:28px;line-height:32px;font-weight:700;letter-spacing:-.02em}
 .su-foot{position:sticky;bottom:0;z-index:6;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin:0 -32px;padding:14px 32px;background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--line);border-radius:0 0 var(--r-l) var(--r-l)}
 .su-gatebox{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
 .su-gates{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
@@ -654,10 +654,10 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 /* Success: one calm moment, the agent mark with a ring */
 .su-donewrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
 .su-done{width:min(560px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:44px 36px 36px}
-.su-done h1{font-size:26px;line-height:32px;font-weight:700;letter-spacing:-.02em}
+.su-done h1{font-size:28px;line-height:32px;font-weight:700;letter-spacing:-.02em}
 .su-mark{position:relative;width:112px;height:112px;display:grid;place-items:center;margin-bottom:4px}
 .su-mark::before{content:"";position:absolute;inset:6px;border-radius:50%;border:2px solid color-mix(in srgb,var(--aqua) 55%,transparent)}
-.su-mark .av.xl{width:80px;height:80px;flex-basis:80px;font-size:30px;box-shadow:0 12px 28px -12px var(--horizon)}
+.su-mark .av.xl{width:80px;height:80px;flex-basis:80px;font-size:28px;box-shadow:0 12px 28px -12px var(--horizon)}
 .su-ring{position:absolute;inset:6px;border-radius:50%;border:2px solid var(--aqua);opacity:0}
 .su-ok{position:absolute;right:10px;bottom:10px;width:28px;height:28px;border-radius:50%;background:var(--green);color:#FFFFFF;display:grid;place-items:center;box-shadow:0 0 0 3px var(--card)}
 .su-done.go .su-ring{animation:suRing 1.6s var(--ease) 250ms both} .su-done.go .su-ring.r2{animation-delay:650ms}
@@ -680,18 +680,18 @@ document.head.insertAdjacentHTML('beforeend', `<style>
   .su-mini .ok i{background:var(--pri)} .su-mini .cur i{background:var(--horizon);box-shadow:0 0 0 3px var(--ring)}
   .su-side{grid-column:1}
   .su-main{padding:20px 18px 0;gap:20px}
-  .su-mhead h1{font-size:22px;line-height:28px}
+  .su-mhead h1{font-size:20px;line-height:28px}
   .su-foot{margin:0 -18px;padding:12px 18px}
   .su-foot .su-later,.su-note,.su-hide-sm{display:none}
   .su-show-sm{display:inline-flex}
   /* keep the prototype pill (review aid) clear of the sticky footer buttons */
   body:has(.su-foot) .proto{bottom:86px} body:has(.su-foot7) .proto{bottom:150px}
   .su-full .full-top>.grow{visibility:hidden}
-  .su-gate{font-size:11.5px;min-height:26px;padding:0 9px}
+  .su-gate{font-size:12px;min-height:26px;padding:0 9px}
   .su-chsub{display:none}
   .su-chat{min-height:480px}
   .su-hrow{grid-template-columns:90px 42px 1fr}.su-hrow .mute:nth-of-type(1),.su-hrow input[type=time]:last-of-type{grid-column:3}
-  .su-done{padding:32px 20px 24px}.su-done h1{font-size:22px;line-height:28px}
+  .su-done{padding:32px 20px 24px}.su-done h1{font-size:20px;line-height:28px}
 }
 </style>`);
 })();

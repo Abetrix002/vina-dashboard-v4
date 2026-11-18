@@ -14,7 +14,7 @@
   .cp-ans .l{font-size:12px;font-weight:600;color:var(--mute)}
   .cp-ans .w{display:flex;align-items:center;gap:8px}
   .cp-ans select.inp{min-height:36px;height:36px;font-size:13px}
-  .cp-vav{width:26px;height:26px;flex:0 0 26px;font-size:11px}
+  .cp-vav{width:26px;height:26px;flex:0 0 26px;font-size:12px}
   .cp-chip-wait{position:relative;overflow:hidden}
   .cp-chip-wait::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent) 0 0/50% 100% no-repeat;animation:cp-shim 2s ease-in-out infinite;animation-delay:var(--ph,0ms)}
   .cp-mgr{display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:var(--card);box-shadow:var(--e1)}
@@ -81,7 +81,7 @@
   .cp-ring::after{animation-delay:.9s}
   .cp-ring .ic{animation:ring 1.2s var(--ease) infinite;transform-origin:50% 50%}
   @keyframes cp-ripple{from{transform:scale(1);opacity:.7}to{transform:scale(1.9);opacity:0}}
-  .cp-timer{font-family:var(--f-display);font-size:40px;line-height:46px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .cp-timer{font-family:var(--f-display);font-size:36px;line-height:46px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
   .cp-eq{display:flex;align-items:center;gap:4px;height:28px}
   .cp-eq i{width:4px;height:100%;border-radius:2px;background:var(--aqua);transform-origin:center;animation:cp-eq 900ms ease-in-out infinite alternate}
   .cp-eq i:nth-child(2){animation-delay:-.3s}.cp-eq i:nth-child(3){animation-delay:-.6s}.cp-eq i:nth-child(4){animation-delay:-.15s}.cp-eq i:nth-child(5){animation-delay:-.45s}
@@ -114,7 +114,7 @@
   /* B1 */
   .cp-plan{background:radial-gradient(500px 200px at 100% 0%,var(--teal-b),transparent 70%),var(--card)}
   .cp-kt{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;line-height:20px;margin-bottom:4px}
-  .cp-big{font-family:var(--f-display);font-size:30px;line-height:36px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .cp-big{font-family:var(--f-display);font-size:28px;line-height:36px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .cp-meter .bar-h{height:10px}
   .cp-stack{display:flex;gap:3px;height:12px;border-radius:999px;overflow:hidden}
   .cp-stack i{display:block;height:100%}
@@ -566,7 +566,7 @@
       ${sec('This month so far', '1 to 7 November 2026 · Meta and AI charges are passed through at cost, with nothing added.', `<div class="grow-x" style="margin-bottom:12px"><div class="cp-stack" role="img" aria-label="Charges so far: ${lines.filter(l => l[2]).map(l => l[0] + ' ' + sar(l[2])).join(', ')}">${lines.filter(l => l[2]).map(l => `<i style="flex:${l[2]} 1 0;background:var(--${l[3]}-f)"></i>`).join('')}</div></div>
         <div class="legend" style="margin-bottom:12px">${lines.filter(l => l[2]).map(l => `<span><i style="background:var(--${l[3]}-f)"></i>${l[0]}</span>`).join('')}</div>
         <div class="tbl-wrap" style="box-shadow:none"><table class="tbl"><tbody>${lines.map(([k, n, v]) => `<tr><td><b>${k}</b><div class="xs mute">${n}</div></td><td class="r num b">${sar(v)}</td></tr>`).join('')}
-        <tr><td><b>Total so far</b><div class="xs mute">Before VAT</div></td><td class="r num bb">${sar(sub)}</td></tr><tr><td class="mute">VAT 15%</td><td class="r num mute">${sar(Math.round(sub * VAT * 100) / 100)}</td></tr><tr><td><b>Total with VAT</b></td><td class="r num bb" style="font-size:15px">${sar(withVat(sub))}</td></tr></tbody></table></div>`)}
+        <tr><td><b>Total so far</b><div class="xs mute">Before VAT</div></td><td class="r num bb">${sar(sub)}</td></tr><tr><td class="mute">VAT 15%</td><td class="r num mute">${sar(Math.round(sub * VAT * 100) / 100)}</td></tr><tr><td><b>Total with VAT</b></td><td class="r num bb" style="font-size:14px">${sar(withVat(sub))}</td></tr></tbody></table></div>`)}
       ${sec('Invoices', 'Amounts include 15% VAT.', `<div class="tbl-wrap" style="box-shadow:none"><table class="tbl cp-inv"><thead><tr><th>Month</th><th>Invoice</th><th class="r">Amount</th><th>Status</th><th><span class="sr">Action</span></th></tr></thead><tbody>${inv.map(i => `<tr class="${flashCls(i.no)}"><td class="b">${i.m}</td><td class="mute num">${i.no}</td><td class="r num b">${sar(withVat(i.base))}</td><td>${i.paid ? chipC('Paid', 'green', true) : chipC('Not paid', 'red', true)}</td><td class="r">${i.paid ? `<button type="button" class="btn sm ghost" data-a="cp-inv-dl" data-x="${i.no}" aria-label="Download ${i.no}">${ic('download', 14)}Download</button>` : `<button type="button" class="btn sm" data-a="cp-pay" data-x="${i.no}">Pay now</button>`}</td></tr>`).join('')}</tbody></table></div>`)}`);
     return page('plan', 'Plan and usage', body);
   }});

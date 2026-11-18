@@ -33,8 +33,8 @@
   /* Brand side: navy with teal glow (core .auth .side) + one quiet product moment */
   .auth .side{justify-content:space-between}
   .au-hero{display:flex;flex-direction:column;gap:14px;max-width:460px}
-  .au-hero h2{font-size:34px;line-height:42px;font-weight:700;letter-spacing:-.02em;color:#FFFFFF}
-  .au-hero p{font-size:15px;line-height:24px;color:rgba(255,255,255,.7);max-width:42ch}
+  .au-hero h2{font-size:36px;line-height:42px;font-weight:700;letter-spacing:-.02em;color:#FFFFFF}
+  .au-hero p{font-size:14px;line-height:24px;color:rgba(255,255,255,.7);max-width:42ch}
   .au-proof{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:rgba(255,255,255,.68);margin-top:4px}
   .au-proof span{display:inline-flex;align-items:center;gap:8px}
   .au-proof i{width:5px;height:5px;border-radius:50%;background:var(--aqua)}
@@ -57,7 +57,7 @@
   .au-typ{align-self:start;display:inline-flex;gap:4px;padding:12px 14px;border-radius:14px;border-bottom-right-radius:4px;background:rgba(110,190,185,.2)}
   .au-typ i{width:6px;height:6px;border-radius:50%;background:#A6E8E2;animation:ty 1s infinite}
   .au-typ i:nth-child(2){animation-delay:.15s}.au-typ i:nth-child(3){animation-delay:.3s}
-  .au-meta{font-size:11px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:6px;margin-top:4px;justify-content:flex-end}
+  .au-meta{font-size:12px;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:6px;margin-top:4px;justify-content:flex-end}
   .au-evt{align-self:center;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(110,190,185,.16);color:#A6E8E2}
   /* Plays once per page load: each re-render resumes the timeline at --el (time since first shown) instead of restarting it */
   .au-live .a1{animation:rise 420ms var(--ease) both;animation-delay:calc(300ms - var(--el,0ms))}
@@ -76,7 +76,7 @@
   @media (min-width:761px){.au-top>.grow>.logo{display:none}}
   .au-top{display:flex;align-items:center;gap:10px;min-height:40px}
   .au-h{display:flex;flex-direction:column;gap:8px}
-  .au-h p{color:var(--mute);font-size:15px;line-height:23px}
+  .au-h p{color:var(--mute);font-size:14px;line-height:23px}
   .au-h p b{color:var(--text)}
   .au-art{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center}
   .auth.enter .au-art{animation:au-pop 520ms var(--spring) 120ms both}
@@ -123,7 +123,7 @@
   .au-client .go{color:var(--faint);transition:transform var(--d2) var(--ease),color var(--d1)}
   .au-client:hover .go{transform:translateX(3px);color:var(--text)}
   .au-stats{display:flex;gap:18px;font-size:12px;color:var(--mute)}
-  .au-stats b{display:block;font-family:var(--f-display);font-size:18px;line-height:24px;color:var(--text);font-variant-numeric:tabular-nums}
+  .au-stats b{display:block;font-family:var(--f-display);font-size:16px;line-height:24px;color:var(--text);font-variant-numeric:tabular-nums}
   .au-chs{display:flex;flex-wrap:wrap;gap:6px 14px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;font-weight:500}
   .au-chs span{display:inline-flex;align-items:center;gap:7px}
   .au-dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
@@ -138,7 +138,7 @@
   .au-site .lang{font-size:13px;font-weight:600;color:var(--mute)}
   .au-login{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--horizon)}
   .au-hero-w{display:flex;flex-wrap:wrap;align-items:center;gap:32px;padding:44px;background:radial-gradient(600px 300px at 90% 10%,var(--teal-b),transparent 70%),var(--sub)}
-  .au-hero-w h3{font-size:38px;line-height:46px;font-weight:700;letter-spacing:-.02em}
+  .au-hero-w h3{font-size:36px;line-height:46px;font-weight:700;letter-spacing:-.02em}
   .au-hero-w p{font-size:16px;line-height:26px;color:var(--mute);margin-top:12px;max-width:520px}
   .au-bubbles{position:relative;width:240px;height:170px;flex:0 0 240px;border-radius:26px;background:linear-gradient(135deg,#5E97CE,#6EBEB9)}
   .au-bubbles span{position:absolute;padding:11px 15px;font-size:14px;border-radius:16px;box-shadow:0 8px 20px -8px rgba(0,0,0,.3)}
@@ -334,7 +334,7 @@
   /* ---------- L5 Join your team ---------- */
   R('join', {id:'L5', title:'Join your team', public:true, states:[['expired','Invite expired']], render() {
     const s = S.f.au5 || (S.f.au5 = {name:'', mob:'', pw:''});
-    const team = `<div class="au-team"><span class="au-lg white" aria-hidden="true">iC</span><div class="grow" style="min-width:0"><b style="font-size:15px">iCaur Alghanim</b><div class="small mute">Madinah Road showroom, Jeddah</div></div>${S.st === 'expired' ? '' : chipC('Sales agent', 'teal')}</div>`;
+    const team = `<div class="au-team"><span class="au-lg white" aria-hidden="true">iC</span><div class="grow" style="min-width:0"><b style="font-size:14px">iCaur Alghanim</b><div class="small mute">Madinah Road showroom, Jeddah</div></div>${S.st === 'expired' ? '' : chipC('Sales agent', 'teal')}</div>`;
     if (S.st === 'expired') return page(`${team}${art('clock', 'amber')}${head('This invite has expired', 'Invites work for 7 days. Ask VINA support to send a new invite.')}<a class="btn pri lg wide" href="mailto:support@vina.sa">${ic('mail', 16)}Email support@vina.sa</a>`);
     const e = s.err || {};
     return page(`${team}${head('Join your team', 'You have been added to iCaur Alghanim as <b>Sales agent</b> by VINA support. Set up your account to start.')}

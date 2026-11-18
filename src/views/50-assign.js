@@ -26,13 +26,13 @@
   .as-rule .n{width:34px;height:34px;border-radius:10px;background:var(--navy-b);color:var(--navy-f);font-family:var(--f-display);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
   .as-rule.off .n{background:var(--sub);color:var(--faint)}
   .as-rule.off .main{opacity:.62}
-  .as-nm{font-family:var(--f-display);font-size:15px;font-weight:700;color:var(--text);text-decoration:none}
+  .as-nm{font-family:var(--f-display);font-size:14px;font-weight:700;color:var(--text);text-decoration:none}
   a.as-nm:hover{color:var(--link);text-decoration:underline}
   .as-flow{display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 12px;margin:8px 0 0;font-size:13px;align-items:baseline}
-  .as-flow dt{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+  .as-flow dt{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--mute);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
   .as-flow dd{margin:0;min-width:0}
   .as-flow dd .m{color:var(--mute)}
-  .as-flow .k{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+  .as-flow .k{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--mute)}
   .as-flow .arr{color:var(--faint)}
   .as-flow .pr{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
   .as-sub{display:flex;flex-wrap:wrap;gap:2px 14px;margin-top:4px;font-size:12px;color:var(--mute);min-width:0}
@@ -40,7 +40,7 @@
   .as-rule .act{display:flex;align-items:center;gap:16px}
   .as-wk{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;min-width:88px}
   .as-wk b{font-family:var(--f-display);font-size:20px;font-weight:700}
-  .as-wk span{font-size:11.5px;color:var(--mute)}
+  .as-wk span{font-size:12px;color:var(--mute)}
   .as-mw{position:relative}
   .as-menu{top:40px;right:0;min-width:200px}
   .as-menu.again{animation:none}
@@ -60,7 +60,7 @@
   .as-rd{width:18px;height:18px;flex:0 0 18px;border-radius:50%;border:2px solid var(--line2);margin-top:1px;transition:border-width var(--d2) var(--spring),border-color var(--d1)}
   [aria-checked="true"]>.as-rd{border:5px solid var(--pri)}
   .as-cond{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--sub)}
-  .as-cond .j{font-size:11px;font-weight:700;color:var(--mute);text-transform:uppercase;min-width:28px}
+  .as-cond .j{font-size:12px;font-weight:600;color:var(--mute);text-transform:none;min-width:28px}
   .as-num{width:84px!important;text-align:center}
   .as-addc .inp{width:auto;flex:1 1 150px}
   /* AS4 */
@@ -75,11 +75,11 @@
   .as-ag{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;text-align:start;color:var(--text);transition:border-color var(--d1),box-shadow var(--d2) var(--ease),background var(--d1)}
   .as-ag:hover{border-color:var(--line2);background:var(--sub)}
   .as-ag[aria-checked="true"]{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri),0 6px 16px -10px var(--pri);background:var(--sel)}
-  .as-ag .ld{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:11px;color:var(--mute)}
-  .as-ag .ld b{font-family:var(--f-display);font-size:15px;color:var(--text)}
+  .as-ag .ld{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:12px;color:var(--mute)}
+  .as-ag .ld b{font-family:var(--f-display);font-size:14px;color:var(--text)}
   .as-ag .ck{width:22px;height:22px;flex:0 0 22px;border-radius:50%;border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--on-pri);transition:background var(--d2),border-color var(--d2)}
   .as-ag[aria-checked="true"] .ck{background:var(--pri);border-color:var(--pri)}
-  .as-sug{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:6px;font-size:11px;font-weight:700;background:var(--green-b);color:var(--green-f)}
+  .as-sug{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:6px;font-size:12px;font-weight:700;background:var(--green-b);color:var(--green-f)}
   .as-q{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:var(--inp);color:var(--mute)}
   .as-q:focus-within{border-color:var(--horizon);box-shadow:0 0 0 4px var(--ring)}
   .as-q input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:14px;color:var(--text)}
@@ -96,7 +96,7 @@
     .as-wk{flex-direction:row;align-items:baseline;gap:6px}
     .as-k{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
     .as-k .kpi{padding:14px}
-    .as-k .kpi .v{font-size:22px;line-height:28px}
+    .as-k .kpi .v{font-size:20px;line-height:28px}
   }
   </style>`);
 
@@ -152,7 +152,7 @@
         ${reportCard({title:'Never qualify', sub:'VINA closes these politely or sends them elsewhere.', body:`
           <div class="tokens">${q.never.map((n, i) => `<span class="tok">${esc(n)}<button type="button" data-a="as1-rm" data-x="${i}" aria-label="Remove ${esc(n)}">${ic('x', 13)}</button></span>`).join('')}<form data-a="as1-add" style="flex:1;display:flex;min-width:160px"><label class="sr" for="b-f-as1-add">Add a topic VINA should never qualify</label><input ${bind('f.as1.add')} placeholder="Add, e.g. Service and repairs"></form></div>`})}
       </div><div class="col loose">
-        ${reportCard({title:'Last 7 days with these settings', body:`<div class="row tight" style="align-items:baseline">${mic('qualified')}<span class="num" style="font-family:var(--f-display);font-size:32px;font-weight:700" ${countAttr(612)}>612</span><span class="small mute">qualified of 2,436 chats</span></div><div class="bar-h" style="margin:10px 0 14px"><i style="width:25%;background:var(--aqua)"></i></div>
+        ${reportCard({title:'Last 7 days with these settings', body:`<div class="row tight" style="align-items:baseline">${mic('qualified')}<span class="num" style="font-family:var(--f-display);font-size:28px;font-weight:700" ${countAttr(612)}>612</span><span class="small mute">qualified of 2,436 chats</span></div><div class="bar-h" style="margin:10px 0 14px"><i style="width:25%;background:var(--aqua)"></i></div>
           <div class="list">${[['Asked for price or financing',268],['Wanted a test drive',151],['Asked to be called',119],['Asked for a person',74]].map(([k, v]) => `<div class="li small"><span class="grow">${k}</span><b class="num">${v}</b></div>`).join('')}</div>`})}
       </div></div>
       ${foot(q.dirty ? `${pulse()}<span>Unsaved changes</span>` : `<span class="ell">Last changed by ${esc(q.saved)}</span>`, `<button type="button" class="btn" data-a="as1-reset" ${q.dirty ? '' : 'disabled title="Nothing to undo"'}>Cancel</button><button type="button" class="btn pri" data-a="as1-save" ${q.dirty && reqN ? '' : `disabled title="${reqN ? 'No changes to save' : 'Tick at least one detail first'}"`}>Save</button>`)}`;

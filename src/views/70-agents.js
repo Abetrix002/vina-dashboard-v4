@@ -203,7 +203,7 @@ R('scenarios', {id:'A4', title:'Test scenarios', roles:['vina'], states:[['runni
   const convo = det.convo.map(m => m.w === 'c' ? `<div class="msg in"><div class="bub" ${isAr(m.t) ? 'dir="rtl"' : ''}>${esc(m.t)}</div></div>`
     : m.w === 'a' ? `<div class="evt teal">${ic('bolt', 13)}${esc(m.t)}</div>`
     : (() => { const wrong = (m.bad && !allp) || (m.bad2 && sres === 'fail'); return `<div class="msg vina ${wrong ? 'ag2-wrong' : ''}"><div class="bub ${m.chk && sres === 'check' ? 'ag2-chkbub' : ''}" ${isAr((m.t || '') + (m.bad || '')) ? 'dir="rtl"' : ''}>${esc(m.t || '')}${m.bad && !allp ? `<mark class="ag2-bad">${esc(m.bad)}</mark>` : esc(m.bad || '')}${esc(m.t2 || '')}</div><div class="meta">${esc(agentName(id))}${m.bad && !allp ? ` · <span class="ag2-flag">${ic('alert', 12)}Wrong part</span>` : m.bad2 && sres === 'fail' ? ` · <span class="ag2-flag">${ic('alert', 12)}Did not hand over</span>` : m.chk && sres === 'check' ? ' · <b class="amber">New kind of answer</b>' : ''}</div></div>`; })()).join('');
-  const panel = `<section class="card col ag2-open" aria-label="Open scenario"><div class="row nowrap su-at"><div class="grow"><div class="row tight">${chipC(ri[2], ri[1], true)}<span class="xs mute">${esc(sel.lang)}${sres && sres !== 'run' ? ' · ' + esc(time) : ''}</span>${sel.act ? chipC('Action: ' + actName(sel.act), 'grey') : ''}</div><h2 style="font-size:18px;font-weight:600;margin-top:8px">${esc(sel.name)}</h2></div><button type="button" class="btn sm" data-a="ag2-sc-edit" data-x="${sel.id}">${ic('edit', 14)}Edit</button></div>
+  const panel = `<section class="card col ag2-open" aria-label="Open scenario"><div class="row nowrap su-at"><div class="grow"><div class="row tight">${chipC(ri[2], ri[1], true)}<span class="xs mute">${esc(sel.lang)}${sres && sres !== 'run' ? ' · ' + esc(time) : ''}</span>${sel.act ? chipC('Action: ' + actName(sel.act), 'grey') : ''}</div><h2 style="font-size:16px;font-weight:600;margin-top:8px">${esc(sel.name)}</h2></div><button type="button" class="btn sm" data-a="ag2-sc-edit" data-x="${sel.id}">${ic('edit', 14)}Edit</button></div>
     <div class="col tight"><div class="eyebrow">Checks</div>${det.checks.map(q => `<div class="row nowrap su-at ag2-chk"><span class="chi c-${q.ok === true ? 'green' : q.ok === false ? 'red' : 'amber'}">${ic(q.ok === true ? 'check' : q.ok === false ? 'x' : 'info', 14)}<span class="sr">${q.ok === true ? 'Passed' : q.ok === false ? 'Failed' : 'To check'}</span></span><div class="grow small"><span class="mute">${esc(q.type)}:</span> <b>${esc(q.t)}</b>${q.ok === false && q.got ? `<div class="red xs" style="margin-top:2px">${esc(q.got)}</div>` : q.ok == null && q.got ? `<div class="amber xs" style="margin-top:2px">${esc(q.got)}</div>` : ''}</div></div>`).join('')}</div>
     <div class="col tight"><div class="eyebrow">What happened</div><div class="chat ag2-replay ${SU._a4seq > Date.now() ? 'su-seq' : ''}">${convo}</div></div>
     ${(sres === 'fail' || sres === 'check') && det.why && !allp ? `<div class="note ${sres === 'fail' ? 'err' : 'warn'}">${ic('info')}<div><b>Why</b><div style="margin-top:2px">${det.why}</div></div></div>` : ''}
@@ -238,7 +238,7 @@ A['ag2-sc-save'] = () => {
 /* ---------- Styles ---------- */
 document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-pick select.inp{min-height:40px;width:auto;min-width:140px}
-.ag2-aname{font-family:var(--f-display);font-size:17px;font-weight:700;letter-spacing:-.01em}
+.ag2-aname{font-family:var(--f-display);font-size:16px;font-weight:700;letter-spacing:-.01em}
 .ag2-n{width:26px;height:26px;flex:0 0 26px;border-radius:8px;background:var(--navy-b);color:var(--navy-f);display:inline-grid;place-items:center;font:700 12px var(--f-display)}
 .ag2-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px var(--amber-b);vertical-align:middle}
 /* A1 */
@@ -294,7 +294,7 @@ document.head.insertAdjacentHTML('beforeend', `<style>
 .ag2-fail{padding:10px;border-radius:10px;background:var(--sub)}
 /* A4 */
 .ag2-run{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
-.ag2-big{font-family:var(--f-display);font-size:26px;line-height:30px;font-weight:700}
+.ag2-big{font-family:var(--f-display);font-size:28px;line-height:30px;font-weight:700}
 .ag2-a4{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
 .ag2-shead,.ag2-srow{display:grid;grid-template-columns:28px minmax(0,1fr) 110px 140px 64px;gap:12px;align-items:center;padding:0 16px}
 .ag2-shead{min-height:36px;background:var(--sub);border-bottom:1px solid var(--line);font-weight:600}

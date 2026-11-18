@@ -487,7 +487,7 @@ const NAV = {
         ['Leads routing', [['rules','Assignment rules','route']]],
         ['Workspace', [['connections','Connections','plug'],['users','Users','user'],['client-settings','Settings','sliders']]]],
 };
-const NAV_ALIAS = {pipeline:'leads', lead:'leads', unassigned: 'leads', qualify:'rules', rule:'rules', agent:'agents', 'conn-website':'connections', 'conn-whatsapp':'connections', 'conn-phone':'connections', 'conn-meta':'connections', plan:'client-settings', statuses:'leads', alerts:'inbox'};
+const NAV_ALIAS = {pipeline:'leads', lead:'leads', unassigned: 'leads', qualify:'rules', rule:'rules', agent:'agents', 'conn-website':'connections', 'conn-whatsapp':'connections', 'conn-phone':'connections', 'conn-meta':'connections', plan:'client-settings', statuses:'leads'};
 function badge(k) {
   if (k === 'inbox' && isAgent()) { const n = mine().filter(l => l.unread).length; return n || ''; }
   if (k === 'callbacks' && isCC()) { const n = mine().filter(l => l.cb && !l.cb.done && l.cb.in < 0).length; return n || ''; }
