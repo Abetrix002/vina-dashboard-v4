@@ -35,18 +35,42 @@
   .ld-pager .pg{min-width:36px;min-height:36px;border-radius:8px;border:1px solid var(--line2);background:var(--card);cursor:pointer;font-weight:600;color:var(--text);transition:background var(--d1),transform var(--d1)}
   .ld-pager .pg:hover:not([disabled]){background:var(--sub)} .ld-pager .pg:active{transform:scale(.95)} .ld-pager .pg[disabled]{opacity:.4;cursor:not-allowed}
   .ld-pager .pg[aria-current="page"]{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
-  .ld-sum{min-width:220px;max-width:420px}
   .ld-nw{white-space:nowrap}
   .ld-chm{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;flex:0 0 18px;border-radius:5px}
-  .ld-next{display:inline-flex;align-items:flex-start;gap:8px;min-width:132px}
-  .ld-next .chi{width:22px;height:22px;flex-basis:22px;border-radius:7px;margin-top:-1px}
+  .ld-next{display:flex;align-items:center;gap:8px;min-width:0}
+  .ld-next .chi{width:22px;height:22px;flex:0 0 22px;border-radius:7px}
+  /* one line per cell, full text on hover: rows stay ~56px */
+  .ld-tbl td{padding-block:9px;white-space:nowrap}
+  .ld-tbl td.ld-c-summary{width:100%;max-width:0;min-width:140px}
+  .ld-tbl .ld-c-next .ld-next{max-width:170px}
+  .ld-next>.ell{min-width:0}
+  .ld-tbl th,.ld-tbl td{padding-inline:10px}
+  .ld-tbl th:first-child,.ld-tbl td:first-child{padding-inline-start:14px}
+  .ld-tbl th:last-child,.ld-tbl td:last-child{padding-inline-end:16px}
+  .ld-tbl .ld-c-name .grow{max-width:210px}
+  .ld-tbl .ld-trim{max-width:120px}
+  .ld-dot{display:inline-flex;flex:0 0 8px;width:8px;margin-inline-end:-2px}
+  .ld-st{display:flex;align-items:center;gap:6px}
   .ld-late{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   /* LD2 board */
-  .ld-board{display:grid;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:start;scrollbar-width:thin}
+  .ld-board{display:grid;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:start;scrollbar-width:thin;scroll-padding-inline:4px}
+  /* every stage is one click away: the index shows all eight, the board scrolls to the one picked */
+  .ld-stg{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:-8px}
+  .ld-stg button{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;min-height:36px;padding:0 6px 0 4px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;font:inherit;font-size:12px;font-weight:700;color:var(--mute);font-variant-numeric:tabular-nums;transition:background var(--d1),border-color var(--d1)}
+  .ld-stg button:hover{background:var(--sub);border-color:var(--line2)}
+  .ld-stg button.off{background:transparent;border-style:dashed}
+  .ld-bw{position:relative}
+  .ld-bw::before,.ld-bw::after{content:"";position:absolute;top:0;bottom:10px;width:56px;pointer-events:none;opacity:0;transition:opacity var(--d2);z-index:2}
+  .ld-bw::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+  .ld-bw::after{right:0;background:linear-gradient(270deg,var(--bg),transparent)}
+  .ld-bw[data-l]::before,.ld-bw[data-r]::after{opacity:1}
+  .ld-scr{position:absolute;top:10px;z-index:3;width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:var(--card);box-shadow:var(--e2);color:var(--text);display:none;align-items:center;justify-content:center;cursor:pointer}
+  .ld-scr.l{left:6px} .ld-scr.r{right:6px}
+  .ld-bw[data-l] .ld-scr.l,.ld-bw[data-r] .ld-scr.r{display:inline-flex}
   .ld-colm{background:var(--sub);border-radius:var(--r-l);padding:12px;display:flex;flex-direction:column;gap:10px;min-height:260px;transition:background var(--d2),outline-color var(--d2)}
   .ld-colm h2{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;min-height:28px;padding:0 2px}
   .ld-colm .ld-cnt{min-width:24px;height:22px;padding:0 7px;border-radius:999px;background:var(--card);font-family:var(--f-display);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;color:var(--mute)}
-  .ld-colm.none{min-height:120px}
+  .ld-colm.none{min-height:120px;padding:12px 10px}
   .ld-colm.none .ld-cnt{background:transparent}
   .ld-none{font-size:12px;color:var(--faint);padding:10px 4px;border-top:1px dashed var(--line2)}
   .ld-board:has(.dragging) .ld-colm{outline:1.5px dashed var(--line2);outline-offset:-1.5px}
@@ -74,9 +98,11 @@
   .ld-cal-d.today{background-color:color-mix(in srgb,var(--sel) 45%,transparent)}
   .ld-cal-d.closed{background-image:repeating-linear-gradient(135deg,var(--sub) 0 6px,transparent 6px 14px)}
   .ld-cal-d .shut{position:sticky;top:80px;padding:12px;text-align:center;font-size:12px;color:var(--mute)}
-  .ld-ev{position:absolute;border-radius:8px;padding:4px 8px 4px 10px;font-size:12px;line-height:1.3;text-align:start;border:0;cursor:pointer;overflow:hidden;box-shadow:inset 3px 0 0 currentColor;transition:box-shadow var(--d2) var(--ease),transform var(--d2) var(--ease);z-index:1}
-  .ld-ev b{display:block;font-size:12px;color:var(--text);font-weight:600}
-  .ld-ev .s{display:block;color:var(--mute)}
+  .ld-ev{position:absolute;display:flex;flex-direction:column;justify-content:center;border-radius:8px;padding:2px 8px 2px 10px;font-size:12px;line-height:16px;text-align:start;border:0;cursor:pointer;overflow:hidden;box-shadow:inset 3px 0 0 currentColor;transition:box-shadow var(--d2) var(--ease),transform var(--d2) var(--ease);z-index:1}
+  .ld-ev .l1{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ld-ev b{font-size:12px;color:var(--text);font-weight:600}
+  .ld-ev .s{display:block;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ld-ev:focus-visible{z-index:3}
   .ld-ev:hover{box-shadow:inset 3px 0 0 currentColor,var(--e2);transform:translateY(-1px);z-index:3}
   .ld-ev.td{background:var(--purple-b);color:var(--purple-f)} .ld-ev.cb{background:var(--amber-b);color:var(--amber-f)}
   .ld-now{position:absolute;left:0;right:0;height:2px;background:var(--horizon);z-index:2;pointer-events:none}
@@ -125,16 +151,34 @@
   .ld-nx{display:flex;gap:14px;align-items:flex-start}
   .ld-nx b{font-family:var(--f-display);font-size:16px}
   /* LD5 reference sheet */
-  .ld5-st{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px}
-  .ld5-t{position:relative;background:var(--card);border:1px solid var(--card-bd);border-radius:var(--r-l);padding:16px 16px 14px;box-shadow:var(--e1);display:flex;flex-direction:column;gap:8px;overflow:hidden}
-  .ld5-t::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--c)}
-  .ld5-t .n{font-family:var(--f-display);font-size:20px;font-weight:700;line-height:1}
   .ld5-sw{width:12px;height:12px;border-radius:4px;background:var(--c)}
-  .ld-sw{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .ld-part{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
   @media (max-width:1000px){.ld-2{grid-template-columns:minmax(0,1fr)}}
+  @media (max-width:600px){
+    .ld-bar .sp,.ld-bar .ld-cols{display:none}
+    .ld-bar .ld-q{flex:1 1 150px;width:auto}
+    .ld-bar .ld-csvt{display:none}
+    .ld-bar .ld-csv{padding:0 11px}
+    .ld-tbl .tbl-wrap{border:0;border-radius:0;box-shadow:none;overflow:visible}
+    .ld-tbl thead{display:none}
+    .ld-tbl table,.ld-tbl tbody{display:block}
+    .ld-tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name wait" "model status" "summary summary" "next own";gap:8px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .ld-tbl tbody tr:last-child{border-bottom:0}
+    .ld-tbl tbody td{display:block;padding:0;border:0;width:auto;max-width:none;min-width:0}
+    .ld-tbl tbody tr.click td:last-child::after{display:none}
+    .ld-tbl tbody tr.sel td:first-child{box-shadow:none}
+    .ld-tbl .ld-c-name{grid-area:name} .ld-tbl .ld-c-wait{grid-area:wait;justify-self:end}
+    .ld-tbl .ld-c-model{grid-area:model;display:flex;min-width:0;align-items:center} .ld-tbl .ld-c-model .ld-trim{max-width:none}
+    .ld-tbl .ld-c-model .ld-trim::before{content:"·";margin:0 6px}
+    .ld-tbl .ld-c-status{grid-area:status;justify-self:end}
+    .ld-tbl .ld-c-summary{grid-area:summary} .ld-tbl .ld-c-next{grid-area:next}
+    .ld-tbl .ld-c-owner,.ld-tbl .ld-c-tick{grid-area:own;justify-self:end;align-self:center}
+    .ld-tbl .ld-c-src,.ld-tbl .ld-c-ch,.ld-tbl .ld-c-city,.ld-tbl .ld-c-lang,.ld-tbl .ld-c-created,.ld-tbl .ld-c-rating{display:none}
+    .ld-tbl .ld-c-name .grow{max-width:none}
+    .ld-tbl td.ld-c-summary{width:auto;max-width:none;min-width:0}
+  }
   @media (max-width:760px){
     .ld-q{width:100%}
+    .ld-stg{margin-bottom:-4px}
     .menu.ld-pop .g{grid-template-columns:1fr}
     .ld-nm{font-size:20px;line-height:27px}
     .ld-hero{padding:18px 16px 16px}
@@ -214,8 +258,8 @@
       ${act.map(f => `<button type="button" class="fchip" data-a="ld-unf" data-x="${f.k}" aria-label="Remove filter ${esc(f.t)}: ${esc(fLabel(f, s[f.k]))}"><span class="k">${esc(f.t)}:</span>${esc(fLabel(f, s[f.k]))}${ic('x', 13, 'x')}</button>`).join('')}
       ${act.length || s.q ? `<button type="button" class="btn ghost sm" data-a="ld-clear">Clear all</button>` : ''}
       <span class="sp"></span>
-      ${withCols ? `<span class="ld-rel"><button type="button" class="btn sm" id="ld-cbtn" data-a="ld-cols" aria-haspopup="dialog" aria-expanded="${S.menu === 'ld-cols'}">${ic('cols', 15)}Columns</button>${colPop}</span>` : ''}
-      ${!isAgent() ? `<button type="button" class="btn sm" data-a="ld-csv">${ic('download', 15)}Download CSV</button>` : ''}
+      ${withCols ? `<span class="ld-rel ld-cols"><button type="button" class="btn sm" id="ld-cbtn" data-a="ld-cols" aria-haspopup="dialog" aria-expanded="${S.menu === 'ld-cols'}">${ic('cols', 15)}Columns</button>${colPop}</span>` : ''}
+      ${!isAgent() ? `<button type="button" class="btn sm ld-csv" data-a="ld-csv" aria-label="Download CSV" title="Download CSV">${ic('download', 15)}<span class="ld-csvt">Download CSV</span></button>` : ''}
     </div>`;
   }
   A['ld-view'] = el => { F().view = el.dataset.x; F().page = 1; F().sel = {}; };
@@ -228,21 +272,21 @@
   A['ld-retry'] = () => { S.st = ''; };
 
   /* ---- LD1 list ---- */
-  const NEXT_IC = s => /test drive/i.test(s) ? ['cal','purple'] : /^call/i.test(s) ? ['phone','navy'] : /^(follow up|reply)/i.test(s) ? ['wa','green'] : /offer/i.test(s) ? ['send','indigo'] : /delivery/i.test(s) ? ['car','green'] : /needs an agent/i.test(s) ? ['user','amber'] : /VINA/.test(s) ? ['spark','teal'] : null;
-  const nextCell = (l, size) => { const n = NEXT_IC(l.next); return `<span class="ld-next">${n ? `<span class="chi c-${n[1]}" aria-hidden="true">${ic(n[0], size || 13)}</span>` : ''}<span class="small">${esc(l.next)}</span></span>`; };
+  const NEXT_IC = s => /test drive/i.test(s) ? ['cal','purple'] : /^call/i.test(s) ? ['phone','navy'] : /^(follow up|reply)/i.test(s) ? ['wa','green'] : /offer/i.test(s) ? ['send','rose'] : /delivery/i.test(s) ? ['car','green'] : /needs an agent/i.test(s) ? ['user','amber'] : /VINA/.test(s) ? ['spark','teal'] : null;
+  const nextCell = (l, size) => { const n = NEXT_IC(l.next); return `<span class="ld-next" title="${esc(l.next)}">${n ? `<span class="chi c-${n[1]}" aria-hidden="true">${ic(n[0], size || 13)}</span>` : ''}<span class="small ell">${esc(l.next)}</span></span>`; };
   const chMini = k => { const c = CH[k] || CH.wa; return `<span class="ld-chm c-${c.c}" title="${c.label}">${ic(c.i, 11)}<span class="sr">${c.label}</span></span>`; };
   function cell(k, l) {
     const s = F();
     switch (k) {
-      case 'name': return `<div class="who">${l.unread ? '<span class="unread-dot" aria-label="Unread message"></span>' : ''}<div class="grow"><div class="nm ell" style="font-weight:${l.unread ? 700 : 600}">${esc(l.name)}</div><div class="xs mute num row tight nowrap ld-nw" style="gap:6px">${s.cols.ch ? '' : chMini(l.ch)}${esc(mob(l))}</div></div></div>`;
-      case 'model': return `<div class="b ld-nw">${esc(l.model)}</div>${l.trim || l.colour ? `<div class="xs mute">${esc([l.trim, l.colour].filter(Boolean).join(' · '))}</div>` : ''}`;
-      case 'status': return `<div class="col" style="gap:4px;align-items:flex-start">${chip(l.status)}${l.vq ? vtag() : ''}</div>`;
-      case 'summary': return `<div class="ell2 small ld-sum" title="${esc(l.summary)}">${esc(l.summary)}</div>`;
+      case 'name': return `<div class="who"><span class="ld-dot">${l.unread ? '<span class="unread-dot" aria-label="Unread message"></span>' : ''}</span><div class="grow"><div class="nm ell" style="font-weight:${l.unread ? 700 : 600}">${esc(l.name)}</div><div class="xs mute num row tight nowrap ld-nw" style="gap:6px">${s.cols.ch ? '' : chMini(l.ch)}${esc(mob(l))}</div></div></div>`;
+      case 'model': { const t = [l.trim, l.colour].filter(Boolean).join(' · '); return `<div class="b ld-nw">${esc(l.model)}</div>${t ? `<div class="xs mute ell ld-trim" title="${esc(t)}">${esc(t)}</div>` : ''}`; }
+      case 'status': return `<div class="ld-st">${chip(l.status)}${l.vq ? vtag() : ''}</div>`;
+      case 'summary': return `<div class="ell small" title="${esc(l.summary)}">${esc(l.summary)}</div>`;
       case 'src': return `<span title="${esc(l.campaign)}">${esc(l.src)}</span>`;
       case 'ch': return chIc(l.ch);
       case 'owner': return l.owner ? `<div class="who ld-nw" title="${esc(uname(l.owner))}">${av(uname(l.owner), 'sm')}<span>${esc(l.owner === 'vina' ? 'VINA' : first(l.owner))}</span></div>` : `<span class="red b">Unassigned</span>`;
       case 'wait': return l.late ? `<span class="num red b ld-late">${ic('clock', 13)}${mins(l.wait)}</span>` : `<span class="num mute ld-nw">${mins(l.wait)}</span>`;
-      case 'next': return nextCell(l);
+      case 'next': return !l.owner && !isAgent() && /needs an agent/i.test(l.next) ? '<span class="mute" title="Needs an agent">—</span>' : nextCell(l);
       case 'city': return esc(l.city);
       case 'lang': return esc(l.lang);
       case 'created': return `<span class="small mute">${esc(l.created)}</span>`;
@@ -268,7 +312,7 @@
         <button type="button" class="btn sm" data-a="ld-bulk-close">Close lead</button>
         <span class="sp"></span><button type="button" class="btn sm ghost" data-a="ld-sel-clear">Clear</button></div>` : ''}
       <div class="tbl-wrap"><table class="tbl"><caption class="sr">${agent ? 'My leads' : 'Leads'}</caption><thead><tr>${agent ? `<th style="width:44px"><input type="checkbox" aria-label="Select all on this page" data-ch="ld-tick-all" ${allOn ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--pri)"></th>` : ''}${cols.map(th).join('')}</tr></thead>
-      <tbody>${pageRows.map(l => `<tr class="click ${s.sel[l.id] || (S.drawer && S.drawer._k === 'lead-preview' && S.drawer.lead === l.id) ? 'sel' : ''} ${flashCls(l.id)}" data-a="ld-row" data-x="${l.id}">${agent ? `<td data-a="noop"><input type="checkbox" aria-label="Select ${esc(l.name)}" data-ch="ld-tick" data-x="${l.id}" ${s.sel[l.id] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--pri)"></td>` : ''}${cols.map(([k]) => `<td>${cell(k, l)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      <tbody>${pageRows.map(l => `<tr class="click ${s.sel[l.id] || (S.drawer && S.drawer._k === 'lead-preview' && S.drawer.lead === l.id) ? 'sel' : ''} ${flashCls(l.id)}" data-a="ld-row" data-x="${l.id}">${agent ? `<td class="ld-c-tick" data-a="noop"><input type="checkbox" aria-label="Select ${esc(l.name)}" data-ch="ld-tick" data-x="${l.id}" ${s.sel[l.id] ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--pri)"></td>` : ''}${cols.map(([k]) => `<td class="ld-c-${k}">${cell(k, l)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
       <div class="ld-pager"><span class="num">Showing ${num(from + 1)} to ${num(Math.min(from + 10, total))} of ${num(total)}</span><span class="sp"></span>
         <button type="button" class="pg" data-a="ld-page" data-x="${s.page - 1}" ${s.page <= 1 ? 'disabled' : ''} aria-label="Previous page">${ic('chevL', 15)}</button>
         ${pgNums.map((n, i) => `${i && n - pgNums[i - 1] > 1 ? '<span aria-hidden="true">…</span>' : ''}<button type="button" class="pg num" data-a="ld-page" data-x="${n}" ${n === s.page ? 'aria-current="page"' : ''} aria-label="Page ${n}">${n}</button>`).join('')}
@@ -282,7 +326,7 @@
     else body = listBody(rs);
     // Saved views are the card's tabs (Unassigned is one of them), so no count in the header and no separate link.
     return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads',
-      body:`${filterBar(true, 'leads')}<section class="card rc rx-tbl" aria-label="${isAgent() ? 'My leads' : 'Leads'}"><div class="rc-tabs">${savedTabs()}</div><div class="rc-b">${body}</div></section>`});
+      body:`${filterBar(true, 'leads')}<section class="card rc rx-tbl ld-tbl" aria-label="${isAgent() ? 'My leads' : 'Leads'}"><div class="rc-tabs">${savedTabs()}</div><div class="rc-b">${body}</div></section>`});
   }, after: afterUi});
   A['ld-sort'] = el => { const s = F(), k = el.dataset.x; if (s.sort === k) s.dir = s.dir === 'asc' ? 'desc' : 'asc'; else { s.sort = k; s.dir = k === 'wait' || k === 'rating' || k === 'created' ? 'desc' : 'asc'; } };
   A['ld-page'] = el => { F().page = Math.max(1, Number(el.dataset.x)); window.scrollTo(0, 0); };
@@ -347,8 +391,8 @@
   A['ld-mv'] = el => { const [id, k] = el.dataset.x.split(':'); S.menu = null; G.ret = null; if (moveLead(lead(id), k) === true) G.focusId = 'mv-' + id; };
   function card(l, drag) {
     return `<article class="ld-card lift ${flashCls(l.id)}" ${drag ? `draggable="true" data-drag="lead" data-x="${l.id}"` : ''}>
-      <div class="row tight nowrap"><a class="nm grow ell" href="#lead-${l.id}" style="font-weight:${l.unread ? 700 : 600}">${l.unread ? '<span class="unread-dot" style="display:inline-block;margin-inline-end:7px;vertical-align:1px" aria-label="Unread"></span>' : ''}${esc(l.name)}</a>${l.vq ? vtag() : ''}${drag ? `<button type="button" class="ibtn sm bare ld-mvb" id="mv-${l.id}" data-a="ld-mv-menu" data-x="${l.id}" aria-haspopup="menu" aria-expanded="${S.menu === 'ld-mv:' + l.id}" aria-label="Move ${esc(l.name)} to another status" title="Move to">${ic('more', 18)}</button>` : ''}</div>
-      <div class="xs b">${esc(l.model)}${l.trim ? ` <span class="mute" style="font-weight:400">· ${esc(l.trim)}</span>` : ''}</div>
+      <div class="row tight nowrap"><a class="nm grow ell" href="#lead-${l.id}" title="${esc(l.name)}" style="font-weight:${l.unread ? 700 : 600}">${l.unread ? '<span class="unread-dot" style="display:inline-block;margin-inline-end:7px;vertical-align:1px" aria-label="Unread"></span>' : ''}${esc(l.name)}</a>${drag ? `<button type="button" class="ibtn sm bare ld-mvb" id="mv-${l.id}" data-a="ld-mv-menu" data-x="${l.id}" aria-haspopup="menu" aria-expanded="${S.menu === 'ld-mv:' + l.id}" aria-label="Move ${esc(l.name)} to another status" title="Move to">${ic('more', 18)}</button>` : ''}</div>
+      <div class="row tight nowrap"><span class="xs b grow ell">${esc(l.model)}${l.trim ? ` <span class="mute" style="font-weight:400">· ${esc(l.trim)}</span>` : ''}</span>${l.vq ? vtag() : ''}</div>
       <div class="small mute ell2" title="${esc(l.summary)}">${esc(l.summary)}</div>
       <div class="ld-cf">${l.owner ? `<span title="${esc(uname(l.owner))}" style="display:inline-flex">${av(uname(l.owner), 'sm')}</span>` : '<span class="red b">Unassigned</span>'}${l.wait != null ? `<span class="num ${l.late ? 'red b' : 'mute'} ld-late">${ic('clock', 12)}${mins(l.wait)}</span>` : ''}<span class="sp"></span><span class="ell mute" style="max-width:150px" title="${esc(l.next)}">${esc(l.next)}</span></div>
     </article>`;
@@ -358,18 +402,26 @@
     const cols = ST_ORDER.map(k => [k, rs.filter(l => l.status === k)]);
     const board = S.st === 'loading' ? `<div class="ld-board" style="grid-template-columns:repeat(8,minmax(240px,1fr))">${ST_ORDER.map(() => `<div class="ld-colm">${loadingRows(3, 110)}</div>`).join('')}</div>`
       : (S.st === 'empty' || !base().length) ? `<div class="card">${empty('overview', 'No leads yet', 'Leads show here as cards, one column per status, as soon as VINA qualifies customers.')}</div>`
-      : `<div class="ld-board" id="ld-board" role="list" aria-label="Pipeline by status" style="grid-template-columns:${cols.map(([, c]) => c.length ? 'minmax(268px,1fr)' : '176px').join(' ')}">${cols.map(([k, c]) => `<section class="ld-colm ${c.length ? '' : 'none'}" role="listitem" aria-label="${STATUS[k].label}, ${c.length} leads" ${drag ? `data-drop="ld-drop" data-x="${k}"` : ''}>
+      : `<nav class="ld-stg" aria-label="Jump to a stage">${cols.map(([k, c]) => `<button type="button" class="${c.length ? '' : 'off'}" data-a="ld-jump" data-x="${k}" aria-label="${STATUS[k].label}, ${c.length} leads">${chip(k)}${c.length}</button>`).join('')}</nav>
+      <div class="ld-bw" id="ld-bw"><button type="button" class="ld-scr l" data-a="ld-scr" data-x="-1" aria-label="Show earlier stages">${ic('chevL', 16)}</button><button type="button" class="ld-scr r" data-a="ld-scr" data-x="1" aria-label="Show more stages">${ic('chevR', 16)}</button>
+      <div class="ld-board" id="ld-board" role="list" aria-label="Pipeline by status" style="grid-template-columns:${cols.map(([, c]) => c.length ? 'minmax(240px,1fr)' : '168px').join(' ')}">${cols.map(([k, c]) => `<section class="ld-colm ${c.length ? '' : 'none'}" role="listitem" data-k="${k}" aria-label="${STATUS[k].label}, ${c.length} leads" ${drag ? `data-drop="ld-drop" data-x="${k}"` : ''}>
         <h2>${chip(k)}<span class="sp"></span><span class="ld-cnt">${c.length}</span></h2>
         ${c.length ? c.map(l => card(l, drag)).join('') : `<p class="ld-none">${drag ? 'No leads. Drop one here.' : 'No leads'}</p>`}
-      </section>`).join('')}</div>`;
+      </section>`).join('')}</div></div>`;
     const mid = S.menu && S.menu.indexOf('ld-mv:') === 0 ? S.menu.slice(6) : null; const ml = mid && lead(mid);
-    const mvMenu = ml && G.mv ? `<div class="menu ld-mvmenu ${G.popNew ? '' : 'again'}" role="menu" aria-label="Move ${esc(ml.name)} to" style="position:absolute;left:${G.mv.left}px;${G.mv.top != null ? 'top:' + G.mv.top + 'px' : 'bottom:' + G.mv.bottom + 'px;transform-origin:bottom right'}"><div class="mh">Move ${esc(ml.name.split(' ')[0])} to</div>${ST_ORDER.filter(k => k !== ml.status).map(k => `<button type="button" role="menuitem" data-a="ld-mv" data-x="${ml.id}:${k}"><span class="sw" style="background:var(--${STATUS[k].c}-f)" aria-hidden="true"></span><span class="grow">${STATUS[k].label}</span>${k === 'testdrive' ? '<span class="xs mute">Pick a time</span>' : k === 'lost' ? '<span class="xs mute">Pick a reason</span>' : ''}</button>`).join('')}</div>` : '';
+    const mvMenu = ml && G.mv ? `<div class="menu ld-mvmenu ${G.popNew ? '' : 'again'}" role="menu" aria-label="Move ${esc(ml.name)} to" style="position:absolute;left:${G.mv.left}px;${G.mv.top != null ? 'top:' + G.mv.top + 'px' : 'bottom:' + G.mv.bottom + 'px;transform-origin:bottom right'}"><div class="mh">Move ${esc(ml.name.split(' ')[0])} to</div>${ST_ORDER.filter(k => k !== ml.status).map(k => `<button type="button" role="menuitem" data-a="ld-mv" data-x="${ml.id}:${k}"><span class="sw" style="background:${stFill(k)}" aria-hidden="true"></span><span class="grow">${STATUS[k].label}</span>${k === 'testdrive' ? '<span class="xs mute">Pick a time</span>' : k === 'lost' ? '<span class="xs mute">Pick a reason</span>' : ''}</button>`).join('')}</div>` : '';
     return shell({nav:'leads', title: isAgent() ? 'My leads' : 'Leads',
       body:`${filterBar(false, 'pipeline')}${savedTabs()}${board}${mvMenu}`});
   }, after() {
-    const b = $('#ld-board'); if (b) { b.scrollLeft = G.bx || 0; b.onscroll = () => { if (b.scrollLeft === G.bx) return; G.bx = b.scrollLeft; if (S.menu && S.menu.indexOf('ld-mv:') === 0) { S.menu = null; render(); } }; }
+    const b = $('#ld-board'); if (b) { b.scrollLeft = G.bx || 0; edges(b); b.onscroll = () => { edges(b); if (b.scrollLeft === G.bx) return; G.bx = b.scrollLeft; if (S.menu && S.menu.indexOf('ld-mv:') === 0) { S.menu = null; render(); } }; }
     afterUi();
   }});
+
+  // left/right fade and arrow only while there are stages off that side
+  const edges = b => { const w = b.parentElement; if (!w) return; w.toggleAttribute('data-l', b.scrollLeft > 4); w.toggleAttribute('data-r', b.scrollWidth - b.clientWidth - b.scrollLeft > 4); };
+  const glide = () => motionOK() ? 'smooth' : 'auto';
+  A['ld-scr'] = el => { const b = $('#ld-board'); if (b) b.scrollBy({left: Number(el.dataset.x) * b.clientWidth * .8, behavior: glide()}); return false; };
+  A['ld-jump'] = el => { const b = $('#ld-board'), c = b && b.querySelector('[data-k="' + el.dataset.x + '"]'); if (c) b.scrollTo({left: c.offsetLeft - b.offsetLeft - 4, behavior: glide()}); return false; };
 
   /* ---- LD3 calendar ---- */
   const WEEK = [['Sat','7'],['Sun','8'],['Mon','9'],['Tue','10'],['Wed','11'],['Thu','12'],['Fri','13']];
@@ -386,13 +438,18 @@
     return out.filter(e => e.h >= H0 && e.h < H1).sort((a, b) => a.h - b.h);
   }
   const nowH = () => now().getHours() + now().getMinutes() / 60;
+  const hShort = h => hLabel(h).replace(':00', '');
+  // Events that overlap share their time slot as full-width rows (a name stays readable), never as thin side-by-side slivers.
   function dayCol(items, d, closed) {
-    const it = items.filter(e => e.d === d); const lanes = [];
-    const ev = it.map(e => { let ln = lanes.findIndex(end => end <= e.h); if (ln < 0) { ln = lanes.length; lanes.push(0); } lanes[ln] = e.h + e.dur; return Object.assign({ln}, e); });
-    const n = Math.max(1, lanes.length); const nh = nowH();
+    const it = items.filter(e => e.d === d), groups = [];
+    it.forEach(e => { const g = groups[groups.length - 1]; if (g && e.h < g.end) { g.ev.push(e); g.end = Math.max(g.end, e.h + e.dur); } else groups.push({start:e.h, end:e.h + e.dur, ev:[e]}); });
+    const nh = nowH();
+    const evBtn = (e, top, h) => { const what = e.kind === 'td' ? 'Test drive' : 'Callback', full = `${what} · ${hLabel(e.h)} · ${e.l.name} · ${e.sub}`;
+      return `<button type="button" class="ld-ev ${e.kind}" data-go="lead-${e.l.id}" style="top:${top + 2}px;height:${h - 4}px;left:4px;right:4px" title="${esc(full)}" aria-label="${esc(full)}, ${WEEK[e.d].join(' ')} Nov"><span class="l1"><span class="num">${hShort(e.h)}</span> <b>${esc(h >= 44 ? e.l.name : e.l.name.split(' ')[0])}</b></span>${h >= 44 ? `<span class="s">${esc(e.sub)}</span>` : ''}</button>`; };
+    const evs = groups.map(g => { const top = (g.start - H0) * PX, tot = (g.end - g.start) * PX, h = Math.max(28, tot / g.ev.length); return g.ev.map((e, i) => g.ev.length > 1 ? evBtn(e, top + i * h, h) : evBtn(e, (e.h - H0) * PX, e.dur * PX)).join(''); }).join('');
     return `<div class="ld-cal-d ${closed ? 'closed' : ''} ${d === 0 ? 'today' : ''}" style="height:${(H1 - H0) * PX}px">${closed ? `<div class="shut">Showroom closed</div>` : ''}
       ${d === 0 && nh >= H0 && nh < H1 ? `<div class="ld-now" style="top:${(nh - H0) * PX}px" aria-hidden="true"></div>` : ''}
-      ${ev.map(e => `<button type="button" class="ld-ev ${e.kind}" data-go="lead-${e.l.id}" style="top:${(e.h - H0) * PX + 2}px;height:${e.dur * PX - 4}px;left:calc(${(e.ln / n) * 100}% + 4px);width:calc(${100 / n}% - 8px)" aria-label="${e.kind === 'td' ? 'Test drive' : 'Callback'}, ${esc(e.l.name)}, ${WEEK[e.d].join(' ')} Nov ${hLabel(e.h)}"><span class="num">${hLabel(e.h)}</span><b class="ell">${esc(e.l.name)}</b><span class="s ell">${esc(e.sub)}</span></button>`).join('')}</div>`;
+      ${evs}</div>`;
   }
   R('calendar', {id:'LD3', title:'Calendar', states:[['empty','Nothing booked']], render() {
     const s = F(); const items = S.st === 'empty' ? [] : calItems();
@@ -478,7 +535,7 @@
     const ni = NEXT_IC(l.next) || ['clock', 'blue'];
     const body = `
       <section class="card ld-hero"><div class="ld-hd">${av(l.name, 'xl')}<div class="grow">
-          <div class="row tight"><h2 class="ld-nm">${esc(l.name)}</h2>${chip(l.status)}${l.vq ? vtag() : ''}</div>
+          <div class="row tight">${chip(l.status)}${l.vq ? vtag() : ''}</div>
           <div class="ld-meta"><span class="num">${ic('phone', 14)}${esc(mob(l))}</span><span>${chIc(l.ch)}${esc(CH[l.ch].label)}</span>${owner}</div></div>${acts}</div>
         <div class="ld-stp">${steps}</div></section>
       <div class="ld-2"><div class="col loose">
@@ -502,19 +559,10 @@
   A['ld-close1'] = el => { openClose(el.dataset.x); };
   A['ld-see-chat'] = el => { if (isAgent()) { S.f.agSel = el.dataset.x; go('inbox'); } else { S.f.m3sel = el.dataset.x; go('conversations'); } return false; };
 
-  /* ---- LD5 statuses and shared parts (reference sheet) ---- */
+  /* ---- LD5 statuses and lost reasons ---- */
   R('statuses', {id:'LD5', title:'Lead statuses', render() {
-    const part = (title, sub, inner) => reportCard({title, sub, body: inner});
-    const body = `${reportCard({title:'Statuses', sub:'In the order a lead moves. Chips always carry the word, so colour never carries the meaning alone.', cls:'rx-tbl', body:`<div class="tbl-wrap"><table class="tbl"><caption class="sr">Lead statuses</caption><thead><tr><th>Status</th><th>Means</th><th>Colour</th><th class="r">Leads now</th></tr></thead><tbody>${ST_ORDER.map(k => { const n = LEADS.filter(l => l.status === k).length; return `<tr><td>${chip(k)}</td><td class="small">${esc(STATUS[k].means)}</td><td><span class="row tight nowrap small" style="--c:var(--${STATUS[k].c}-f)"><span class="ld5-sw" aria-hidden="true"></span>${STATUS[k].colour}</span></td><td class="r num b" ${countAttr(n)}>${n}</td></tr>`; }).join('')}</tbody></table></div>`})}
-      <div class="rx-g3">
-        ${part('Buttons', 'One main action per area. Disabled buttons say why.', `<div class="ld-sw"><button type="button" class="btn pri" data-a="noop">Main action</button><button type="button" class="btn" data-a="noop">Other action</button><button type="button" class="btn ghost" data-a="noop">Link action</button><button type="button" class="btn danger-o" data-a="noop">Close lead</button><button type="button" class="btn" disabled title="Example of a button that cannot be used yet">Not yet</button></div>`)}
-        ${part('Tags', 'View only marks pages a manager can see but not change.', `<div class="ld-sw">${vo()}${vtag()}<span class="pill c-teal">VINA team</span><span class="row tight nowrap small">${pulse()}Needs you now</span><span class="row tight nowrap small"><span class="unread-dot" aria-hidden="true"></span>Unread</span></div>`)}
-        ${part('Who did it', 'Teal means VINA did it. Navy or blue means a person did it.', `<div class="ld-sw"><span class="row tight nowrap">${av('VINA')}<span class="small">VINA</span></span><span class="row tight nowrap">${av('Reem Al-Harbi')}<span class="small">A person</span></span><span class="evt teal">${ic('spark', 13)}VINA marked it qualified</span></div>`)}
-        ${part('Channels', 'Icon plus name, the same on every screen.', `<div class="ld-sw">${Object.keys(CH).map(k => `<span class="row tight nowrap">${chIc(k, true)}<span class="small b">${CH[k].label}</span></span>`).join('')}</div>`)}
-        ${part('Availability', 'Only available agents get new leads.', `<div class="ld-sw">${[['available','Available','green'],['busy','Busy','amber'],['away','Away','grey']].map(([k, t, c]) => `<span class="chip c-${c}"><span class="pres ${k}" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span>${t}</span>`).join('')}</div>`)}
-        ${part('Lost reasons', 'Asked for when a lead is closed as Lost. Not interested is its own result.', `<div class="fchips">${LOST_REASONS.map(r => chipC(r, 'grey')).join('')}</div>`)}
-        ${part('Switches and ratings', '', `<div class="ld-sw">${sw(true, 'noop', '', 'Example switch on')}${sw(false, 'noop', '', 'Example switch off')}${stars(4, 16)}<span class="small mute">4 of 5</span></div>`)}
-      </div>`;
+    const body = `${reportCard({title:'Statuses', sub:'In the order a lead moves. Chips always carry the word, so colour never carries the meaning alone.', cls:'rx-tbl', body:`<div class="tbl-wrap"><table class="tbl"><caption class="sr">Lead statuses</caption><thead><tr><th>Status</th><th>Means</th><th>Colour</th><th class="r">Leads now</th></tr></thead><tbody>${ST_ORDER.map(k => { const n = LEADS.filter(l => l.status === k).length; return `<tr><td>${chip(k)}</td><td class="small">${esc(STATUS[k].means)}</td><td><span class="row tight nowrap small" style="--c:${stFill(k)}"><span class="ld5-sw" aria-hidden="true"></span>${STATUS[k].colour}</span></td><td class="r num b" ${countAttr(n)}>${n}</td></tr>`; }).join('')}</tbody></table></div>`})}
+      ${reportCard({title:'Lost reasons', sub:'Asked for when a lead is closed as Lost. Not interested is its own result.', body:`<div class="fchips">${LOST_REASONS.map(r => chipC(r, 'grey')).join('')}</div>`})}`;
     return shell({nav:'leads', title:'Lead statuses', crumb:[isAgent() ? 'My leads' : 'Leads', 'leads'], viewOnly:false, body});
   }});
 })();

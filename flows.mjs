@@ -192,4 +192,39 @@ export default [
     const n = lead('l03').m.length; ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', shiftKey:true, bubbles:true})); await tick(); if (lead('l03').m.length !== n) return 'Shift+Enter sent';
     ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', ctrlKey:true, bubbles:true})); await tick(100);
     return (lead('l03').m.some(x => x.k === 'agent' && /Madinah Road showroom/.test(x.text)) && lead('l03').h[0].title === 'Message sent') || 'Ctrl+Enter did not send';`],
+  ['Audit 2 (M1, M3, M5): strip is not tabs, calm Unassigned, plain bars, no duplicate Next step, all folders visible', `${G}
+    signIn('manager'); await tick(150); await go2('overview'); await tick(300);
+    const strip = document.querySelector('#app .mg-strip'); if (!strip) return 'no strip';
+    if (strip.querySelector('button, [role="tab"]')) return 'strip items are interactive';
+    if ([...strip.children].some(li => !li.querySelector('.mic'))) return 'strip item without an icon';
+    if (document.querySelector('#app .mg-wl .meta .red')) return 'red text in the waiting list meta';
+    const ab = r => document.querySelector('#app [aria-label="' + r + '"]').getBoundingClientRect();
+    if (Math.abs(ab('Car model interest').left - ab('Arabic vs English').left) > 1) return 'Car model and language cards are not stacked';
+    await go2('ratings'); await tick(200);
+    if (document.querySelector('#app .mg-lol')) return 'slider-like dots still on M5';
+    if (document.querySelectorAll('#app [aria-label="By channel"] .bar-h').length !== 3) return 'By channel is not three bars';
+    S.f.m3sel = null; await go2('conversations'); await tick(200);
+    const dp = document.querySelector('#app .cx-dp'); if (dp && [...dp.querySelectorAll('h3')].some(h => /next step/i.test(h.textContent))) return 'Next step heading over a Next step row';
+    const tl = document.querySelector('#app .mg-tabs'), tb = tl.getBoundingClientRect();
+    const cut = [...tl.querySelectorAll('.tab')].filter(t => t.getBoundingClientRect().right > tb.right + 1); return !cut.length || 'folder cut off: ' + cut[0].textContent;`],
+  ['Audit 2 (LD1 to LD5): one-line rows, no Unassigned twice, stage index, readable overlaps, name once, no style guide, distinct status colours', `${G}
+    signIn('manager'); await tick(150); S.f.ld = null; await go2('leads'); await tick(200);
+    const trs = [...document.querySelectorAll('#app .ld-tbl tbody tr')]; if (trs.length !== 10) return 'rows ' + trs.length;
+    const tall = trs.filter(r => r.getBoundingClientRect().height > 60); if (tall.length) return 'row taller than 60px: ' + Math.round(tall[0].getBoundingClientRect().height);
+    if (trs.some(r => /Unassigned/.test(r.innerText) && /Needs an agent/.test(r.innerText))) return 'Unassigned and Needs an agent on one row';
+    const xs = new Set(trs.map(r => Math.round(r.querySelector('.ld-c-name .nm').getBoundingClientRect().left))); if (xs.size !== 1) return 'customer names not aligned';
+    await go2('pipeline'); await tick(200);
+    const stg = document.querySelectorAll('#app .ld-stg [data-a="ld-jump"]'); if (stg.length !== 8) return 'stage index has ' + stg.length;
+    const b = document.getElementById('ld-board'); stg[7].click(); await tick(100);
+    const lost = b.querySelector('[data-k="lost"]').getBoundingClientRect(), bb = b.getBoundingClientRect(); if (lost.left < bb.left - 1 || lost.left > bb.right - 100) return 'Lost stage not brought into view';
+    signIn('sales'); await tick(150); S.f.ld = null; await go2('calendar'); await tick(200);
+    const evs = [...document.querySelectorAll('#app .ld-ev')]; if (!evs.length) return 'no events';
+    for (const e of evs) { const r = e.getBoundingClientRect(); if (r.width < 100) return 'event squeezed to ' + Math.round(r.width) + 'px'; const l1 = e.querySelector('.l1'); if (l1.getBoundingClientRect().bottom > r.bottom + 1) return 'event text clipped: ' + e.textContent; if (!e.title) return 'event without full details on hover'; }
+    await go2('lead-l05'); await tick(100);
+    const hero = document.querySelector('#app .ld-hero'); if (!hero || hero.innerText.includes(lead('l05').name)) return 'customer name repeated in the header card';
+    signIn('manager'); await tick(150); await go2('statuses'); await tick(100);
+    const heads = [...document.querySelectorAll('#app .rc-h h2')].map(h => h.textContent).join('|'); if (heads !== 'Statuses|Lost reasons') return 'LD5 panels ' + heads;
+    if (new Set(ST_ORDER.map(k => STATUS[k].c)).size !== 8) return 'two statuses share a colour';
+    if (/blue/i.test(STATUS.offer.colour)) return 'Offer sent is still a blue';
+    return true;`],
 ];

@@ -11,7 +11,7 @@
   --e3:0 24px 48px -12px rgba(22,26,61,.22),0 4px 12px rgba(22,26,61,.06);
   --card-bd:transparent;
   --blue-b:#EAF2FB; --blue-f:#2C68A6; --teal-b:#E2F3F1; --teal-f:#17675F; --amber-b:#FFF3DD; --amber-f:#8A5300;
-  --navy-b:#E5E6F3; --navy-f:#202253; --purple-b:#EFEBFB; --purple-f:#5B3FB5; --indigo-b:#E7E8F7; --indigo-f:#3B3F8F;
+  --navy-b:#E5E6F3; --navy-f:#202253; --purple-b:#F3EAFC; --purple-f:#7A2EBF; --rose-b:#FCE8F1; --rose-f:#A3175C; --grey-m:#A9AEC4; --indigo-b:#E7E8F7; --indigo-f:#3B3F8F;
   --green-b:#E4F5EB; --green-f:#16714A; --grey-b:#EDEFF5; --grey-f:#4A5070; --red-b:#FDEBE9; --red-f:#B42318; --red:#D92D20; --amber:#F2A93B; --green:#12B76A;
   --ch-a:#5E97CE; --ch-b:#6EBEB9; --ch-c:#202253; --ch-d:#C3C9DD; --ch-e:#9B83DE; --ch-f:#E0A34B;
   --logo-ink:#202253;
@@ -32,7 +32,7 @@
   --e1:0 1px 2px rgba(0,0,0,.4); --e2:0 8px 20px -6px rgba(0,0,0,.55); --e3:0 28px 56px -12px rgba(0,0,0,.7);
   --card-bd:#232848;
   --blue-b:rgba(94,151,206,.16); --blue-f:#93BBE8; --teal-b:rgba(110,190,185,.15); --teal-f:#80D4CD; --amber-b:rgba(242,184,75,.14); --amber-f:#F3C46E;
-  --navy-b:rgba(195,201,240,.12); --navy-f:#CBD0F3; --purple-b:rgba(185,166,245,.14); --purple-f:#C6B7F8; --indigo-b:rgba(150,156,240,.14); --indigo-f:#B6BAF6;
+  --navy-b:rgba(195,201,240,.12); --navy-f:#CBD0F3; --purple-b:rgba(200,140,250,.15); --purple-f:#D3A3FA; --rose-b:rgba(245,140,190,.15); --rose-f:#F59CC6; --grey-m:#5C6286; --indigo-b:rgba(150,156,240,.14); --indigo-f:#B6BAF6;
   --green-b:rgba(111,211,160,.13); --green-f:#80DAA9; --grey-b:rgba(181,186,211,.11); --grey-f:#B7BCD5; --red-b:rgba(242,139,130,.14); --red-f:#F59C94; --red:#F04438; --amber:#F2B84B; --green:#32D583;
   --ch-a:#6FA3D8; --ch-b:#6EBEB9; --ch-c:#A9B4E8; --ch-d:#363C68; --ch-e:#B9A3F0; --ch-f:#E8B465;
   --logo-ink:#FFFFFF; color-scheme:dark;
@@ -46,7 +46,7 @@
   --e1:0 1px 2px rgba(0,0,0,.4); --e2:0 8px 20px -6px rgba(0,0,0,.55); --e3:0 28px 56px -12px rgba(0,0,0,.7);
   --card-bd:#232848;
   --blue-b:rgba(94,151,206,.16); --blue-f:#93BBE8; --teal-b:rgba(110,190,185,.15); --teal-f:#80D4CD; --amber-b:rgba(242,184,75,.14); --amber-f:#F3C46E;
-  --navy-b:rgba(195,201,240,.12); --navy-f:#CBD0F3; --purple-b:rgba(185,166,245,.14); --purple-f:#C6B7F8; --indigo-b:rgba(150,156,240,.14); --indigo-f:#B6BAF6;
+  --navy-b:rgba(195,201,240,.12); --navy-f:#CBD0F3; --purple-b:rgba(200,140,250,.15); --purple-f:#D3A3FA; --rose-b:rgba(245,140,190,.15); --rose-f:#F59CC6; --grey-m:#5C6286; --indigo-b:rgba(150,156,240,.14); --indigo-f:#B6BAF6;
   --green-b:rgba(111,211,160,.13); --green-f:#80DAA9; --grey-b:rgba(181,186,211,.11); --grey-f:#B7BCD5; --red-b:rgba(242,139,130,.14); --red-f:#F59C94; --red:#F04438; --amber:#F2B84B; --green:#32D583;
   --ch-a:#6FA3D8; --ch-b:#6EBEB9; --ch-c:#A9B4E8; --ch-d:#363C68; --ch-e:#B9A3F0; --ch-f:#E8B465;
   --logo-ink:#FFFFFF; color-scheme:dark;
@@ -146,7 +146,7 @@ header.top .cmdk kbd,.kbd{margin-inline-start:auto;font:600 12px var(--f);paddin
 .chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:7px;font-size:12px;font-weight:600;white-space:nowrap;line-height:1}
 .chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 .c-blue{background:var(--blue-b);color:var(--blue-f)} .c-teal{background:var(--teal-b);color:var(--teal-f)} .c-amber{background:var(--amber-b);color:var(--amber-f)}
-.c-navy{background:var(--navy-b);color:var(--navy-f)} .c-purple{background:var(--purple-b);color:var(--purple-f)} .c-indigo{background:var(--indigo-b);color:var(--indigo-f)}
+.c-navy{background:var(--navy-b);color:var(--navy-f)} .c-purple{background:var(--purple-b);color:var(--purple-f)} .c-indigo{background:var(--indigo-b);color:var(--indigo-f)} .c-rose{background:var(--rose-b);color:var(--rose-f)}
 .c-green{background:var(--green-b);color:var(--green-f)} .c-grey{background:var(--grey-b);color:var(--grey-f)} .c-red{background:var(--red-b);color:var(--red-f)}
 .vtag{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 7px;border-radius:6px;font-size:12px;font-weight:700;background:var(--teal-b);color:var(--teal-f);letter-spacing:.02em}
 .pulse{position:relative;display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--amber);flex:0 0 8px}

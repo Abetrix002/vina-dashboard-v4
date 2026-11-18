@@ -18,6 +18,11 @@
   .mg-r3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:stretch}
   .mg-stack{display:flex;flex-direction:column;gap:20px;min-width:0}
   .mg-stack>.rc{flex:1}
+  .mg-r11{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:stretch}
+  .mg-r11>.mg-stack>.rc{flex:0 0 auto}
+  /* a tall list card next to a stack spreads its rows instead of leaving a gap at the bottom */
+  .mg-fill .rc-b{display:flex;flex-direction:column}
+  .mg-fill .rc-b>.col{flex:1;justify-content:space-between}
   .mg-tot{font-family:var(--f-display);font-size:20px;line-height:24px;font-weight:700;font-variant-numeric:tabular-nums}
   .mg-d{display:inline-flex;align-items:center;height:22px;padding:0 7px;border-radius:6px;font-size:12px;font-weight:600;white-space:nowrap}
   .mg-empty{padding:28px 16px}
@@ -35,11 +40,12 @@
   .mg-cp{flex:1;padding:18px 20px 14px;min-width:0}
   .mg-cph{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-bottom:14px}
   .mg-cph .legend{flex:1}
-  .mg-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
-  .mg-si{display:flex;align-items:flex-start;gap:10px;padding:14px 20px;min-width:0}
-  .mg-si+.mg-si{border-inline-start:1px solid var(--line)}
-  .mg-si .k{display:block;font-size:13px;line-height:17px;color:var(--mute)}
-  .mg-si .v{font-family:var(--f-display);font-size:16px;line-height:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  /* the strip is read-only context, so it reads as a quiet line of facts, not as more tabs */
+  .mg-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px 24px;margin:0;padding:12px 20px;list-style:none;border-top:1px solid var(--line);background:color-mix(in srgb,var(--sub) 55%,transparent)}
+  .mg-si{display:inline-flex;align-items:center;gap:8px;min-width:0;font-size:13px;line-height:20px;color:var(--mute);white-space:nowrap}
+  .mg-si .mic{background:transparent;width:auto;height:auto;flex:0 0 auto}
+  .mg-si .v{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+  .mg-si .dl{font-size:12px;font-weight:600}
   /* M1 waiting now: a live card */
   .mg-rtn{display:flex;align-items:center;gap:12px}
   .mg-rtn .v{font-family:var(--f-display);font-size:44px;line-height:48px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
@@ -111,6 +117,7 @@
   .mg-tabs{flex:0 0 auto;padding:4px 6px 0}
   .mg-tabs .tab{flex:1 0 auto;justify-content:center;padding:0 7px;gap:5px}
   .mg-tabs .tab .n{min-width:18px;height:18px;padding:0 5px}
+  @media (min-width:1281px){.mg-tabs{-webkit-mask-image:none;mask-image:none;padding:4px 6px 0}.mg-tabs .tab{flex:1 1 auto;padding:0 4px;gap:4px}}
   .mg-lh{position:relative;display:flex;flex-direction:column;gap:8px;padding:12px 12px 0}
   .mg-lh .mg-fbtn{min-height:38px}
   .mg-fbtn[aria-expanded="true"]{background:var(--sel);border-color:var(--horizon)}
@@ -152,6 +159,8 @@
   .mg-fun.hd{min-height:26px;white-space:nowrap;font-size:13px;font-weight:600;color:var(--mute)}
   .mg-fun.hd .mg-ft{height:0}
   .mg-fun.hd .nr{display:none}
+  .mg-func .rc-b{display:flex;flex-direction:column}
+  .mg-func .mg-fun:not(.hd){flex:1 0 auto}
   .mg-fun+.mg-fun:not(.hd){border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
   .mg-tblc .rc-b{padding:0}
   .mg-tw{overflow-x:auto;border-top:1px solid var(--line)}
@@ -163,12 +172,6 @@
   /* M5 */
   .mg-avg{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-bottom:18px}
   .mg-big{font-family:var(--f-display);font-size:44px;line-height:48px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-  .mg-cmp{display:grid;grid-template-columns:minmax(96px,120px) minmax(0,1fr) 30px;gap:14px;align-items:center;min-height:46px}
-  .mg-lol{height:14px;display:flex;align-items:center;background:linear-gradient(var(--line),var(--line)) center/100% 2px no-repeat}
-  .mg-lol i{position:relative;display:block;height:4px;border-radius:2px}
-  .mg-lol i::after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;border-radius:50%;background:inherit;box-shadow:0 0 0 3px var(--card)}
-  .mg-axis{min-height:18px;font-size:12px;color:var(--faint)}
-  .mg-axis div{display:flex;justify-content:space-between}
   .mg-lr{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:calc(100% + 20px);margin:0 -10px;padding:10px;border:0;border-radius:10px;background:transparent;color:inherit;font:inherit;text-align:start;cursor:pointer;transition:background var(--d1)}
   .mg-lr:hover{background:var(--sub)}
   .mg-lr+.mg-lr{margin-top:2px}
@@ -181,12 +184,13 @@
   }
   @media (max-width:760px){
     .mg-r3{grid-template-columns:minmax(0,1fr)}
-    .mg-mt,.mg-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .mg-tab:nth-child(odd),.mg-si:nth-child(odd){border-inline-start:0}
-    .mg-tab:nth-child(n+3),.mg-si:nth-child(n+3){border-top:1px solid var(--line)}
+    .mg-mt{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mg-tab:nth-child(odd){border-inline-start:0}
+    .mg-tab:nth-child(n+3){border-top:1px solid var(--line)}
+    .mg-strip{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:12px 16px}
+    .mg-r11{grid-template-columns:minmax(0,1fr)}
     .mg-tab{padding:12px 14px 10px}
     .mg-tab .v{font-size:20px;line-height:28px}
-    .mg-si{padding:12px 14px}
     .mg-cp{padding:14px 16px 12px}
     .mg-area{height:min(var(--ph),220px)}
     .mg-wl .meta{flex-wrap:wrap;row-gap:2px}
@@ -333,7 +337,7 @@
     const tabs = `<div class="mg-mt" role="tablist" aria-label="Metric to chart">${Object.entries(MET).map(([key, o]) => `<button type="button" role="tab" class="mg-tab" id="mg-t-${key}" aria-selected="${mk === key}" aria-controls="mg-panel" data-a="mg-met" data-x="${key}"><span class="k">${mic(o.k, 13)}<span>${o.k}</span></span><span class="row tight nowrap" style="align-items:baseline"><span class="v" ${fd ? '' : countAttr(o.v)} data-k="${o.k}">${fd ? '—' : o.v}</span>${fd ? '' : delta(o.d)}</span></button>`).join('')}</div>`;
     let chart = '', lg = '';
     if (!fd) {
-      let series, opt = {h:300, label:m.k + ' for ' + rangeShort() + ', with the previous period'};
+      let series, opt = {h:370, label:m.k + ' for ' + rangeShort() + ', with the previous period'};
       if (mk === 'conv') {
         const handed = m.vals.map((v, i) => Math.round(v * (0.2 + ((i * 7) % 5) / 100))), alone = m.vals.map((v, i) => v - handed[i]);
         series = [{name:'VINA alone', c:'--ch-b', vals:alone}, {name:'Handed to the team', c:'--ch-a', vals:handed}, {name:'All, previous period', c:'--faint', vals:prev, dash:true}];
@@ -346,21 +350,21 @@
       chart = lines(ax, series, opt);
     }
     const STRIP = [['Customers who replied', num(sc(1987)), '+9%'], ['Test drive requests', num(sc(48)), '+6'], ['Not interested', num(sc(131)), '−4%'], ['Customer rating', '4.6', '+0.1']];
-    const strip = `<div class="mg-strip" aria-label="More numbers">${STRIP.map(([k, v, d]) => `<div class="mg-si">${mic(k, 13)}<div style="min-width:0"><span class="k">${k}</span><div class="row tight nowrap" style="align-items:baseline"><span class="v">${fd ? '—' : v}</span>${fd ? '' : delta(d)}</div></div></div>`).join('')}</div>`;
+    const strip = `<ul class="mg-strip" aria-label="More numbers">${STRIP.map(([k, v, d]) => `<li class="mg-si">${mic(k, 14)}<span>${k}</span><span class="v">${fd ? '—' : v}</span>${fd ? '' : `<span class="dl ${d[0] === '−' ? 'mute' : 'green'}">${esc(d)}</span>`}</li>`).join('')}</ul>`;
     const summary = `<section class="card mg-sum" aria-label="Summary">${tabs}<div class="mg-cp" id="mg-panel" role="tabpanel" aria-labelledby="mg-t-${mk}">
       ${fd ? emptyBox('Conversations, answers by VINA alone, qualified leads and cars sold will show here day by day, next to the previous period.') : `<div class="mg-cph">${lg}</div>${chart}`}</div>${strip}</section>`;
     // Waiting for the team now: a live card
     const LH = [4, 5, 5, 6, 6, 7, 8, 7, 8, 9, 9, w.length];
     const mini = `<div class="mg-mini" role="img" aria-label="Customers waiting over the last hour">${LH.map((v, i) => `<i style="height:${Math.max(6, v / Math.max(1, ...LH) * 100).toFixed(0)}%" title="${clock(new Date(NOW0.getTime() - (11 - i) * 3e5))}: ${v} waiting"></i>`).join('')}</div><div class="mg-cap"><span>60 min ago</span><span>Now</span></div>`;
-    const wlist = `<div class="mg-rtl"><div class="hd"><span>Waiting the longest</span><span>Minutes</span></div>${w.slice(0, 5).map(l => `<a class="mg-wl" href="#lead-${l.id}">${av(l.name, 'sm')}<span style="min-width:0"><span class="nm ell">${esc(l.name)}</span><span class="meta">${chip(l.status)}<span class="ell">${l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone</span>'}</span></span></span><span class="w ${l.late ? 'red' : 'amber'}">${mins(l.wait)}</span></a>`).join('')}</div>`;
+    const wlist = `<div class="mg-rtl"><div class="hd"><span>Waiting the longest</span><span>Minutes</span></div>${w.slice(0, 5).map(l => `<a class="mg-wl" href="#lead-${l.id}">${av(l.name, 'sm')}<span style="min-width:0"><span class="nm ell">${esc(l.name)}</span><span class="meta">${chip(l.status)}<span class="ell">${l.owner ? esc(uname(l.owner)) : chipC('Unassigned', 'grey')}</span></span></span><span class="w ${l.late ? 'red' : 'amber'}">${mins(l.wait)}</span></a>`).join('')}</div>`;
     const live = reportCard({title:'Waiting for the team now', cls:'mg-live-c', right: fd ? '' : `<span class="mg-live c-amber">${pulse()}Live</span>`, link:['View unassigned leads', 'unassigned'],
       body: fd || !w.length ? emptyBox('Nobody is waiting. Customers waiting for a person show here, longest first.') : `<div class="mg-rtn">${mic('Waiting for the team now', 17)}<span class="v amber" ${countAttr(String(w.length))} data-k="Waiting now">${w.length}</span></div>
         <div class="mg-long">${ic('clock', 14)}Longest wait <b>${mins(w[0].wait)}</b></div>${mini}${wlist}`});
     // Row 2: report cards
     const SB = [['new',186],['qualified',74],['callback',41],['contacted',132],['testdrive',48],['offer',22],['sold',9],['lost',100]].map(([s, n]) => [s, sc(n)]);
     const smax = Math.max(1, ...SB.map(x => x[1]));
-    const status = reportCard({title:'Leads by status', right: fd ? '' : `<span class="mg-tot">${num(SB.reduce((a, x) => a + x[1], 0))}</span>`, link:['View leads', 'leads'],
-      body: fd ? emptyBox('Each lead status will show here with its count.') : `<div class="col" style="gap:0">${SB.map(([s, n]) => `<div class="mg-hrow"><span>${chip(s)}</span><div class="bar-h" aria-hidden="true"><i style="width:${Math.max(2, Math.round(n / smax * 100))}%;background:var(--${STATUS[s].c}-f)"></i></div><span class="n">${num(n)}</span></div>`).join('')}</div>`});
+    const status = reportCard({title:'Leads by status', cls:'mg-fill', right: fd ? '' : `<span class="mg-tot">${num(SB.reduce((a, x) => a + x[1], 0))}</span>`, link:['View leads', 'leads'],
+      body: fd ? emptyBox('Each lead status will show here with its count.') : `<div class="col" style="gap:0">${SB.map(([s, n]) => `<div class="mg-hrow"><span>${chip(s)}</span><div class="bar-h" aria-hidden="true"><i style="width:${Math.max(2, Math.round(n / smax * 100))}%;background:${stFill(s)}"></i></div><span class="n">${num(n)}</span></div>`).join('')}</div>`});
     const MD = [['V27 2027',318],['03T 2026',165],['V27 2026',129]].filter(([x]) => f.model === 'all' || f.model === x).map(([x, n]) => [x, Math.round(n * DK() * CHK[f.ch] * SK[f.src])]);
     const mt = MD.reduce((a, x) => a + x[1], 0) || 1;
     const models = reportCard({title:'Car model interest', link:['View leads by car model', 'leads'],
@@ -372,11 +376,11 @@
     const hv = HRS.map(v => Math.round(v * 3.9 * K()));
     const out = HRS.reduce((a, v, i) => a + (i < 9 || i >= 22 ? v : 0), 0) / 931;
     const hours = reportCard({title:'Messages by hour', right: fd ? '' : `<span class="row tight nowrap small mute">${mic('VINA alone', 12)}<b class="mg-tot" style="font-size:16px">${Math.round(out * 100)}%</b>while closed</span>`,
-      body: fd ? emptyBox('Messages by hour will show here, with showroom hours shaded.') : vbars(HRS.map((_, i) => HL(i)), [{name:'Messages', c: i => i >= 9 && i < 22 ? '--ch-a' : '--ch-b', vals:hv}], {h:200, shade:[9, 22], every:3, label:'Messages by hour. Low overnight, rising through the day, peaking at 9 PM.'}) + `<div style="margin-top:14px">${legend([['Showroom open, 9 AM to 10 PM', '--ch-a'], ['Closed, VINA answers', '--ch-b']])}</div>`});
+      body: fd ? emptyBox('Messages by hour will show here, with showroom hours shaded.') : vbars(HRS.map((_, i) => HL(i)), [{name:'Messages', c: i => i >= 9 && i < 22 ? '--ch-a' : '--ch-b', vals:hv}], {h:260, shade:[9, 22], every:3, label:'Messages by hour. Low overnight, rising through the day, peaking at 9 PM.'}) + `<div style="margin-top:14px">${legend([['Showroom open, 9 AM to 10 PM', '--ch-a'], ['Closed, VINA answers', '--ch-b']])}</div>`});
     const ST = STARS.map(([s, n]) => [s, sc(n)]), stot = ST.reduce((a, x) => a + x[1], 0);
     const rating = reportCard({title:'Customer rating', link:['View customer ratings', 'ratings'],
       body: fd ? emptyBox('Ratings out of 5 will show here after the first chats close.') : `<div class="mg-rtn">${mic('Customer rating', 17)}<span class="v" ${countAttr('4.6')} data-k="Rating card">4.6</span><span class="mute">out of 5</span></div><div class="row tight" style="margin:4px 0 14px">${stars(4.6, 15)}<span class="small mute">${num(stot)} ratings</span></div>${starRows(ST, stot)}`});
-    return shell({nav:'overview', title:'Overview', body:`${tb}<div class="mg-r21">${summary}${live}</div><div class="mg-r3">${status}${models}${lang}</div><div class="mg-r21">${hours}${rating}</div>`});
+    return shell({nav:'overview', title:'Overview', body:`${tb}<div class="mg-r21">${summary}${live}</div><div class="mg-r11">${status}<div class="mg-stack">${models}${lang}</div></div><div class="mg-r21">${hours}${rating}</div>`});
   }});
   A['mg-met'] = el => { S.f.mgMet = el.dataset.x; };
 
@@ -493,7 +497,7 @@
       <div class="${over ? 'hot' : ''}"><span class="v">${over}</span><span class="k">${over ? pulse('red') : ic('alert', 14)}Overdue</span></div>
       <div><span class="v">${todo}</span><span class="k">${ic('clock', 14)}To call</span></div></div>${nextCb ? `<p class="small" style="margin-top:14px"><span class="mute">Next:</span> <b>${esc(nextCb.name)}</b> at ${esc(nextCb.cb.at)}, ${esc(first(nextCb.owner))} calls</p>` : ''}`});
     const FN = [['Conversations', 2436, 'Every chat VINA had', '--ch-b'], ['Qualified by VINA', 612, 'Ready for the team', '--ch-b'], ['Sent to call centre', 221, 'Callbacks VINA handed over', '--ch-a'], ['Reached', 181, 'The call centre spoke to them', '--ch-a'], ['Sent to sales', 94, 'From the call centre · 235 more went straight from VINA', '--ch-a'], ['Test drive', 48, 'Madinah Road and Prince Sultan Road', '--ch-a'], ['Sold', 9, '4 V27 2027 · 3 03T · 2 V27 2026', '--green']].map(([l, n, t, c]) => [l, sc(n, k), t, c]);
-    const funnel = reportCard({title:'From conversation to sale', right: legend([['VINA', '--ch-b'], ['Your team', '--ch-a'], ['Sold', '--green']]), link:['View pipeline', 'pipeline'],
+    const funnel = reportCard({title:'From conversation to sale', cls:'mg-func', right: legend([['VINA', '--ch-b'], ['Your team', '--ch-a'], ['Sold', '--green']]), link:['View pipeline', 'pipeline'],
       body:`<div class="mg-fun hd"><span class="mg-fl">Step</span><span class="mg-ft"></span><span class="mg-fc" style="font:inherit">Count</span><span class="mg-fp"><span class="wd">Conversion</span><span class="nr">%</span></span></div>
       ${FN.map(([l, n, t, c], i) => `<div class="mg-fun"><span class="mg-fl"><b title="${esc(t)}">${l}</b></span><div class="mg-ft" role="img" aria-label="${l}: ${num(n)}"><i class="grow-x" style="width:${Math.max(2, Math.sqrt(n / Math.max(1, FN[0][1])) * 100).toFixed(1)}%;background:var(${c})"></i></div><span class="mg-fc">${num(n)}</span><span class="mg-fp">${i ? Math.round(n / Math.max(1, FN[i - 1][1]) * 100) + '%' : '—'}</span></div>`).join('')}`});
     const CC = [['reem', 86, 71, '14 min', 38, '4.7', false], ['faisal', 74, 58, '22 min', 29, '4.5', true], ['huda', 61, 52, '11 min', 27, '4.8', false]];
@@ -523,16 +527,16 @@
     const vals = trend([4.5, 4.6, 4.5, 4.7, 4.6, 4.6, 4.6], true), prev = prevOf(vals, .1, true);
     const over = reportCard({title:'Rating over time', right: legend([['Average rating', '--ch-a'], ['Previous period', '', null, true]]),
       body:`<div class="mg-avg">${mic('Customer rating', 17)}<span class="mg-big" ${countAttr('4.6')}>4.6</span><div class="col" style="gap:4px"><span class="row tight">${stars(4.6, 16)}${delta('+0.1')}</span><span class="small mute">out of 5 · <b style="color:var(--text)">${num(tot)}</b> customers rated · <span class="green b">${Math.round((ST[0][1] + ST[1][1]) / Math.max(1, tot) * 100)}%</span> gave 4 or 5</span></div></div>
-      ${lines(AX(), [{name:'Average rating', c:'--ch-a', vals}, {name:'Previous period', c:'--faint', vals:prev, dash:true}], {h:220, min:3.8, max:5, fmt: v => v.toFixed(1), label:'Average rating for ' + rangeShort() + ', steady around 4.6.'})}`});
+      ${lines(AX(), [{name:'Average rating', c:'--ch-a', vals}, {name:'Previous period', c:'--faint', vals:prev, dash:true}], {h:300, min:3.8, max:5, fmt: v => v.toFixed(1), label:'Average rating for ' + rangeShort() + ', steady around 4.6.'})}`});
     const brk = reportCard({title:'Stars given', right:`<span class="mg-tot">${num(tot)}</span>`, body: starRows(ST, tot)});
-    const axis = `<div class="mg-cmp mg-axis" aria-hidden="true"><span></span><div><span>4.0</span><span>4.5</span><span>5.0</span></div><span></span></div>`;
-    const cmp = rows => `<div class="col" style="gap:0">${rows.map(([n, v, col]) => `<div class="mg-cmp"><b>${n}</b><div class="mg-lol" aria-hidden="true"><i class="grow-x" style="width:${((v - 4) * 100).toFixed(0)}%;background:var(${col || '--ch-a'})"></i></div><b class="num" style="text-align:end">${v.toFixed(1)}</b></div>`).join('')}${axis}</div>`;
+    // plain bars on the full 0 to 5 scale, value at the end
+    const cmp = rows => `<div class="col tight" role="img" aria-label="${rows.map(([n, v]) => n + ' ' + v.toFixed(1) + ' of 5').join(', ')}">${rows.map(([n, v, col]) => hrow(esc(n), v, 5, col || '--ch-a', v.toFixed(1) + ' <span class="mute" style="font-weight:400">of 5</span>')).join('')}</div>`;
     const byWho = reportCard({title:'By who handled the chat', link:['View conversations', 'conversations'], body: cmp([['VINA alone', 4.6, '--ch-b'], ['Call centre', 4.7, '--ch-a'], ['Sales', 4.5, '--ch-c']])});
     const byCh = reportCard({title:'By channel', link:['View channels', 'channels'], body: cmp([['WhatsApp', 4.6], ['Website chat', 4.5], ['Phone line', 4.4]])});
     const low = LEADS.filter(l => l.rating && l.rating <= 2 && l.ratingNote);
     const lowCard = reportCard({title:'Latest low ratings', sub:'1 or 2 stars, with the customer\'s comment', right:`<span class="pill c-red">${sc(16, k)}</span>`, link:['View all low ratings', 'conversations'],
       body: low.map(l => `<button type="button" class="mg-lr" data-a="m5-open" data-x="${l.id}">${stars(l.rating, 13)}<span class="mg-qt">“${esc(l.ratingNote)}”</span><span class="xs mute">${esc(l.name)} · ${esc(l.handled)}${l.owner && U[l.owner] ? ' · ' + esc(first(l.owner)) : ''} · ${esc(l.ratedAt || '')}</span></button>`).join('')}).replace('<a href="#conversations">', '<a href="#conversations" data-a="m5-low">');
-    return shell({nav:'ratings', title:'Customer ratings', body:`${tb}<div class="mg-r21">${over}${brk}</div><div class="mg-r3">${byWho}${byCh}${lowCard}</div>`});
+    return shell({nav:'ratings', title:'Customer ratings', body:`${tb}<div class="mg-r21">${over}${lowCard}</div><div class="mg-r3">${brk}${byWho}${byCh}</div>`});
   }});
   A['m5-open'] = el => { S.f.m3sel = el.dataset.x; Object.assign(M3(), {folder:'low', ch:'all', st:'all', hb:'all', date:'all', rated:false, low:false, q:'', open:true}); go('conversations'); return false; };
   A['m5-low'] = () => { S.f.m3sel = null; Object.assign(M3(), {folder:'low', ch:'all', st:'all', hb:'all', date:'all', rated:false, low:false, q:'', open:false}); };
