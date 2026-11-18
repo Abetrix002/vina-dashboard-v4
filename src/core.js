@@ -106,10 +106,10 @@ const STATUS = {
   qualified:{label:'Qualified', c:'teal', means:'Ready for the team.', colour:'Teal'},
   callback:{label:'Callback', c:'amber', means:'The call centre must call back.', colour:'Amber'},
   contacted:{label:'Contacted', c:'navy', means:'The team has spoken to the customer.', colour:'Navy'},
-  testdrive:{label:'Test drive booked', c:'purple', means:'Date and time set.', colour:'Purple'},
-  offer:{label:'Offer sent', c:'indigo', means:'Price or offer shared.', colour:'Dark blue'},
+  testdrive:{label:'Test drive booked', c:'purple', means:'Date and time set.', colour:'Violet'},
+  offer:{label:'Offer sent', c:'rose', means:'Price or offer shared.', colour:'Rose'},
   sold:{label:'Sold', c:'green', means:'Car sold.', colour:'Green'},
-  lost:{label:'Lost', c:'grey', means:'Not going ahead, with a reason.', colour:'Grey'},
+  lost:{label:'Lost', c:'grey', means:'Not going ahead, with a reason.', colour:'Grey', bar:'--grey-m'},
 };
 const ST_ORDER = ['new','qualified','callback','contacted','testdrive','offer','sold','lost'];
 const STEPS = ['new','qualified','contacted','testdrive','offer','sold']; // LD4 stepper
@@ -122,6 +122,7 @@ const SOURCES = ['Meta ad','Snapchat ad','Google','Website','Walk-in'];
 const MODELS = ['V27 2027','V27 2026','03T 2026'];
 const SHOWROOMS = ['Madinah Road','Prince Sultan Road'];
 const chip = k => { const s = STATUS[k] || {label:k, c:'grey'}; return `<span class="chip c-${s.c}"><span class="dot" aria-hidden="true"></span>${esc(s.label)}</span>`; };
+const stFill = k => { const s = STATUS[k] || {c:'grey'}; return `var(${s.bar || '--' + s.c + '-f'})`; }; // bar and swatch colour for a status
 const chipC = (label, c, dot) => `<span class="chip c-${c || 'grey'}">${dot ? '<span class="dot" aria-hidden="true"></span>' : ''}${esc(label)}</span>`;
 const vtag = () => `<span class="vtag" title="Qualified by VINA">${ic('spark', 11)}VINA</span>`;
 const chIc = (k, lg) => { const c = CH[k] || CH.wa; return `<span class="chi c-${c.c} ${lg ? 'lg' : ''}" title="${c.label}">${ic(c.i, lg ? 20 : 14)}<span class="sr">${c.label}</span></span>`; };
@@ -460,7 +461,7 @@ function cxDetails(l, o) {
     <div class="cx-dph">${av(l.name, 'lg')}<div class="grow"><div class="cx-dpn ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="small mute num">${esc(mob(l))}</div></div><button type="button" class="ibtn sm bare cx-dpx" data-a="dp" aria-label="Close customer details" title="Close (])">${ic('x', 16)}</button></div>
     <div class="row tight">${chip(l.status)}${l.vq ? vtag() : ''}</div>
     <section class="cx-sum" aria-label="VINA summary"><div class="hd">${ic('spark', 14)}VINA summary</div><p>${esc(l.summary)}.</p>${l.facts ? `<dl class="kv">${l.facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}</section>
-    <section class="cx-sec"><h3>Next step</h3>${kv([['Next step', esc(l.next)], ['Callback time', o && o.cb], ['Car model', car], ['Given to', l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone yet</span>']])}</section>
+    <section class="cx-sec" aria-label="Next step">${kv([['Next step', esc(l.next)], ['Callback time', o && o.cb], ['Car model', car], ['Given to', l.owner ? esc(uname(l.owner)) : '<span class="red b">Not given to anyone yet</span>']])}</section>
     <section class="cx-sec"><button type="button" class="cx-dpmore" data-a="dp-more" aria-expanded="${DP.more}">Lead details${ic('chevD', 16)}</button>${DP.more ? `<div class="cx-dpg ${moreNew ? 'anim-in' : ''}">${kv([['Channel', CH[l.ch].label], ['Came from', esc(l.src)], ['Campaign', l.src === 'Walk-in' ? '' : esc(l.campaign)], ['Handled by', esc(l.handled)], ['City', esc(l.city)], ['Language', esc(l.lang)], ['Lead since', esc(l.created)]])}</div>` : ''}</section>
     <section class="cx-sec"><h3>Customer rating</h3>${l.rating ? `<div>${stars(l.rating)}${l.ratingNote ? `<p class="xs mute" style="margin-top:6px">“${esc(l.ratingNote)}”</p>` : ''}</div>` : '<span class="small mute">Not rated yet</span>'}</section>
   </aside>`;
