@@ -13,6 +13,11 @@
   /* sticky Save / Cancel bar (leaves room for the prototype pill on the right) */
   .as-foot{position:sticky;bottom:16px;z-index:12;display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-inline-end:236px;padding:10px 12px 10px 18px;border-radius:var(--r-l);background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);box-shadow:var(--e3);border:1px solid var(--line)}
   .as-foot .st{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mute);min-width:0}
+  .as-hero .verdict{font-size:20px;line-height:30px}
+  .rc .as-rule{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;padding:14px 20px 14px 14px}
+  .rc .as-rule:hover{box-shadow:none;background:var(--sub)}
+  .rc .as-fixed{background:transparent;border-top:1px dashed var(--line2)}
+  .as-wide{padding:0 20px}
   /* AS2 rule cards */
   .as-rule{position:relative;display:grid;grid-template-columns:18px 34px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 14px 16px 12px;background:var(--card);border:1px solid var(--card-bd);border-radius:var(--r-l);box-shadow:var(--e1);transition:box-shadow var(--d2) var(--ease),opacity var(--d2)}
   .as-rule:hover{box-shadow:var(--e2)}
@@ -115,11 +120,12 @@
     {id:'r4', name:'After hours', when:'person', only:[['Working hours','Outside']], to:'cc', by:'least', avail:false, max:20, mins:15, on:true, week:37},
     {id:'r5', name:'Phone line leads', when:'qualified', only:[['Channel','Phone line']], to:'sales', by:'turns', avail:true, max:15, mins:15, on:false, week:0},
   ];
-  const tabs = cur => isVina() ? `<nav class="tabs" aria-label="Lead assignment">${[['qualify','When a lead is qualified'],['rules','Assignment rules'],['unassigned','Unassigned leads']].map(([k, t]) => `<a class="tab" href="#${k}" ${cur === k ? 'aria-selected="true" aria-current="page"' : ''}>${t}${k === 'unassigned' ? `<span class="n">${unassigned().length}</span>` : ''}</a>`).join('')}</nav>` : '';
+  // One row: the three views on the left, the page action (if any) on the right
+  const tabs = (cur, act) => isVina() ? `<div class="rx-tbar"><nav class="tabs" aria-label="Lead assignment">${[['qualify','When a lead is qualified'],['rules','Assignment rules'],['unassigned','Unassigned leads']].map(([k, t]) => `<a class="tab" href="#${k}" ${cur === k ? 'aria-selected="true" aria-current="page"' : ''}>${t}${k === 'unassigned' ? `<span class="n">${unassigned().length}</span>` : ''}</a>`).join('')}</nav><span class="sp"></span>${act ? `<span class="act">${act}</span>` : ''}</div>` : '';
   const agents = () => Object.keys(U).filter(k => ['cc','sales'].includes(U[k].role));
   const PRES_C = {available:['Available','green'], busy:['Busy','amber'], away:['Away','grey']};
   const presChip = k => { const s = U[k].status || 'available'; const m = PRES_C[s]; return `<span class="chip c-${m[1]}"><span class="pres ${s}" style="width:7px;height:7px;border-radius:50%;display:inline-block"></span>${m[0]}</span>`; };
-  const availCard = wide => `<section class="card"><div class="card-h"><div class="grow"><h2>Who is available now</h2><div class="sub">Only available agents get new leads.</div></div></div><div class="list ${wide ? 'as-wide' : ''}">${agents().map(k => `<div class="li"><span class="avw">${av(U[k].name)}<span class="pres ${U[k].status || 'available'}" aria-hidden="true"></span></span><span class="grow"><b class="small">${esc(U[k].name)}</b><div class="xs mute">${U[k].team}${U[k].showroom ? ' · ' + U[k].showroom : ''}</div></span><span class="xs mute num">${mineCount(k)} open</span>${presChip(k)}</div>`).join('')}</div></section>`;
+  const availCard = wide => reportCard({title:'Who is available now', sub:'Only available agents get new leads.', cls:'rx-tbl', body:`<div class="list ${wide ? 'as-wide' : ''}">${agents().map(k => `<div class="li"><span class="avw">${av(U[k].name)}<span class="pres ${U[k].status || 'available'}" aria-hidden="true"></span></span><span class="grow"><b class="small">${esc(U[k].name)}</b><div class="xs mute">${U[k].team}${U[k].showroom ? ' · ' + U[k].showroom : ''}</div></span><span class="xs mute num">${mineCount(k)} open</span>${presChip(k)}</div>`).join('')}</div>`});
   const foot = (status, btns) => `<div class="as-foot" role="region" aria-label="Save changes"><span class="st grow">${status}</span><span class="sp"></span>${btns}</div>`;
 
   /* ---- AS1 ---- */
@@ -139,17 +145,15 @@
   R('qualify', {id:'AS1', title:'When is a lead qualified', roles:['vina'], render() {
     const q = Q(); const reqN = Object.values(q.req).filter(Boolean).length; const sigN = Object.values(q.sig).filter(Boolean).length;
     const body = `${tabs('qualify')}
-      <section class="as-hero" aria-labelledby="as1-eb"><div class="eyebrow" id="as1-eb">${ic('spark', 13)}In one line</div><p class="verdict ${flashCls('as1-line')}" aria-live="polite">${qLine(q)}</p>
-        <div class="meta"><span><b>${reqN}</b> details needed</span><span><b>${sigN}</b> buying signals</span><span><b>${q.never.length}</b> never qualify</span></div></section>
+      <section class="as-hero" aria-label="When a lead is qualified, in one line"><p class="verdict ${flashCls('as1-line')}" aria-live="polite" style="margin-top:0">${qLine(q)}</p></section>
       <div class="as-2"><div class="col loose">
-        <section class="card"><div class="card-h"><span class="as-step">1</span><div class="grow"><h2>Details VINA must have</h2><div class="sub">VINA asks for these in the chat before the lead can be qualified.</div></div></div><div class="g3" style="gap:4px 16px">${Object.keys(q.req).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-req" data-x="${esc(k)}" ${q.req[k] ? 'checked' : ''}>${esc(k)}</label>`).join('')}</div>${!reqN ? `<div class="note err" style="margin-top:10px">${ic('alert')}<span>Tick at least one detail.</span></div>` : ''}</section>
-        <section class="card"><div class="card-h"><span class="as-step">2</span><div class="grow"><h2>Buying signals</h2><div class="sub">Any one of these is enough.</div></div></div><div class="col tight">${Object.keys(q.sig).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-sig" data-x="${esc(k)}" ${q.sig[k] ? 'checked' : ''}><span class="grow"><b class="small">${esc(k)}</b><div class="xs mute">For example: <span dir="rtl" class="ar">${esc(SIG_EX[k])}</span></div></span></label>`).join('')}</div>${!sigN ? `<div class="note warn" style="margin-top:10px">${ic('alert')}<span>Without a buying signal, VINA will never qualify a lead.</span></div>` : ''}</section>
-        <section class="card"><div class="card-h"><span class="as-step">3</span><div class="grow"><h2>Never qualify</h2><div class="sub">VINA closes these politely or sends them elsewhere.</div></div></div>
-          <div class="tokens">${q.never.map((n, i) => `<span class="tok">${esc(n)}<button type="button" data-a="as1-rm" data-x="${i}" aria-label="Remove ${esc(n)}">${ic('x', 13)}</button></span>`).join('')}<form data-a="as1-add" style="flex:1;display:flex;min-width:160px"><label class="sr" for="b-f-as1-add">Add a topic VINA should never qualify</label><input ${bind('f.as1.add')} placeholder="Add, e.g. Service and repairs"></form></div></section>
+        ${reportCard({title:'Details VINA must have', sub:'VINA asks for these in the chat before the lead can be qualified.', body:`<div class="g3" style="gap:4px 16px">${Object.keys(q.req).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-req" data-x="${esc(k)}" ${q.req[k] ? 'checked' : ''}>${esc(k)}</label>`).join('')}</div>${!reqN ? `<div class="note err" style="margin-top:10px">${ic('alert')}<span>Tick at least one detail.</span></div>` : ''}`})}
+        ${reportCard({title:'Buying signals', sub:'Any one of these is enough.', body:`<div class="col tight">${Object.keys(q.sig).map(k => `<label class="chk"><input type="checkbox" data-ch="as1-sig" data-x="${esc(k)}" ${q.sig[k] ? 'checked' : ''}><span class="grow"><b class="small">${esc(k)}</b><div class="xs mute">For example: <span dir="rtl" class="ar">${esc(SIG_EX[k])}</span></div></span></label>`).join('')}</div>${!sigN ? `<div class="note warn" style="margin-top:10px">${ic('alert')}<span>Without a buying signal, VINA will never qualify a lead.</span></div>` : ''}`})}
+        ${reportCard({title:'Never qualify', sub:'VINA closes these politely or sends them elsewhere.', body:`
+          <div class="tokens">${q.never.map((n, i) => `<span class="tok">${esc(n)}<button type="button" data-a="as1-rm" data-x="${i}" aria-label="Remove ${esc(n)}">${ic('x', 13)}</button></span>`).join('')}<form data-a="as1-add" style="flex:1;display:flex;min-width:160px"><label class="sr" for="b-f-as1-add">Add a topic VINA should never qualify</label><input ${bind('f.as1.add')} placeholder="Add, e.g. Service and repairs"></form></div>`})}
       </div><div class="col loose">
-        <section class="card"><div class="card-h"><h2>Last 7 days with these settings</h2></div><div class="row tight" style="align-items:baseline"><span class="num" style="font-family:var(--f-display);font-size:32px;font-weight:700" ${countAttr(612)}>612</span><span class="small mute">qualified of 2,436 chats</span></div><div class="bar-h" style="margin:10px 0 14px"><i style="width:25%;background:var(--aqua)"></i></div>
-          <div class="list">${[['Asked for price or financing',268],['Wanted a test drive',151],['Asked to be called',119],['Asked for a person',74]].map(([k, v]) => `<div class="li small"><span class="grow">${k}</span><b class="num">${v}</b></div>`).join('')}</div></section>
-        <section class="card flat"><div class="card-h"><h2>What happens next</h2></div><p class="small">VINA marks the lead ${chip('qualified')}, writes a summary for the team, and the <a href="#rules">assignment rules</a> choose the agent.</p></section>
+        ${reportCard({title:'Last 7 days with these settings', body:`<div class="row tight" style="align-items:baseline">${mic('qualified')}<span class="num" style="font-family:var(--f-display);font-size:32px;font-weight:700" ${countAttr(612)}>612</span><span class="small mute">qualified of 2,436 chats</span></div><div class="bar-h" style="margin:10px 0 14px"><i style="width:25%;background:var(--aqua)"></i></div>
+          <div class="list">${[['Asked for price or financing',268],['Wanted a test drive',151],['Asked to be called',119],['Asked for a person',74]].map(([k, v]) => `<div class="li small"><span class="grow">${k}</span><b class="num">${v}</b></div>`).join('')}</div>`})}
       </div></div>
       ${foot(q.dirty ? `${pulse()}<span>Unsaved changes</span>` : `<span class="ell">Last changed by ${esc(q.saved)}</span>`, `<button type="button" class="btn" data-a="as1-reset" ${q.dirty ? '' : 'disabled title="Nothing to undo"'}>Cancel</button><button type="button" class="btn pri" data-a="as1-save" ${q.dirty && reqN ? '' : `disabled title="${reqN ? 'No changes to save' : 'Tick at least one detail first'}"`}>Save</button>`)}`;
     return shell({nav:'qualify', title:'Lead assignment', cp:true, viewOnly:false, body});
@@ -184,14 +188,13 @@
   }
   R('rules', {id:'AS2', title:'Assignment rules', roles:['vina'], render() {
     const un = unassigned().length;
-    const body = `${tabs('rules')}
-      <div class="row"><p class="lead-in grow">Rules are checked in order. The top one is checked first, and the first rule that fits gives the lead to an agent. Drag a rule to change the order, or use its menu.</p><a class="btn pri" href="#rule-new">${ic('plus', 15)}New rule</a></div>
-      <div class="as-2"><div class="col" aria-label="Rules in order">${RULES.map(ruleRow).join('')}
+    const body = `${tabs('rules', `<a class="btn pri" href="#rule-new">${ic('plus', 15)}New rule</a>`)}
+      <div class="as-2"><section class="card rc rx-tbl" aria-label="Rules in order"><header class="rc-h"><div class="grow"><h2>Rules in order</h2><div class="sub">The top rule is checked first. Drag to change the order.</div></div></header><div class="rc-b">${RULES.map(ruleRow).join('')}
         <article class="as-rule as-fixed" aria-label="Last rule, Everything else goes to Unassigned. Always last."><span class="grip" aria-hidden="true">${ic('lock', 15)}</span><span class="n num" aria-hidden="true">${RULES.length + 1}</span>
           <div class="main" style="min-width:0"><div class="row tight"><b class="as-nm">Everything else goes to Unassigned</b><span class="chip c-grey">${ic('lock', 11)}Always last</span></div><div class="xs mute" style="margin-top:6px">It cannot be moved, turned off or deleted. The manager sees these leads and the VINA team assigns them by hand.</div></div>
           <div class="act"><a class="btn sm" href="#unassigned">${un ? pulse() : ''}${un} waiting${ic('arrowR', 14)}</a></div></article>
-      </div><div class="col loose">${availCard()}
-        <section class="card flat"><div class="card-h"><h2>For every rule</h2></div><div class="col tight small"><div class="sw-row">${ic('check', 16, 'green')}<span>Only give leads to agents who are <b>Available</b></span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Not opened within <b>15 minutes</b>: give it to the next agent and alert the manager</span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Outside working hours: keep until 9 AM, then assign</span></div></div></section>
+      </div></section><div class="col loose">${availCard()}
+        ${reportCard({title:'For every rule', body:`<div class="col tight small"><div class="sw-row">${ic('check', 16, 'green')}<span>Only give leads to agents who are <b>Available</b></span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Not opened within <b>15 minutes</b>: give it to the next agent and alert the manager</span></div><div class="sw-row">${ic('check', 16, 'green')}<span>Outside working hours: keep until 9 AM, then assign</span></div></div>`})}
       </div></div>`;
     return shell({nav:'rules', title:'Lead assignment', cp:true, viewOnly:false, body});
   }, after: afterUi});
@@ -210,7 +213,7 @@
     return S.f.as3;
   }
   const radio = (grp, k, t, d, cur) => `<button type="button" class="radio-card" role="radio" aria-checked="${cur === k}" data-a="as3-set" data-x="${grp}:${k}"><span class="as-rd" aria-hidden="true"></span><span class="grow"><b class="small">${t}</b>${d ? `<div class="xs mute">${d}</div>` : ''}</span></button>`;
-  const grp = (n, t, sub, inner) => `<section class="card as-grp"><div class="card-h"><span class="as-step">${n}</span><div class="grow"><h2>${t}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div></div><div class="col loose">${inner}</div></section>`;
+  const grp = (n, t, sub, inner) => reportCard({title:t, sub, body:`<div class="col loose">${inner}</div>`});
   R('rule', {id:'AS3', title:'Rule editor', roles:['vina'], render(param) {
     const e = E(param);
     if (!e) return shell({nav:'rules', title:'Rule', crumb:['Assignment rules','rules'], cp:true, viewOnly:false, body:`<div class="card">${empty('route', 'We could not find this rule', 'It may have been deleted.', `<a class="btn pri" href="#rules">Back to rules</a>`)}</div>`});
@@ -222,9 +225,9 @@
       ${grp(1, 'Name', 'So the team knows why a lead came to them.', `<div class="field"><label for="b-f-as3-d-name">Rule name</label><input class="inp ${e.err ? 'bad' : ''}" ${bind('f.as3.d.name')} placeholder="e.g. Qualified to Sales" aria-describedby="as3-err" aria-invalid="${!!e.err}">${e.err ? `<span class="err" id="as3-err">${ic('alert', 14)}${esc(e.err)}</span>` : ''}</div>`)}
       ${grp(2, 'Which leads', 'When the rule starts, and the leads it applies to.', `
         <div class="field"><span class="lbl" id="as3-when">When</span><div class="as-opts" role="radiogroup" aria-labelledby="as3-when">${Object.keys(WHEN).map(k => radio('when', k, WHEN[k], '', d.when)).join('')}</div></div>
-        <div class="field"><span class="lbl">Only if <span class="mute" style="font-weight:400">(optional)</span></span>
+        <details class="rx-more" ${S.f.as3open ? 'open' : ''}><summary data-a="as3-more">${ic('chevD', 14)}Only if (optional)<span class="m">${d.only.length ? '· ' + d.only.length + (d.only.length === 1 ? ' condition' : ' conditions') : '· any lead'}</span></summary><div class="in"><div class="field">
           ${d.only.length ? `<div class="col tight">${d.only.map(([a, v], i) => `<div class="as-cond"><span class="j">${i ? 'And' : 'If'}</span><b class="small">${esc(a)}</b><span class="small mute">is</span>${chipC(v, 'blue')}<span class="sp"></span><button type="button" class="ibtn sm bare" data-a="as3-rm" data-x="${i}" aria-label="Remove condition ${esc(a)} is ${esc(v)}">${ic('x', 15)}</button></div>`).join('')}</div>` : `<p class="small mute">No conditions. The rule applies to every lead.</p>`}
-          <div class="row tight as-addc"><label class="sr" for="b-f-as3-ca">Condition</label>${bindSel('f.as3.ca', Object.keys(COND))}<label class="sr" for="b-f-as3-cv">Value</label>${bindSel('f.as3.cv', COND[e.ca] || [])}<button type="button" class="btn sm" data-a="as3-add" style="min-height:42px">${ic('plus', 14)}Add condition</button></div></div>`)}
+          <div class="row tight as-addc"><label class="sr" for="b-f-as3-ca">Condition</label>${bindSel('f.as3.ca', Object.keys(COND))}<label class="sr" for="b-f-as3-cv">Value</label>${bindSel('f.as3.cv', COND[e.ca] || [])}<button type="button" class="btn sm" data-a="as3-add" style="min-height:42px">${ic('plus', 14)}Add condition</button></div></div></div></details>`)}
       ${grp(3, 'Who gets them', 'The team or person, and how the agent is chosen.', `
         <div class="field"><span class="lbl" id="as3-to">Send to</span><div class="as-opts" role="radiogroup" aria-labelledby="as3-to">${radio('to', 'cc', 'Call centre team', agents().filter(k => U[k].role === 'cc').length + ' agents', d.to)}${radio('to', 'sales', 'Sales team', 'Madinah Road · ' + agents().filter(k => U[k].role === 'sales').length + ' agents', d.to)}${radio('to', 'one', 'One agent', 'Pick a name', d.to)}</div>
           ${d.to === 'one' ? `<label class="sr" for="b-f-as3-d-agent">Agent</label>${bindSel('f.as3.d.agent', agents().map(k => [k, U[k].name + ' · ' + U[k].team]))}` : ''}</div>
@@ -236,12 +239,13 @@
         <div class="row"><label class="small b" for="b-f-as3-d-mins">Not opened within</label><input class="inp as-num num" type="number" min="1" max="240" ${bind('f.as3.d.mins')}><span class="small">minutes: give it to the next agent and alert the manager</span></div>`)}
       </div>
       <div class="col loose">
-        <section class="card"><div class="card-h"><div class="grow"><h2>If this rule ran last week</h2><div class="sub">Based on the ${num(d.week || 318)} leads it would have matched.</div></div></div><div class="col">${sim.map(([k, v, w]) => `<div><div class="row small"><span class="grow b">${esc(U[k].name)}</span><span class="num">${num(v)} leads</span></div><div class="bar-h" style="margin-top:6px"><i style="width:${w}%;background:var(--ch-a)"></i></div>${U[k].status === 'away' && d.avail ? '<div class="xs mute" style="margin-top:4px">Away today, so gets no leads</div>' : ''}</div>`).join('') || '<p class="small mute">Nobody in this team yet.</p>'}</div></section>
-        <section class="card flat"><div class="card-h"><h2>History</h2></div><p class="small mute">${param === 'new' ? 'New rule. Saved with your name and the time.' : 'Changed by Lina Haddad on Mon 2 Nov: most open leads from 20 to 15.'}</p>${param !== 'new' ? `<div class="hr" style="margin:14px 0"></div><button type="button" class="btn sm danger-o" data-a="as3-del">${ic('trash', 14)}Delete rule</button>` : ''}</section>
+        ${reportCard({title:'If this rule ran last week', sub:`Based on the ${num(d.week || 318)} leads it would have matched.`, body:`<div class="col">${sim.map(([k, v, w]) => `<div><div class="row small"><span class="grow b">${esc(U[k].name)}</span><span class="num">${num(v)} leads</span></div><div class="bar-h" style="margin-top:6px"><i style="width:${w}%;background:var(--ch-a)"></i></div>${U[k].status === 'away' && d.avail ? '<div class="xs mute" style="margin-top:4px">Away today, so gets no leads</div>' : ''}</div>`).join('') || '<p class="small mute">Nobody in this team yet.</p>'}</div>`})}
+        ${reportCard({title:'History', body:`<p class="small mute">${param === 'new' ? 'New rule. Saved with your name and the time.' : 'Changed by Lina Haddad on Mon 2 Nov: most open leads from 20 to 15.'}</p>${param !== 'new' ? `<div class="hr" style="margin:14px 0"></div><button type="button" class="btn sm danger-o" data-a="as3-del">${ic('trash', 14)}Delete rule</button>` : ''}`})}
       </div></div>
       ${foot(dirty ? `${pulse()}<span>Unsaved changes</span>` : `<span>${param === 'new' ? 'New rule' : 'No changes yet'}</span>`, `<button type="button" class="btn" data-a="as3-cancel">Cancel</button><button type="button" class="btn pri" data-a="as3-save">${ic('check', 15)}Save rule</button>`)}`;
     return shell({nav:'rules', title: param === 'new' ? 'New rule' : 'Edit rule', crumb:['Assignment rules','rules'], cp:true, viewOnly:false, body});
   }});
+  A['as3-more'] = (el, ev) => { if (ev) ev.preventDefault(); S.f.as3open = !S.f.as3open; };
   A['as3-set'] = el => { const [g, k] = el.dataset.x.split(':'); S.f.as3.d[g] = k; };
   A['as3-avail'] = () => { S.f.as3.d.avail = !S.f.as3.d.avail; };
   A['as3-rm'] = el => { S.f.as3.d.only.splice(Number(el.dataset.x), 1); };
@@ -264,18 +268,17 @@
     const rs = S.st === 'empty' ? [] : unassigned().slice().sort((a, b) => (b.wait || 0) - (a.wait || 0));
     const longest = rs[0]; const late = rs.filter(l => l.late).length;
     const stats = [
-      kpi({k:'Waiting now', v:String(rs.length), n: late ? `${late} overdue, waiting over 15 minutes` : 'Leads not given to anyone', hot: late > 0}),
-      kpi({k:'Longest wait', v: longest ? mins(longest.wait) : '—', n: longest ? esc(longest.name) : 'Nobody waiting'}),
+      kpi({mini:true, k:'Waiting now', v:String(rs.length), n: late ? `${late} overdue, waiting over 15 minutes` : 'Leads not given to anyone', hot: late > 0}),
+      kpi({mini:true, k:'Longest wait', v: longest ? mins(longest.wait) : '—', n: longest ? esc(longest.name) : 'Nobody waiting'}),
       kpi({k:'No agent available', v:String(rs.filter(l => /no salesperson|Most open|outside working/i.test(l.unWhy || '')).length), n:'All agents busy, off or full', mini:true}),
       kpi({k:'No rule matched', v:String(rs.filter(l => /No rule/i.test(l.unWhy || '')).length), n:'For example Phone line leads', mini:true})];
-    const table = S.st === 'loading' ? loadingRows(6, 56) : !rs.length ? `<div class="card">${empty('check', 'Every lead has an agent', 'When no rule can place a lead, it waits here and the manager gets an alert.')}</div>`
+    const table = S.st === 'loading' ? `<div style="padding:16px">${loadingRows(6, 56)}</div>` : !rs.length ? empty('check', 'Every lead has an agent', 'When no rule can place a lead, it waits here and the manager gets an alert.')
       : `<div class="tbl-wrap"><table class="tbl"><caption class="sr">Unassigned leads, longest wait first</caption><thead><tr><th>Customer</th><th>Car model</th><th>${ic('spark', 12, 'teal')} VINA summary</th><th>Why it is here</th><th>Waiting</th>${isVina() ? '<th><span class="sr">Assign</span></th>' : ''}</tr></thead><tbody>${rs.map(l => `<tr class="${flashCls(l.id)}">
         <td><a href="#lead-${l.id}" class="who" style="text-decoration:none;color:inherit">${av(l.name, 'sm')}<span style="min-width:0"><span class="nm ell" style="display:block">${esc(l.name)}</span><span class="xs mute num" style="display:block">${esc(mob(l))}</span></span></a></td>
         <td><div class="row tight nowrap" style="white-space:nowrap">${chIc(l.ch)}<b>${esc(l.model)}</b></div></td><td><div class="small ell2" style="min-width:220px;max-width:380px" title="${esc(l.summary)}">${esc(l.summary)}</div></td><td class="small mute" style="min-width:180px;max-width:280px">${esc(l.unWhy || 'No rule matched')}</td>
         <td class="num" style="white-space:nowrap">${l.late ? `<span class="as-late">${pulse('red')}${mins(l.wait)}</span><div class="xs red">Overdue</div>` : `<span class="mute">${mins(l.wait)}</span>`}</td>${isVina() ? `<td class="r"><button type="button" class="btn sm pri" data-a="as-assign" data-x="${l.id}" aria-label="Assign ${esc(l.name)}">${ic('user', 14)}Assign</button></td>` : ''}</tr>`).join('')}</tbody></table></div>`;
-    const body = `${tabs('unassigned')}<div class="g4 as-k">${stats.join('')}</div>
-      ${isMgr() ? `<div class="note info">${ic('info')}<span>The VINA team has been told and gives these leads to an agent by hand.</span></div>` : ''}
-      ${table}${isVina() ? availCard(true) : ''}`;
+    const body = `${tabs('unassigned')}${reportCard({title:'Waiting for an agent', body:`<div class="g4 as-k">${stats.join('')}</div>`})}
+      ${reportCard({title:'Unassigned leads', sub: isMgr() ? 'The VINA team has been told and gives these leads to an agent by hand.' : 'Longest wait first.', cls:'rx-tbl', body: table})}${isVina() ? availCard(true) : ''}`;
     return shell({nav:'unassigned', title: isVina() ? 'Lead assignment' : 'Unassigned leads', crumb: isMgr() ? ['Leads','leads'] : null, cp:true, viewOnly: isMgr(), body});
   }});
   A['as-assign'] = el => { openAssign(el.dataset.x); };

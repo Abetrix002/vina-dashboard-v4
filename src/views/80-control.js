@@ -113,6 +113,7 @@
 
   /* B1 */
   .cp-plan{background:radial-gradient(500px 200px at 100% 0%,var(--teal-b),transparent 70%),var(--card)}
+  .cp-kt{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;line-height:20px;margin-bottom:4px}
   .cp-big{font-family:var(--f-display);font-size:30px;line-height:36px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .cp-meter .bar-h{height:10px}
   .cp-stack{display:flex;gap:3px;height:12px;border-radius:999px;overflow:hidden}
@@ -120,7 +121,7 @@
   .cp-inv td{white-space:nowrap}
   .cp-paid{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:8px 0}
   .cp-paid .ok{width:60px;height:60px;border-radius:50%;background:var(--green-b);color:var(--green-f);display:flex;align-items:center;justify-content:center;animation:cp-tick 520ms var(--spring) both}
-  @media (max-width:760px){.cp-save{bottom:72px}.cp-seat{min-width:0;width:100%}.cp-search{width:100%}}
+  @media (max-width:760px){.rc-h:has(>.cp-seat){flex-wrap:wrap}.rc-h:has(>.cp-seat)>.grow{flex:1 1 100%}.cp-save{bottom:72px}.cp-seat{min-width:0;width:100%}.cp-search{width:100%}}
   .cp-utbl .who .nm,.cp-utbl .who .xs{white-space:nowrap}
   </style>`);
 
@@ -148,7 +149,8 @@
 
   /* ---------- Shared page bits ---------- */
   const page = (nav, title, body, o) => shell(Object.assign({nav, title, body, cp:true, viewOnly:false}, o || {}));
-  const sec = (title, sub, body, right) => `<section class="card"><div class="card-h"><div class="grow"><h2>${title}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div>${right || ''}</div>${body}</section>`;
+  // Report-card structure (core .rc): short title, optional one-line sub, body. Title and sub are trusted HTML here.
+  const sec = (title, sub, body, right, cls) => `<section class="card rc ${cls || ''}"><header class="rc-h"><div class="grow"><h2>${title}</h2>${sub ? `<div class="sub">${sub}</div>` : ''}</div>${right || ''}</header><div class="rc-b">${body}</div></section>`;
   const kv = rows => `<dl class="kv">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`;
   const stateWrap = (body, retryText) => S.st === 'loading' ? loadingRows(6, 72) : S.st === 'error' ? errorBox(retryText || 'We could not load this page', 'Check your internet connection, then try again. Nothing you saved is lost.', 'cp-retry') : body;
   A['cp-retry'] = () => { S.st = ''; };
@@ -170,7 +172,7 @@
     ];
     const live = chans.filter(c => c.st === 'ok').length;
     const card = c => {
-      const btn = c.st === 'ok' ? `<a class="btn sm" href="#${c.go}">Manage</a>` : c.st === 'warn' ? `<a class="btn sm danger" href="#${c.go}">Reconnect</a>` : c.st === 'wait' ? `<a class="btn sm" href="#${c.go}">See progress</a>` : `<a class="btn sm pri" href="#${c.go}">Connect</a>`;
+      const btn = c.st === 'ok' ? `<a class="btn sm" href="#${c.go}">Manage</a>` : c.st === 'warn' ? `<a class="btn sm danger" href="#${c.go}">Reconnect</a>` : c.st === 'wait' ? `<a class="btn sm" href="#${c.go}">See progress</a>` : `<a class="btn sm" href="#${c.go}">Connect</a>`;
       return `<section class="card lift cp-ch ${c.st === 'warn' ? 'warn' : ''}" aria-labelledby="cp-c-${c.k}">
         <div class="hd">${chIc(c.k, true)}<div class="grow" style="min-width:0"><h2 class="h2" id="cp-c-${c.k}">${c.t}</h2><div class="small mute">${c.what}</div></div>${stChip(c.st)}</div>
         ${kv(c.facts)}
@@ -180,7 +182,7 @@
     const problem = w === 'warn' ? `<div class="g2">
       <div class="note err" role="alert">${ic('alert')}<div><b>WhatsApp is disconnected.</b> Customers on WhatsApp are not getting replies since 4:12 PM. 6 messages are waiting. The red bar shows on every page for the VINA team until it is fixed, and the VINA support team got an email at 4:13 PM.<div style="margin-top:10px"><a class="btn sm danger" href="#conn-whatsapp">Reconnect WhatsApp</a></div></div></div>
       <div class="card flat col tight"><span class="eyebrow">What managers see</span><div class="small mute">On Channels in the Manager dashboard. No reconnect button.</div><div class="cp-mgr">${chIc('wa', true)}<div class="grow"><b>WhatsApp</b><div class="xs mute">The VINA team has been told.</div></div>${stChip('warn')}</div></div></div>` : '';
-    return page('connections', 'Connections', stateWrap(`<div class="col tight"><p class="lead-in">Connect and check every channel. For the website, the client installs the VINA plugin. Each channel is answered by one agent.</p></div>${problem}<div class="cp-cards">${chans.map(card).join('')}</div>`));
+    return page('connections', 'Connections', stateWrap(`${problem}<div class="cp-cards">${chans.map(card).join('')}</div>`));
   }});
 
   /* ---------- C2 Website · Get the plugin ---------- */
@@ -218,7 +220,6 @@
     const left = w.pos === 'left';
     const steps = INSTALL[w.tab];
     const body = `
-      <p class="lead-in">Put the VINA chat on ${esc(client().name)}'s website. It takes about 10 minutes. The chat is answered by ${esc(w.name)}.</p>
       <div class="g2" style="align-items:start">
       <div class="col loose">
         ${sec('Get the plugin', check === 'live' ? 'All four steps are done.' : 'Four steps. Each one ticks when it is done.', vsteps([
@@ -236,11 +237,11 @@
           <div class="row"><span class="sp"></span><button type="button" class="btn" data-a="cp-look-reset">Cancel</button><button type="button" class="btn pri" data-a="cp-look-save">Save</button></div>
         </div>`)}
       </div>
-      <section class="card col" aria-label="Preview on a sample page" style="position:sticky;top:84px"><div class="row tight"><span class="eyebrow grow">Live preview</span><span class="xs mute">Sample page</span></div>
+      <section class="card rc" aria-label="Preview on a sample page" style="position:sticky;top:84px"><header class="rc-h"><div class="grow"><h2>Live preview</h2><div class="sub">Sample page</div></div></header><div class="rc-b col">
         <div class="cp-site ${left ? 'left' : ''}" id="cp-prev" style="--wc:${w.color};--wf:${fg}" aria-hidden="true"><div class="bar">iCaur Alghanim<span class="sp"></span><i></i><i></i><i></i></div><div class="hero"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:52%"></div><div class="ln" style="width:60%"></div>
           <div class="cp-win"><div class="wh"><span class="av sm" data-t="i">${esc((w.name || 'S')[0])}</span><span data-t="n">${esc(w.name || 'Sara')}</span><span class="sp"></span>${ic('x', 14)}</div><div class="wb"><span class="bub" dir="auto" data-t="g">${esc(w.greet)}</span><span class="in">Write a message…${ic('send', 14)}</span></div></div>
           <div class="cp-fab">${ic('conv', 22)}</div></div>
-        <div class="xs mute">Shown on: ${esc(w.pages)}</div></section>
+        <div class="xs mute">Shown on: ${esc(w.pages)}</div></div></section>
       </div>`;
     return page('conn-website', 'Website', body, {crumb:['Connections', 'connections']});
   }});
@@ -295,7 +296,7 @@
     else if (disc) top = `<div class="note err" role="alert">${ic('alert')}<div><b>WhatsApp was disconnected</b> on Today 4:12 PM. Customers are not getting replies. A red bar shows on every page for the VINA team. Continue with Meta to connect it again.</div></div>`;
     else if (S.st === 'checking') top = `<div class="note warn" role="status">${ic('clock')}<div><b>Meta is still checking.</b> This can take some time. You can leave this page; we will email you.</div></div>`;
     const side = sec('Good to know', '', `<ul class="small" style="margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:8px"><li>The number cannot be used on the WhatsApp app at the same time.</li><li>Meta's checks usually take 1 to 3 days. You can leave this page.</li><li>If something is blocked, the step says what to do.</li></ul>`);
-    const body = `<p class="lead-in">Connect ${esc(client().name)}'s WhatsApp Business number through Meta. VINA answers every WhatsApp chat on this number.</p>${top}
+    const body = `${top}
       ${st === 'ok' || down ? `<div class="g2" style="align-items:start">${manage}${setupDone}</div>` : `<div class="g2" style="align-items:start">${step === 0 ? before : ''}${progress}${step === 0 ? '' : side}</div>`}`;
     return page('conn-whatsapp', 'WhatsApp', body, {crumb:['Connections', 'connections']});
   }});
@@ -347,7 +348,7 @@
   R('conn-phone', {id:'C4', title:'Phone line', roles:['vina'], states:[['loading','Loading'],['error','Could not save']], render() {
     const p = S.f.cpp;
     const own = p.num === 'own', on = CS.ph.st === 'ok', s = on ? 'done' : 'num';
-    const body = `<p class="lead-in">Let ${esc(p.agent)} answer phone calls for ${esc(client().name)}. Calls that need a person go to the call centre.</p>
+    const body = `
     ${S.st === 'error' ? errorBox('We could not set up the phone line', 'The number provider did not answer. Try again in a minute. Your settings are kept.', 'cp-retry') : ''}
     ${on ? `<div class="note ok">${ic('check')}<div><b>The phone line is connected.</b> ${esc(p.agent)} answers on ${esc(CS.ph.number)}.</div></div>` : ''}
     <div class="g2" style="align-items:start">
@@ -393,7 +394,7 @@
     const sel = PAGES.filter(pg => S.f.cpm[pg.id]).length;
     const pst = pg => S.st === 'disconnected' && pg.id === 'fb' ? 'warn' : pg.st;
     const anyOn = PAGES.some(pg => pg.st === 'ok');
-    const body = `<p class="lead-in">Connect Messenger for your Facebook pages. It goes through Meta.</p>
+    const body = `
     ${S.st === 'disconnected' ? `<div class="note err" role="alert">${ic('alert')}<div class="grow"><b>Messenger is disconnected.</b> The page password was changed, so Meta disconnected it. Customers on Messenger are not getting replies.</div><button type="button" class="btn sm danger" data-a="cp-meta-open" data-x="meta">Reconnect</button></div>` : ''}
     <div class="g2" style="align-items:start">
     ${sec('Connect through Meta', signed ? 'Signed in as iCaur Alghanim Business' : 'Sign in with the Meta business account that owns the pages.', `${vsteps([
@@ -439,11 +440,10 @@
     </tbody></table></div>` : `<div class="card">${empty('search', 'No one matches', 'Nobody on the team has that name or role. Clear the search or add people.', `<button type="button" class="btn" data-a="cp-u-clear">Clear search</button>`)}</div>`;
     const waiting = PEOPLE.filter(p => p.status === 'Invite waiting').length;
     const body = stateWrap(`
-      <div class="row" style="align-items:flex-end"><div class="col tight grow" style="min-width:min(100%,320px)"><p class="lead-in">People get an email invite to set their own password.</p></div>${seatBar(used())}<button type="button" class="btn pri" data-a="cp-add" ${full ? 'disabled title="All users on the plan are used"' : ''}>${ic('plus', 16)}Add people</button></div>
+      ${pageToolbar({left:`<label class="cp-search">${ic('search', 16)}<span class="sr">Search by name</span><input type="search" placeholder="Search by name or email" ${bind('f.cpu.q', true)}></label><div class="fchips" role="group" aria-label="Filter by role">${[['', 'All']].concat(ROLES.map(r => [r, r])).map(([v, t]) => `<button type="button" class="fchip" aria-pressed="${rf === v}" data-a="cp-u-role" data-x="${v}">${t} <span class="n">${v ? PEOPLE.filter(p => p.role === v).length : PEOPLE.length}</span></button>`).join('')}</div>`,
+        right:`<button type="button" class="btn pri" data-a="cp-add" ${full ? 'disabled title="All users on the plan are used"' : ''}>${ic('plus', 16)}Add people</button>`})}
       ${full ? `<div class="note warn">${ic('info')}<div>All ${LIMIT} users on the plan are used, so Add people is off. Turn someone off, or <a href="#plan">change the plan</a> to add more people.</div></div>` : ''}
-      <div class="row"><div class="fchips" role="group" aria-label="Filter by role">${[['', 'All']].concat(ROLES.map(r => [r, r])).map(([v, t]) => `<button type="button" class="fchip" aria-pressed="${rf === v}" data-a="cp-u-role" data-x="${v}">${t} <span class="n">${v ? PEOPLE.filter(p => p.role === v).length : PEOPLE.length}</span></button>`).join('')}</div><span class="sp"></span>
-        <label class="cp-search">${ic('search', 16)}<span class="sr">Search by name</span><input type="search" placeholder="Search by name or email" ${bind('f.cpu.q', true)}></label></div>
-      ${table}
+      ${rows.length ? sec('People', 'Each person gets an email invite to set their own password.', table, seatBar(used()), 'rx-tbl') : table}
       ${sec('Roles and what they can do', 'Roles are the same for every client.', `<div class="tbl-wrap" style="box-shadow:none;background:var(--sub)"><table class="tbl cp-roles"><thead><tr><th style="background:var(--sub)">Can…</th><th style="background:var(--sub)">Account admin, Manager</th><th style="background:var(--sub)">Call centre agent</th><th style="background:var(--sub)">Sales agent</th></tr></thead><tbody>${['Open the Manager dashboard','See all conversations and leads','Work their own chats and leads','Send a lead to sales','Book test drives','Download CSV','Use the control panel'].map(k => `<tr><td>${k}</td>${can(k).map(v => `<td>${v === 'Yes' ? `<span class="green">${ic('check', 16)}</span><span class="sr">Yes</span>` : v === '—' ? '<span class="faint" aria-label="No">—</span>' : `<span class="chip c-grey">${v}</span>`}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`)}`);
     return page('users', 'Users and roles', body);
   }});
@@ -554,12 +554,12 @@
     const conv = 2436, convMax = 10000, u = used();
     const lines = [['Pro plan','November 2026',750,'navy'],['Meta WhatsApp charges','Passed through at cost · 1,742 conversations',418,'green'],['AI usage','Passed through at cost',236,'teal'],['Phone minutes', CS.ph.st === 'ok' ? 'Passed through at cost · 0 minutes' : 'Not used',0,'grey']];
     const sub = lines.reduce((a, l) => a + l[2], 0);
-    const meter = (k, v, of, pct, tone, n) => `<div class="card cp-meter col tight"><span class="eyebrow mk">${mic(k, 13)}${k}</span><div class="row tight" style="align-items:baseline"><span class="cp-big" ${countAttr(v)}>${v}</span><span class="mute">of ${of}</span></div><div class="bar-h" role="progressbar" aria-label="${k}" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div><span class="xs mute">${n}</span></div>`;
+    const meter = (k, v, of, pct, tone, n) => `<div class="card cp-meter col tight"><span class="cp-kt">${mic(k, 13)}${k}</span><div class="row tight" style="align-items:baseline"><span class="cp-big" ${countAttr(v)}>${v}</span><span class="mute">of ${of}</span></div><div class="bar-h" role="progressbar" aria-label="${k}" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${Math.max(2, pct)}%;background:var(--${tone})"></i></div><span class="xs mute">${n}</span></div>`;
     const unpaid = inv.filter(i => !i.paid);
     const body = stateWrap(`${tabs('plan')}
       ${unpaid.length ? `<div class="note warn" role="status">${ic('info')}<div class="grow">The October invoice of <b>${sar(withVat(unpaid[0].base))}</b> is not paid yet. It was due on 5 November.</div><button type="button" class="btn sm pri" data-a="cp-pay" data-x="${unpaid[0].no}">Pay now</button></div>` : ''}
-      <div class="g3">
-        <div class="card cp-plan col tight"><span class="eyebrow mk">${mic('plan', 13)}Your plan</span><span class="cp-big">Pro</span><span>${sar(750)} a month, before VAT</span><span class="xs mute">3 agents and ${LIMIT} users included · renews 1 December 2026</span><div class="row tight" style="margin-top:auto;padding-top:10px"><button type="button" class="btn sm" data-a="cp-plan-change">Change plan</button><button type="button" class="btn sm ghost" data-a="cp-plan-talk">Talk to us</button></div></div>
+      <div class="rx-g3">
+        <div class="card cp-plan col tight"><span class="cp-kt">${mic('plan', 13)}Your plan</span><span class="cp-big">Pro</span><span>${sar(750)} a month, before VAT</span><span class="xs mute">3 agents and ${LIMIT} users included · renews 1 December 2026</span><div class="row tight" style="margin-top:auto;padding-top:10px"><button type="button" class="btn sm" data-a="cp-plan-change">Change plan</button><button type="button" class="btn sm ghost" data-a="cp-plan-talk">Talk to us</button></div></div>
         ${meter('Conversations this month', num(conv), num(convMax), conv / convMax * 100, 'horizon', '1 to 7 November · resets 1 December')}
         ${meter('Users', String(u), LIMIT, u / LIMIT * 100, u >= LIMIT ? 'red' : u >= LIMIT - 2 ? 'amber' : 'green', 'Agents: 3 of 3 · <a href="#users">Users and roles</a>')}
       </div>
@@ -567,7 +567,7 @@
         <div class="legend" style="margin-bottom:12px">${lines.filter(l => l[2]).map(l => `<span><i style="background:var(--${l[3]}-f)"></i>${l[0]}</span>`).join('')}</div>
         <div class="tbl-wrap" style="box-shadow:none"><table class="tbl"><tbody>${lines.map(([k, n, v]) => `<tr><td><b>${k}</b><div class="xs mute">${n}</div></td><td class="r num b">${sar(v)}</td></tr>`).join('')}
         <tr><td><b>Total so far</b><div class="xs mute">Before VAT</div></td><td class="r num bb">${sar(sub)}</td></tr><tr><td class="mute">VAT 15%</td><td class="r num mute">${sar(Math.round(sub * VAT * 100) / 100)}</td></tr><tr><td><b>Total with VAT</b></td><td class="r num bb" style="font-size:15px">${sar(withVat(sub))}</td></tr></tbody></table></div>`)}
-      ${sec('Invoices', 'Amounts include 15% VAT.', `<div class="tbl-wrap" style="box-shadow:none"><table class="tbl cp-inv"><thead><tr><th>Month</th><th>Invoice</th><th class="r">Amount</th><th>Status</th><th><span class="sr">Action</span></th></tr></thead><tbody>${inv.map(i => `<tr class="${flashCls(i.no)}"><td class="b">${i.m}</td><td class="mute num">${i.no}</td><td class="r num b">${sar(withVat(i.base))}</td><td>${i.paid ? chipC('Paid', 'green', true) : chipC('Not paid', 'red', true)}</td><td class="r">${i.paid ? `<button type="button" class="btn sm ghost" data-a="cp-inv-dl" data-x="${i.no}" aria-label="Download ${i.no}">${ic('download', 14)}Download</button>` : `<button type="button" class="btn sm pri" data-a="cp-pay" data-x="${i.no}">Pay now</button>`}</td></tr>`).join('')}</tbody></table></div>`)}`);
+      ${sec('Invoices', 'Amounts include 15% VAT.', `<div class="tbl-wrap" style="box-shadow:none"><table class="tbl cp-inv"><thead><tr><th>Month</th><th>Invoice</th><th class="r">Amount</th><th>Status</th><th><span class="sr">Action</span></th></tr></thead><tbody>${inv.map(i => `<tr class="${flashCls(i.no)}"><td class="b">${i.m}</td><td class="mute num">${i.no}</td><td class="r num b">${sar(withVat(i.base))}</td><td>${i.paid ? chipC('Paid', 'green', true) : chipC('Not paid', 'red', true)}</td><td class="r">${i.paid ? `<button type="button" class="btn sm ghost" data-a="cp-inv-dl" data-x="${i.no}" aria-label="Download ${i.no}">${ic('download', 14)}Download</button>` : `<button type="button" class="btn sm" data-a="cp-pay" data-x="${i.no}">Pay now</button>`}</td></tr>`).join('')}</tbody></table></div>`)}`);
     return page('plan', 'Plan and usage', body);
   }});
   A['cp-plan-change'] = () => { toast('Plan changes are made with VINA support for now. We will call the account admin.'); };

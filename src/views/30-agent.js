@@ -61,7 +61,7 @@
 .ag-sum{background:var(--teal-b);border-radius:var(--r-m);padding:12px 14px;font-size:13px;color:var(--text)}
 .ag-sum .hd{display:flex;align-items:center;gap:6px;color:var(--teal-f);font-weight:700;font-size:12px;letter-spacing:.02em;margin-bottom:6px}
 /* AG2 callbacks */
-.ag-daycard{padding:18px 20px}
+.ag-day .kpi.mini{background:transparent;padding:4px 0}
 .ag-day{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .ag-dayline{display:none}
 .ag-grp{overflow:hidden}
@@ -189,21 +189,11 @@
     const F = [['all', 'All']].concat(types.map(k => [k, AT[k][3]]));
     const list = S.alerts.filter(a => G.alF === 'all' || a.type === G.alF);
     const n = S.alerts.filter(a => !a.read).length;
+    // Status lives in the header (and the profile menu on phones); this page keeps one toolbar and one report card.
     return shell({nav:'inbox', title:'Alerts', body:`
-      <div class="ag-alpage">
-        <section class="card"><div class="card-h"><h2>All alerts</h2><span class="sub">${n ? n + ' new' : 'Nothing new'}</span><span class="sp"></span>${readAll(n)}</div>
-          <div class="fchips" role="group" aria-label="Show">${F.map(([k, t]) => `<button type="button" class="fchip" data-a="ag-alf" data-x="${k}" aria-pressed="${G.alF === k}">${t} <span class="n">${S.alerts.filter(a => k === 'all' || a.type === k).length}</span></button>`).join('')}</div>
-          ${list.length ? alertGroups(list) : empty('bell', 'No alerts yet', 'When a lead is given to you or a callback is due, it shows here.')}
-        </section>
-        <div class="col loose">
-          <section class="card"><div class="card-h" style="margin-bottom:12px"><h2>Your status</h2></div>
-            <div class="seg" role="group" aria-label="Your status">${Object.entries(PRES).map(([k, [t]]) => `<button type="button" data-a="presence" data-x="${k}" aria-pressed="${S.presence === k}"><span class="pres ${k}" style="width:9px;height:9px;border-radius:50%;display:inline-block"></span>${t}</button>`).join('')}</div>
-            <p class="small mute" style="margin-top:12px">${S.presence === 'available' ? 'You are getting new leads and pop-ups. Only available agents get new leads.' : 'New leads go to the next available agent. Callbacks you already have still remind you.'}</p></section>
-          <section class="card"><div class="card-h" style="margin-bottom:8px"><h2>Pop-ups and sound</h2></div>
-            <div class="sw-row">${sw(S.sound, 'ag-sound', '', 'Alert sound')}<span class="grow"><b class="small">Sound</b><span class="xs mute" style="display:block">A short sound with each pop-up.</span></span></div>
-            <p class="xs mute" style="margin-top:6px">Pop-ups show at the top right when a lead is given to you, when a callback is due in 10 minutes, and when a lead is given to someone else.</p></section>
-        </div>
-      </div>`});
+      ${pageToolbar({left:`<div class="fchips" role="group" aria-label="Show">${F.map(([k, t]) => `<button type="button" class="fchip" data-a="ag-alf" data-x="${k}" aria-pressed="${G.alF === k}">${t} <span class="n">${S.alerts.filter(a => k === 'all' || a.type === k).length}</span></button>`).join('')}</div>`,
+        right:`<label class="row tight nowrap small" title="A short sound with each pop-up">${sw(S.sound, 'ag-sound', '', 'Alert sound')}Sound</label>${readAll(n)}`})}
+      ${reportCard({title:'Alerts', sub: n ? '' : 'Nothing new', body: list.length ? alertGroups(list) : empty('bell', 'No alerts yet', 'When a lead is given to you or a callback is due, it shows here.')})}`});
   }});
 
   /* ---------- AG1 Inbox ---------- */
@@ -453,6 +443,7 @@
     return {calls, reached, sent};
   }
   const tries = n => !n ? 'No tries yet' : n === 1 ? '1 try so far' : n + ' tries so far';
+  let cbFirst = null; // the next callback to make: the only primary Call on the page
   function cbRow(l) {
     const r = rem(l); const done = l.cb.done; const tom = l.cb.day === 'tomorrow'; const over = !done && !tom && r < 0;
     const rel = done ? esc(done) : tom ? 'Tomorrow' : over ? `${pulse('red')}${mins(-r)} late` : 'in ' + mins(r);
@@ -461,7 +452,7 @@
       <div class="ag-tm"><div class="tm ${over ? 'red' : ''}">${esc(l.cb.at.replace(/^Sun /, ''))}</div><div class="row tight nowrap xs ${over ? 'red b' : 'mute'}">${rel}</div></div>
       <div class="who ag-who">${av(l.name)}<div style="min-width:0"><div class="nm ell" title="${esc(l.name)}">${esc(l.name)}</div><div class="row tight nowrap" style="margin-top:4px">${chipC(l.model, 'navy')}<span class="xs mute num ell">${esc(l.mob)}</span></div></div></div>
       <div class="ag-why"><div class="small b ell2">${esc(why)}</div><div class="xs mute" style="margin-top:2px">${tries(l.cb.tries)}</div></div>
-      <div class="ag-act row tight nowrap"><button type="button" class="btn sm" data-a="ag-open-chat" data-x="${l.id}">${ic('conv', 14)}Open chat</button>${done ? `<a class="btn sm" href="#lead-${l.id}">${ic('arrowR', 14)}Lead</a>` : `<button type="button" class="btn sm pri" data-a="ag-call" data-x="${l.id}">${ic('phone', 14)}Call</button>`}</div></div>`;
+      <div class="ag-act row tight nowrap"><button type="button" class="btn sm" data-a="ag-open-chat" data-x="${l.id}">${ic('conv', 14)}Open chat</button>${done ? `<a class="btn sm" href="#lead-${l.id}">${ic('arrowR', 14)}Lead</a>` : `<button type="button" class="btn sm ${l.id === cbFirst ? 'pri' : ''}" data-a="ag-call" data-x="${l.id}">${ic('phone', 14)}Call</button>`}</div></div>`;
   }
   R('callbacks', {id:'AG2', title:'Callbacks', roles:['cc'], states:[['empty','Nothing to call'],['loading','Loading']], render() {
     const pend = S.st === 'empty' ? [] : mine().filter(l => isOpen(l) && l.cb && !l.cb.done);
@@ -471,18 +462,18 @@
     const done = S.st === 'empty' ? [] : LEADS.filter(l => l.cb && l.cb.done && (l.cbBy === S.me || l.owner === S.me));
     const d = S.st === 'empty' ? {calls:0, reached:0, sent:0} : myDay();
     const tabs = [['today', 'Today', tday.length], ['tomorrow', 'Tomorrow', tom.length], ['done', 'Done today', done.length]];
-    const grp = (title, rows, c, sub) => rows.length ? `<section class="card pad0 ag-grp" aria-label="${title}"><div class="ag-grp-h">${c === 'red' ? pulse('red') : ''}<h2${c === 'red' ? ' class="red"' : ''}>${title}</h2><span class="ag-cnt c-${c}">${rows.length}</span><span class="sp"></span><span class="xs mute">${sub}</span></div>${rows.map(cbRow).join('')}</section>` : '';
-    const list = (rows, icon, t, b) => rows.length ? `<section class="card pad0 ag-grp">${rows.map(cbRow).join('')}</section>` : `<div class="card">${empty(icon, t, b)}</div>`;
+    cbFirst = G.cbTab === 'today' ? (over[0] || hour[0] || later[0] || {}).id : null;
+    const grp = (title, rows, c, sub) => rows.length ? `<section class="card rc rx-tbl ag-grp" aria-label="${title}"><header class="rc-h"><div class="grow row tight nowrap">${c === 'red' ? pulse('red') : ''}<h2${c === 'red' ? ' class="red"' : ''}>${title}</h2><span class="ag-cnt c-${c}">${rows.length}</span></div>${sub ? `<span class="xs mute">${sub}</span>` : ''}</header><div class="rc-b">${rows.map(cbRow).join('')}</div></section>` : '';
+    const list = (rows, icon, t, b) => rows.length ? `<section class="card rc rx-tbl ag-grp"><div class="rc-b">${rows.map(cbRow).join('')}</div></section>` : `<div class="card">${empty(icon, t, b)}</div>`;
     let body;
     if (S.st === 'loading') body = loadingRows(5, 64);
-    else if (G.cbTab === 'today') body = tday.length ? grp('Overdue', over, 'red', 'Call these first') + grp('In the next hour', hour, 'amber', 'Due by ' + clock(new Date(now().getTime() + 3600000))) + grp('Later today', later, 'grey', '') : `<div class="card">${empty('phone', 'Nothing to call right now', 'New callbacks show here when VINA books one or a customer asks to be called. You get an alert 10 minutes before each one.', `<a class="btn" href="#inbox">Open my inbox</a>`)}</div>`;
+    else if (G.cbTab === 'today') body = tday.length ? grp('Overdue', over, 'red', '') + grp('In the next hour', hour, 'amber', 'Due by ' + clock(new Date(now().getTime() + 3600000))) + grp('Later today', later, 'grey', '') : `<div class="card">${empty('phone', 'Nothing to call right now', 'New callbacks show here when VINA books one or a customer asks to be called. You get an alert 10 minutes before each one.', `<a class="btn" href="#inbox">Open my inbox</a>`)}</div>`;
     else if (G.cbTab === 'tomorrow') body = list(tom, 'cal', 'Nothing booked for tomorrow', 'Callbacks for tomorrow show here.');
     else body = list(done, 'check', 'No calls done yet today', 'Calls you finish today show here with their result.');
     const rate = d.calls ? Math.round(d.reached / d.calls * 100) + '% of calls' : 'no calls yet';
     return shell({nav:'callbacks', title:'Callbacks', body:`
-      <section class="card ag-daycard" aria-label="My day"><div class="card-h" style="margin-bottom:12px"><h2>My day</h2><span class="sub">${esc(nowStr())}</span></div><div class="ag-day">
-        ${kpi({k:'Calls made', v:d.calls, n:'today', mini:true})}${kpi({k:'Reached', v:d.reached, n:rate, mini:true})}${kpi({k:'Sent to sales', v:d.sent, n:'today', mini:true})}${kpi({k:'Still to call today', v:tday.length, n: over.length ? `<span class="red b">${over.length} overdue</span>` : 'none overdue', hot: over.length > 0, mini:true})}</div></section>
-      <div class="tabs" role="tablist" aria-label="Lists">${tabs.map(([k, t, n]) => `<button type="button" role="tab" class="tab ${k === 'done' ? flashCls('ag-done') : ''}" aria-selected="${G.cbTab === k}" data-a="ag-cbtab" data-x="${k}">${t}<span class="n">${n}</span></button>`).join('')}</div>
+      <div class="rx-tbar"><div class="tabs" role="tablist" aria-label="Lists">${tabs.map(([k, t, n]) => `<button type="button" role="tab" class="tab ${k === 'done' ? flashCls('ag-done') : ''}" aria-selected="${G.cbTab === k}" data-a="ag-cbtab" data-x="${k}">${t}<span class="n">${n}</span></button>`).join('')}</div><span class="sp"></span><span class="act xs mute hide-sm">${esc(nowStr())}</span></div>
+      ${reportCard({title:'My day', cls:'ag-daycard', body:`<div class="ag-day">${kpi({k:'Calls made', v:d.calls, n:'today', mini:true})}${kpi({k:'Reached', v:d.reached, n:rate, mini:true})}${kpi({k:'Sent to sales', v:d.sent, n:'today', mini:true})}${kpi({k:'Still to call today', v:tday.length, n: over.length ? `<span class="red b">${over.length} overdue</span>` : 'none overdue', hot: over.length > 0, mini:true})}</div>`})}
       <div class="col">${body}</div>
       <p class="ag-dayline" aria-label="My day"><span class="b" style="color:var(--text)">My day</span><span><b>${d.calls}</b> calls</span><span><b>${d.reached}</b> reached</span><span><b>${d.sent}</b> sent to sales</span></p>`});
   }});
