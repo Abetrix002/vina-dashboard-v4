@@ -173,14 +173,14 @@ export default [
   ['Composer: N switches to a tinted team-only note, R back to reply', `${G}
     signIn('sales'); await tick(150); await go2('inbox'); A['ag-sel']({dataset:{x:'l06'}}); render(); await tick(); const l = lead('l06');
     document.dispatchEvent(new KeyboardEvent('keydown', {key:'n', bubbles:true})); await tick();
-    const c = document.querySelector('#app .ag-comp'); if (!c.classList.contains('note')) return 'N did not switch to Note';
+    const c = document.querySelector('#app .ag-comp'); if (!c.classList.contains('is-note')) return 'N did not switch to Note'; { const b = c.querySelector('.ag-box'); if (b.getBoundingClientRect().width < c.getBoundingClientRect().width - 40) return 'note box does not fill the composer'; }
     if (!/Only your team sees notes/.test(c.innerText)) return 'no team-only line';
     const ta = document.querySelector('#app textarea'); if (document.activeElement !== ta) return 'note box not focused';
     fire(ta, 'Trade-in photos are in the lead.'); ta.dispatchEvent(new KeyboardEvent('keydown', {key:'Enter', bubbles:true})); await tick(150);
     if (l.m[l.m.length - 1].k !== 'note' || l.h[0].t !== 'note') return 'note not saved or not in history';
     const g = [...document.querySelectorAll('#ag-chat .cx-g.note')].pop(); if (!g || !/Trade-in photos/.test(g.innerText)) return 'note not in the thread';
     document.dispatchEvent(new KeyboardEvent('keydown', {key:'r', bubbles:true})); await tick();
-    return !document.querySelector('#app .ag-comp.note') || 'R did not switch back to Reply';`],
+    return !document.querySelector('#app .ag-comp.is-note') || 'R did not switch back to Reply';`],
   ['Composer: "/" opens saved replies filtered as you type, Enter picks, Shift+Enter is a new line, Ctrl+Enter sends', `${G}
     signIn('sales'); await tick(150); await go2('inbox'); A['ag-sel']({dataset:{x:'l03'}}); render(); await tick();
     document.dispatchEvent(new KeyboardEvent('keydown', {key:'/', bubbles:true})); await tick(50);

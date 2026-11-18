@@ -2735,14 +2735,14 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
 .ag-comp{position:relative;padding:10px 16px 14px}
 .ag-box{display:flex;flex-direction:column;border:1px solid var(--line2);border-radius:14px;background:var(--card);box-shadow:var(--e1);transition:border-color var(--d1),box-shadow var(--d2) var(--ease),background var(--d2)}
 .ag-box:focus-within{border-color:var(--horizon);box-shadow:0 0 0 4px var(--ring)}
-.ag-comp.note .ag-box{background:var(--amber-b);border-color:color-mix(in srgb,var(--amber-f) 45%,transparent)}
-.ag-comp.note .ag-box:focus-within{box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 30%,transparent)}
+.ag-comp.is-note .ag-box{background:var(--amber-b);border-color:color-mix(in srgb,var(--amber-f) 45%,transparent)}
+.ag-comp.is-note .ag-box:focus-within{box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 30%,transparent)}
 .ag-ctop{container-type:inline-size;display:flex;align-items:center;gap:8px;padding:6px 8px 0 6px;min-width:0}
 .ag-ctabs{display:flex;gap:2px}
 .ag-ctabs button{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:var(--mute);font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background var(--d1),color var(--d1)}
 .ag-ctabs button:hover{color:var(--text)}
 .ag-ctabs button[aria-selected="true"]{background:var(--sub);color:var(--text)}
-.ag-comp.note .ag-ctabs button[aria-selected="true"]{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-f)}
+.ag-comp.is-note .ag-ctabs button[aria-selected="true"]{background:color-mix(in srgb,var(--amber) 22%,transparent);color:var(--amber-f)}
 .ag-win{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:999px;background:var(--green-b);color:var(--green-f);font-size:12px;font-weight:600;white-space:nowrap;cursor:help}
 .ag-win.low{background:var(--amber-b);color:var(--amber-f)}
 .ag-nhint{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--amber-f);white-space:nowrap}
@@ -2946,7 +2946,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       <div class="ag-tpls" role="group" aria-label="WhatsApp templates">${TPL.map(([n, s], i) => `<button type="button" class="ag-tplc" data-a="ag-tpl" data-x="${i}"><b>${esc(n)}</b><span>${esc(fill(s, l))}</span></button>`).join('')}</div></div></div>`;
     const ta = bindTa('f.agText');
     const matches = savedFor(l);
-    return `<div class="ag-comp ${note ? 'note' : ''}"><div class="ag-box">
+    return `<div class="ag-comp ${note ? 'is-note' : ''}"><div class="ag-box">
       <div class="ag-ctop">${tabs}<span class="sp"></span>${note ? `<span class="ag-nhint">${ic('eyeOff', 13)}Only your team sees notes</span>` : winChip(l)}</div>
       <label class="sr" for="b-f-agText">${note ? 'Note for the team' : 'Message to ' + esc(l.name)}</label>
       <textarea class="ag-ta" rows="1" ${ta[0]} data-in="ag-type" aria-describedby="ag-hint" placeholder="${note ? 'Write a note for the team…' : 'Reply to ' + fn + '… Type / for saved replies'}">${ta[1]}</textarea>
