@@ -842,3 +842,7 @@ html,body{overflow-anchor:none}
 .cx-r2 .cx-rm{flex:0 0 auto;margin-top:0;max-width:46%;gap:6px}
 .cx-r2 .cx-st{overflow:hidden;text-overflow:ellipsis}
 .cx-r2 .cx-st:only-child::before{content:none}
+
+/* Faint inset divider between chats: starts at the name (avatars stay a clean column), hidden next to the hovered or selected row */
+.cx-row+.cx-row::after{content:"";position:absolute;top:0;inset-inline-start:56px;inset-inline-end:10px;height:1px;background:var(--line);pointer-events:none;transition:opacity var(--d1)}
+.cx-row:hover::after,.cx-row[aria-current="true"]::after,.cx-row:hover+.cx-row::after,.cx-row[aria-current="true"]+.cx-row::after{opacity:0}
