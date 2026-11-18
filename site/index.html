@@ -2215,6 +2215,16 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   .mg-gl span{position:absolute;right:calc(100% + 8px);top:-8px;font-size:12px;line-height:16px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap}
   .mg-cols{position:absolute;inset:0;display:flex}
   .mg-c{position:relative;flex:1;display:flex;align-items:flex-end;justify-content:center;min-width:0}
+  .mg-pc{gap:3px}
+  .mg-pc i{display:block;width:min(30%,26px);border-radius:4px 4px 1px 1px;min-height:0}
+  .mg-pc i.c{background:var(--ch-a)}
+  .mg-pc i.p{background:color-mix(in srgb,var(--faint) 14%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--faint) 55%,transparent)}
+  .mg-cols:hover .mg-pc i{opacity:.6} .mg-cols .mg-pc:hover i{opacity:1}
+  .mg-sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:6px;vertical-align:-1px;background:color-mix(in srgb,var(--faint) 14%,transparent);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--faint) 55%,transparent)}
+  /* the strip under the chart: four across when the card is wide, otherwise two by two (never three and one) */
+  .mg-sum{container-type:inline-size}
+  .mg-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  @container (min-width:1000px){.mg-strip{grid-template-columns:repeat(4,minmax(0,max-content));justify-content:space-between}}
   .mg-c.sh{background:color-mix(in srgb,var(--sel) 80%,transparent)}
   .mg-st{width:58%;max-width:40px;display:flex;flex-direction:column-reverse;gap:2px;border-radius:4px 4px 1px 1px;overflow:hidden}
   .mg-st>i{display:block;min-height:1px}
@@ -2363,6 +2373,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   const K = () => DK() * FK(); // ponytail: flat multipliers stand in for real filtered queries
   const sc = (n, k) => Math.round(n * (k == null ? K() : k));
   const DATES = [['1','Today'],['7','Last 7 days'],['30','Last 30 days'],['c','Custom']];
+  const prevLabel = () => { if (F().date === '1') return 'Yesterday'; const [a] = span(), n = days(), pb = new Date(a.getFullYear(), a.getMonth(), a.getDate() - 1), pa = new Date(a.getFullYear(), a.getMonth(), a.getDate() - n); return 'Previous ' + (n === 1 ? 'day' : n + ' days') + ' (' + (pa.getMonth() === pb.getMonth() ? pa.getDate() : fmtD(pa)) + '–' + fmtD(pb) + ')'; };
   const rangeShort = () => { const [a, b] = span(), y = ' ' + b.getFullYear(); if (+a === +b) return fmtD(b) + y; return (a.getMonth() === b.getMonth() ? a.getDate() : fmtD(a)) + '–' + fmtD(b) + y; };
   const FD = {
     ch:['Channel', [['wa','WhatsApp'],['web','Website chat'],['ph','Phone line']]],
@@ -2401,7 +2412,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   /* ---------- charts: one scale, token colours, light grid, thin lines ---------- */
   const top4 = v => Math.max(4, nice(v / 4) * 4); // axis top whose quarters are round numbers
   const nice = v => { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))), m = v / p; return [1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10].find(x => m <= x) * p; };
-  const grid = (min, max, fmt) => [0, 1, 2, 3, 4].map(i => `<div class="mg-gl ${i ? '' : 'z'}" style="bottom:${i * 25}%"><span>${fmt(min + (max - min) * i / 4)}</span></div>`).join('');
+  const grid = (min, max, fmt, steps) => { steps = steps || 4; return Array.from({length:steps + 1}, (_, i) => `<div class="mg-gl ${i ? '' : 'z'}" style="bottom:${(i * 100 / steps).toFixed(2)}%"><span>${fmt(min + (max - min) * i / steps)}</span></div>`).join(''); };
   const colour = (c, i) => typeof c === 'function' ? c(i) : c;
   // o: {h, max, fmt, shade:[from,to], every, label}
   function vbars(labels, series, o) {
@@ -2412,6 +2423,14 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const cols = labels.map((lb, i) => `<div class="mg-c ${o.shade && i >= o.shade[0] && i < o.shade[1] ? 'sh' : ''}"><div class="mg-st grow-y" style="height:${pc(tot[i]).toFixed(1)}%">${series.map(se => se.vals[i] > 0 ? `<i style="flex:${se.vals[i]} 0 0;background:var(${colour(se.c, i)})" title="${esc(lb)} · ${esc(se.name)}: ${fmt(se.vals[i])}"></i>` : '').join('')}</div></div>`).join('');
     const xl = labels.map((lb, i) => `<span class="${(i / every) % 2 ? 'o' : ''}">${i % every === 0 ? esc(lb) : ''}</span>`).join('');
     return `<figure class="mg-plot" role="img" aria-label="${esc(o.label || '')}"><div class="mg-area" style="--ph:${o.h || 200}px">${grid(0, max, fmt)}<div class="mg-cols">${cols}</div></div><div class="mg-xl">${xl}</div></figure>`;
+  }
+  // Small daily counts (cars sold): a column per day, the previous period as a light column beside it. Lines would invent a trend between single sales.
+  function pairs(labels, cur, prev, o) {
+    const n = labels.length, every = Math.ceil(n / 7), hi = Math.max(1, ...cur, ...prev), small = hi < 8;
+    const max = small ? hi + 1 : top4(hi), pc = v => (v / max * 100).toFixed(1);
+    const cols = labels.map((lb, i) => `<div class="mg-c mg-pc" title="${esc(lb)} · ${esc(o.name)}: ${num(cur[i])} · ${esc(o.prevName)}: ${num(prev[i])}"><i class="p grow-y" style="height:${pc(prev[i])}%"></i><i class="c grow-y" style="height:${pc(cur[i])}%"></i></div>`).join('');
+    const xl = labels.map((lb, i) => `<span class="${(i / every) % 2 ? 'o' : ''}">${i % every === 0 ? esc(lb) : ''}</span>`).join('');
+    return `<figure class="mg-plot" role="img" aria-label="${esc(o.label || '')}"><div class="mg-area" style="--ph:${o.h || 200}px">${grid(0, max, v => num(Math.round(v)), small ? max : 4)}<div class="mg-cols">${cols}</div></div><div class="mg-xl">${xl}</div></figure>`;
   }
   // series: [{name, c, vals, dash}] (dash = previous period); o: {h, min, max, fmt, label}. Each column has a hover target with every value.
   function lines(labels, series, o) {
@@ -2464,29 +2483,30 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     const cnt = b => trend(b).map(v => Math.round(v * fk));
     const MET = {
       conv:{k:'Conversations', v:num(sc(2436)), d:'+12%', vals:cnt([298,312,342,356,372,389,367]), r:1.12},
-      alone:{k:'Answered by VINA alone', v:alonePct + '%', d:'+3 pts', vals:trend([74,75,77,76,78,79,78].map(x => x + alonePct - 78), true), r:3, rate:true},
+      alone:{k:'VINA alone', tip:'Chats VINA answered with no person stepping in', v:alonePct + '%', d:'+3 pts', vals:trend([74,75,77,76,78,79,78].map(x => x + alonePct - 78), true), r:3, rate:true},
       qual:{k:'Qualified leads', v:num(sc(612)), d:'+8%', vals:cnt([78,84,88,90,92,95,85]), r:1.08},
-      sold:{k:'Sold', v:num(sc(9)), d:'+2', vals:cnt([0,1,2,1,2,1,2]), r:1.29},
+      sold:{k:'Sold', vals:cnt([0,1,2,1,2,1,2]), pv:cnt([1,0,1,2,1,1,1])},
     };
-    const mk = MET[S.f.mgMet] ? S.f.mgMet : 'conv', m = MET[mk], prev = prevOf(m.vals, m.r, m.rate);
+    { const sm = a => a.reduce((x, y) => x + y, 0), o = MET.sold, df = sm(o.vals) - sm(o.pv); o.v = num(sm(o.vals)); o.d = (df < 0 ? '−' : '+') + Math.abs(df); }
+    const mk = MET[S.f.mgMet] ? S.f.mgMet : 'conv', m = MET[mk], prev = m.pv || prevOf(m.vals, m.r, m.rate), PL = prevLabel();
     // Summary card: metric tabs switch the one chart; previous period is the dashed line
-    const tabs = `<div class="mg-mt" role="tablist" aria-label="Metric to chart">${Object.entries(MET).map(([key, o]) => `<button type="button" role="tab" class="mg-tab" id="mg-t-${key}" aria-selected="${mk === key}" aria-controls="mg-panel" data-a="mg-met" data-x="${key}"><span class="k">${mic(o.k, 13)}<span>${o.k}</span></span><span class="row tight nowrap" style="align-items:baseline"><span class="v" ${fd ? '' : countAttr(o.v)} data-k="${o.k}">${fd ? '—' : o.v}</span>${fd ? '' : delta(o.d)}</span></button>`).join('')}</div>`;
+    const tabs = `<div class="mg-mt" role="tablist" aria-label="Metric to chart">${Object.entries(MET).map(([key, o]) => `<button type="button" role="tab" class="mg-tab" id="mg-t-${key}" aria-selected="${mk === key}" aria-controls="mg-panel" data-a="mg-met" data-x="${key}"${o.tip ? ` title="${esc(o.tip)}"` : ''}><span class="k">${mic(o.k, 13)}<span>${o.k}</span></span><span class="row tight nowrap" style="align-items:baseline"><span class="v" ${fd ? '' : countAttr(o.v)} data-k="${o.k}">${fd ? '—' : o.v}</span>${fd ? '' : delta(o.d).replace('<span ', `<span title="Compared with the ${esc(PL.toLowerCase())}" `)}</span></button>`).join('')}</div>`;
     let chart = '', lg = '';
     if (!fd) {
       let series, opt = {h:370, label:m.k + ' for ' + rangeShort() + ', with the previous period'};
       if (mk === 'conv') {
         const handed = m.vals.map((v, i) => Math.round(v * (0.2 + ((i * 7) % 5) / 100))), alone = m.vals.map((v, i) => v - handed[i]);
-        series = [{name:'VINA alone', c:'--ch-b', vals:alone}, {name:'Handed to the team', c:'--ch-a', vals:handed}, {name:'All, previous period', c:'--faint', vals:prev, dash:true}];
-        lg = legend([['VINA alone', '--ch-b', num(alone.reduce((a, b) => a + b, 0))], ['Handed to the team', '--ch-a', num(handed.reduce((a, b) => a + b, 0))], ['Previous period', '', null, true]]);
+        series = [{name:'VINA alone', c:'--ch-b', vals:alone}, {name:'Handed to the team', c:'--ch-a', vals:handed}, {name:'All, ' + PL.toLowerCase(), c:'--faint', vals:prev, dash:true}];
+        lg = legend([['VINA alone', '--ch-b', num(alone.reduce((a, b) => a + b, 0))], ['Handed to the team', '--ch-a', num(handed.reduce((a, b) => a + b, 0))], [PL, '', null, true]]);
       } else {
-        series = [{name:m.k, c:'--ch-a', vals:m.vals}, {name:'Previous period', c:'--faint', vals:prev, dash:true}];
-        lg = legend([[m.k, '--ch-a'], ['Previous period', '', null, true]]);
+        series = [{name:m.k, c:'--ch-a', vals:m.vals}, {name:PL, c:'--faint', vals:prev, dash:true}];
+        lg = mk === 'sold' ? `<div class="legend mg-lg"><span><i style="background:var(--ch-a)"></i>${m.k}<b>${m.v}</b></span><span><span class="mg-sw" aria-hidden="true"></span>${esc(PL)}<b>${num(prev.reduce((a, b) => a + b, 0))}</b></span></div>` : legend([[m.k, '--ch-a'], [PL, '', null, true]]);
         if (m.rate) { const all = m.vals.concat(prev), lo = Math.floor(Math.min(...all) / 5) * 5 - 5, st = Math.max(5, Math.ceil((Math.ceil(Math.max(...all) / 5) * 5 - lo) / 20) * 5); Object.assign(opt, {min:lo, max:lo + st * 4, fmt:v => Math.round(v) + '%'}); }
       }
-      chart = lines(ax, series, opt);
+      chart = mk === 'sold' ? pairs(ax, m.vals, prev, {h:opt.h, label:opt.label, name:m.k, prevName:PL}) : lines(ax, series, opt);
     }
-    const STRIP = [['Customers who replied', num(sc(1987)), '+9%'], ['Test drive requests', num(sc(48)), '+6'], ['Not interested', num(sc(131)), '−4%'], ['Customer rating', '4.6', '+0.1']];
-    const strip = `<ul class="mg-strip" aria-label="More numbers">${STRIP.map(([k, v, d]) => `<li class="mg-si">${mic(k, 14)}<span>${k}</span><span class="v">${fd ? '—' : v}</span>${fd ? '' : `<span class="dl ${d[0] === '−' ? 'mute' : 'green'}">${esc(d)}</span>`}</li>`).join('')}</ul>`;
+    const STRIP = [['Customers who replied', num(sc(1987)), '+9%'], ['Test drive requests', num(sc(48)), '+6'], ['Not interested', num(sc(131)), '↓4%', 'Down 4%, fewer people said no'], ['Customer rating', '4.6', '+0.1']];
+    const strip = `<ul class="mg-strip" aria-label="More numbers">${STRIP.map(([k, v, d]) => `<li class="mg-si">${mic(k, 14)}<span>${k}</span><span class="v">${fd ? '—' : v}</span>${fd ? '' : `<span class="dl green" title="${esc((STRIP.find(x => x[0] === k)[3] || d) + ', compared with the ' + PL.toLowerCase())}">${esc(d)}</span>`}</li>`).join('')}</ul>`;
     const summary = `<section class="card mg-sum" aria-label="Summary">${tabs}<div class="mg-cp" id="mg-panel" role="tabpanel" aria-labelledby="mg-t-${mk}">
       ${fd ? emptyBox('Conversations, answers by VINA alone, qualified leads and cars sold will show here day by day, next to the previous period.') : `<div class="mg-cph">${lg}</div>${chart}`}</div>${strip}</section>`;
     // Waiting for the team now: a live card
