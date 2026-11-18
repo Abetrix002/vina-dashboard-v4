@@ -1650,7 +1650,7 @@ let VT_KIND = '';
 function vtRender(kind, after) {
   const run = () => { render(); if (after) after(); };
   if (!canVT()) { run(); return; }
-  VT_KIND = kind; document.documentElement.dataset.vt = kind;
+  VT_KIND = kind; document.documentElement.dataset.vt = kind; nameMovers(); // names for the old snapshot match what is in view now
   try { const t = document.startViewTransition(run); t.ready.catch(() => {}); t.finished.catch(() => {}).then(() => { if (VT_KIND === kind) delete document.documentElement.dataset.vt; }); } // a newer change skips the older one; that is expected
   catch (e) { run(); }
 }
@@ -1658,10 +1658,17 @@ function vtRender(kind, after) {
 const vtFor = el => !!el && !el.closest('.menu, .modal, .drawer, .cmd') && el.getAttribute('aria-haspopup') == null && (
   el.matches('[role="tab"], .tab, .seg > *, .fchip, .cx-row, [data-vt], [aria-expanded]') || /(^|-)(move|mv|sort|page|folder|view|cal|tab|sel|drop|up|down)(-|$)/.test(el.dataset.a || ''));
 // give items that can move a stable view-transition name so the browser animates them to their new place
+// View-transition layers are drawn above the page and are not clipped by scrolling lists, so only items fully in view get one;
+// a row half-hidden under a list header would otherwise flash on top of it (seen in Safari when switching chats).
+const clipOf = e => { let r = {top:0, left:0, bottom:innerHeight, right:innerWidth}; for (let a = e.parentElement; a && a !== document.body; a = a.parentElement) { const cs = getComputedStyle(a); if (/(auto|scroll|hidden|clip)/.test(cs.overflowX + cs.overflowY)) { const b = a.getBoundingClientRect(); r = {top:Math.max(r.top, b.top), left:Math.max(r.left, b.left), bottom:Math.min(r.bottom, b.bottom), right:Math.min(r.right, b.right)}; } } return r; };
 function nameMovers() {
   if (!document.startViewTransition) return;
   const seen = new Set();
-  $$('#app .cx-row[data-x], #app [data-drag][data-x]').forEach(e => { const n = 'vt-' + (e.dataset.drag || 'row') + '-' + String(e.dataset.x).replace(/[^a-zA-Z0-9_-]/g, ''); if (seen.has(n)) return; seen.add(n); e.style.viewTransitionName = n; });
+  $$('#app .cx-row[data-x], #app [data-drag][data-x]').forEach(e => {
+    const n = 'vt-' + (e.dataset.drag || 'row') + '-' + String(e.dataset.x).replace(/[^a-zA-Z0-9_-]/g, ''), b = e.getBoundingClientRect(), c = clipOf(e);
+    const inView = b.height > 0 && b.top >= c.top - 1 && b.bottom <= c.bottom + 1 && b.left >= c.left - 1 && b.right <= c.right + 1;
+    if (!inView || seen.has(n)) { e.style.viewTransitionName = ''; return; } seen.add(n); e.style.viewTransitionName = n;
+  });
 }
 // dialogs grow from the control that opened them
 let PTR = null;
