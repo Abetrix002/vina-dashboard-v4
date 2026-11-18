@@ -3204,14 +3204,19 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
   /* one line per cell, full text on hover: rows stay ~56px */
   .ld-tbl td{padding-block:9px;white-space:nowrap}
   .ld-tbl td.ld-c-summary{width:100%;max-width:0;min-width:140px}
+  /* the VINA summary is the most useful column: two lines fit in the row height the name and number already use */
+  .ld-tbl td.ld-c-summary{white-space:normal}
+  .ld-sum2{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:18px}
   .ld-tbl .ld-c-next .ld-next{max-width:170px}
   .ld-next>.ell{min-width:0}
   .ld-tbl th,.ld-tbl td{padding-inline:10px}
-  .ld-tbl th:first-child,.ld-tbl td:first-child{padding-inline-start:14px}
+  .ld-tbl th:first-child,.ld-tbl td:first-child{padding-inline-start:22px}
   .ld-tbl th:last-child,.ld-tbl td:last-child{padding-inline-end:16px}
   .ld-tbl .ld-c-name .grow{max-width:210px}
   .ld-tbl .ld-trim{max-width:120px}
-  .ld-dot{display:inline-flex;flex:0 0 8px;width:8px;margin-inline-end:-2px}
+  /* the unread dot sits in the cell padding, so every name lines up with the column header */
+  .ld-tbl .who{position:relative}
+  .ld-dot{position:absolute;inset-inline-start:-15px;top:7px;display:inline-flex;width:8px}
   .ld-st{display:flex;align-items:center;gap:6px}
   .ld-late{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   /* LD2 board */
@@ -3325,7 +3330,8 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
     .ld-tbl table,.ld-tbl tbody{display:block}
     .ld-tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name wait" "model status" "summary summary" "next own";gap:8px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}
     .ld-tbl tbody tr:last-child{border-bottom:0}
-    .ld-tbl tbody td{display:block;padding:0;border:0;width:auto;max-width:none;min-width:0}
+    .ld-tbl tbody td,.ld-tbl tbody td:first-child,.ld-tbl tbody td:last-child{display:block;padding:0;border:0;width:auto;max-width:none;min-width:0}
+    .ld-dot{inset-inline-start:-12px}
     .ld-tbl tbody tr.click td:last-child::after{display:none}
     .ld-tbl tbody tr.sel td:first-child{box-shadow:none}
     .ld-tbl .ld-c-name{grid-area:name} .ld-tbl .ld-c-wait{grid-area:wait;justify-self:end}
@@ -3443,7 +3449,7 @@ window.addEventListener('offline', () => { S.offline = true; render(); });
       case 'name': return `<div class="who"><span class="ld-dot">${l.unread ? '<span class="unread-dot" aria-label="Unread message"></span>' : ''}</span><div class="grow"><div class="nm ell" style="font-weight:${l.unread ? 700 : 600}">${esc(l.name)}</div><div class="xs mute num row tight nowrap ld-nw" style="gap:6px">${s.cols.ch ? '' : chMini(l.ch)}${esc(mob(l))}</div></div></div>`;
       case 'model': { const t = [l.trim, l.colour].filter(Boolean).join(' · '); return `<div class="b ld-nw">${esc(l.model)}</div>${t ? `<div class="xs mute ell ld-trim" title="${esc(t)}">${esc(t)}</div>` : ''}`; }
       case 'status': return `<div class="ld-st">${chip(l.status)}${l.vq ? vtag() : ''}</div>`;
-      case 'summary': return `<div class="ell small" title="${esc(l.summary)}">${esc(l.summary)}</div>`;
+      case 'summary': return `<div class="ld-sum2 small" title="${esc(l.summary)}">${esc(l.summary)}</div>`;
       case 'src': return `<span title="${esc(l.campaign)}">${esc(l.src)}</span>`;
       case 'ch': return chIc(l.ch);
       case 'owner': return l.owner ? `<div class="who ld-nw" title="${esc(uname(l.owner))}">${av(uname(l.owner), 'sm')}<span>${esc(l.owner === 'vina' ? 'VINA' : first(l.owner))}</span></div>` : `<span class="red b">Unassigned</span>`;
